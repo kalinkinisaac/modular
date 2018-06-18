@@ -86,3 +86,31 @@ class GammaBottomZero(GammaZero):
     def sort_key(m):
         return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]
 
+
+class GammaTopZero(GammaZero):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.reduce_cache = dict()
+        self.gen_l()
+
+    def gen_l(self):
+        self.L = []
+        for a, b, N in self.representatives:
+            self.L.append(self.reduce(np.matrix([[a, b],[0,0]])))
+
+    def reduce(self, matrix):
+        a, b = matrix.item(0,0), matrix.item(0,1)
+        if (a, b) in self.reduce_cache:
+            return self.reduce_cache[(a, b)]
+        else:
+            self.reduce_cache[(a, b)] = self._reduce(a, b)
+            return self.reduce_cache[(a, b)]
+
+    def _reduce(self, a, b):
+        a, b = self.pair_reduction_procedure(a, b)[0:2]
+        d, c = list(map(lambda x : x % self.N, get_xy(a, b, self.N)))
+        return np.matrix([[a, b],[(-c), d]]) % self.N
+
+    @staticmethod
+    def sort_key(m):
+        return [ m.item(0, 0), m.item(0, 1), m.item(1, 0), m.item(1, 1)]

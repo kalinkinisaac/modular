@@ -29,8 +29,8 @@ ax.grid(which='minor', alpha=0.2)
 ax.grid(which='major', alpha=0.5)
 
 
-ax.set_xlim(0.48, 0.77)
-ax.set_ylim(-0.02, 0.27)
+ax.set_xlim(-0.2, 1.8)
+ax.set_ylim(-0.2, 1.5)
 
 def draw_polygon(polygon, *args, **kwargs):
     pd = PolygonDrawer(ax, polygon)
