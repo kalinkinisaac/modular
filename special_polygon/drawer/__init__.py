@@ -16,8 +16,8 @@ ax.set_aspect('equal')
 # ax.xaxis.tick_bottom()
 # ax.set_frame_on(True)
 
-major_ticks = np.linspace(0, 1, 9)
-minor_ticks = np.linspace(0, 1, 17)
+major_ticks = np.linspace(0, 1, 5)
+minor_ticks = np.linspace(0, 1, 9)
 
 ax.set_xticks(major_ticks)
 ax.set_xticks(minor_ticks, minor=True)
@@ -29,7 +29,7 @@ ax.grid(which='minor', alpha=0.2)
 ax.grid(which='major', alpha=0.5)
 
 
-ax.set_xlim(-0.2, 1.8)
+ax.set_xlim(-0.2, 3.8)
 ax.set_ylim(-0.2, 1.5)
 
 def draw_polygon(polygon, *args, **kwargs):

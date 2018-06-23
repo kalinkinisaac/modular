@@ -6,7 +6,7 @@ from numpy_helpers import *
 def construct_g_0_graph(gamma):
     gc = GraphConstructor(
         L=gamma.L,
-        reduce=gamma.reduce,
+        reduce=gamma.reduced,
         sort_key=gamma.sort_key,
         N=gamma.N)
 

@@ -19,6 +19,7 @@ def inv_element(a, N):
         return -1
     else:
         return (x % N + N) % N
+
 def gcd_ex(a, b):
     if a == 0:
         return b, 0, 1
