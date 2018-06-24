@@ -9,23 +9,24 @@ import itertools
 class GammaZero(Gamma):
 
     def __init__(self, *args, **kwargs):
-
-        self._fact = None
-        self.fact = None
-
         super(__class__, self).__init__(*args, **kwargs)
 
-    def gen_reprs(self):
+        self.pair_reprs = []
+        #TODO: push _fact work into factor
         self._fact = factor(self.N)
         self.fact = list(zip(self._fact.keys(), self._fact.values()))
+        self.gen_pair_reprs()
 
-        t_repr = []
+    def gen_pair_reprs(self):
+        tmp_pair_reprs = []
         for (p_i, m_i) in self.fact:
-            t_repr.append(self._gen_reprs_prime(p_i, m_i))
-        for combination in list(itertools.product(*t_repr)):
-            self.reprs.append(many2one(list(combination)))
+            tmp_pair_reprs += [self._gen_pair_reprs_prime(p_i, m_i)]
 
-    def _gen_reprs_prime(self, p, m):
+
+        for combination in list(itertools.product(*tmp_pair_reprs)):
+            self.pair_reprs.append(many2one(list(combination)))
+
+    def _gen_pair_reprs_prime(self, p, m):
         reprs = []
         reprs.append([0, 1, [p, m]])
         reprs.extend([[1, i, [p, m]] for i in range(p ** m)])
@@ -34,14 +35,14 @@ class GammaZero(Gamma):
             reprs.extend([[p ** i, b, [p, m]] for b in bs])
         return reprs
 
-    def pair_reduction(self, a, b):
+    def pair_reduced(self, a, b):
         many = one2many([a, b, self.N], fact=self._fact)
         reduced = []
         for one in many:
-            reduced.append(self._pair_reduction(one))
+            reduced.append(self._pair_reduced(one))
         return many2one(reduced)
 
-    def _pair_reduction(self, one):
+    def _pair_reduced(self, one):
         a, b, [p, m] = one
         N = p ** m
 
@@ -58,23 +59,20 @@ class GammaZero(Gamma):
             return [p ** i, (bc % p ** (m - i)) % N, [p, m]]
 
 
-class GammaBottomZero(GammaZero):
+class GammaBotZero(GammaZero):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gen_l()
+        super(__class__, self).__init__(*args, **kwargs)
+        self.gen_reprs()
 
-    def gen_l(self):
-        self.L = []
-        for a, b, N in self.reprs:
-            self.L.append(self.reduced(np.matrix([[0, 0], [a, b]])))
+    def gen_reprs(self):
+        self.reprs = []
+        for a, b, N in self.pair_reprs:
+            self.reprs.append(self.reduced(np.matrix([[0, 0], [a, b]])))
 
-    def not_cached_reduced(self, matrix):
-        a, b = matrix.item(1, 0), matrix.item(1, 1)
-        return self._reduced(a, b)
-
-    def _reduced(self, a, b):
-        a, b = self.pair_reduction(a, b)[0:2]
-        d, c = list(map(lambda x : x % self.N, get_xy(a, b, self.N)))
+    def not_cached_reduced(self, mat):
+        a, b = mat.item(1, 0), mat.item(1, 1)
+        a, b = self.pair_reduced(a, b)[0:2]
+        d, c = list(map(lambda x: x % self.N, get_xy(a, b, self.N)))
         return np.matrix([[c, (-d)], [a, b]]) % self.N
 
     @staticmethod
@@ -84,21 +82,19 @@ class GammaBottomZero(GammaZero):
 
 class GammaTopZero(GammaZero):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.gen_l()
+        super(__class__, self).__init__(*args, **kwargs)
+        self.gen_reprs()
 
-    def gen_l(self):
-        for a, b, N in self.reprs:
-            self.L.append(self.reduced(np.matrix([[a, b],[0,0]])))
+    def gen_reprs(self):
+        for a, b, N in self.pair_reprs:
+            self.reprs.append(self.reduced(np.matrix([[a, b], [0, 0]])))
 
-    def not_cached_reduced(self, matrix):
-        a, b = matrix.item(0, 0), matrix.item(0, 1)
-        return self._reduced(a, b)
-
-    def _reduced(self, a, b):
-        a, b = self.pair_reduction(a, b)[0:2]
+    def not_cached_reduced(self, mat):
+        a, b = mat.item(0, 0), mat.item(0, 1)
+        a, b = self.pair_reduced(a, b)[0:2]
         d, c = list(map(lambda x : x % self.N, get_xy(a, b, self.N)))
         return np.matrix([[a, b],[(-c), d]]) % self.N
+
 
     @staticmethod
     def sort_key(m):

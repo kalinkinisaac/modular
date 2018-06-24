@@ -5,8 +5,18 @@ from numpy_helpers import *
 
 def construct_g_0_graph(gamma):
     gc = GraphConstructor(
-        L=gamma.L,
-        reduce=gamma.reduced,
+        L=gamma.reprs,
+        reduced=gamma.reduced,
+        sort_key=gamma.sort_key,
+        N=gamma.N)
+
+
+    return gc.construct_graph()
+
+def construct_g_1_graph(gamma):
+    gc = GraphConstructor(
+        L=gamma.reprs,
+        reduced=gamma.reduced,
         sort_key=gamma.sort_key,
         N=gamma.N)
 
@@ -14,9 +24,9 @@ def construct_g_0_graph(gamma):
 
 class GraphConstructor(object):
 
-    def __init__(self, L, N, reduce, sort_key):
+    def __init__(self, L, N, reduced, sort_key):
         self.L = L
-        self.reduce = reduce
+        self.reduce = reduced
         self.N = N
         self.sort_key = sort_key
 

@@ -1,12 +1,12 @@
 from special_polygon.drawer import draw_polygon
 from special_polygon import SPolygon
 from graph_constructor import construct_g_0_graph
-from classical_subgroups.gamma_zero import GammaBottomZero, GammaTopZero
+from subgroups.gamma_zero import (GammaBotZero, GammaTopZero)
+from subgroups.gamma_one import (GammaBotOne, GammaTopOne)
 from graph import BCGraph
 
-# 2> ??? <300
 
-g2 = GammaTopZero(77)
+g2 = GammaTopOne(3)
 g2_graph = construct_g_0_graph(g2)
 
 G_gr = BCGraph(V0=[[0, 1], [0, 1], [0, 1]], V1=[[0, 1, 2], [0, 1, 2]], dist_edge=[2, 0, 0])

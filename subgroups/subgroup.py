@@ -1,8 +1,9 @@
 from .gamma import Gamma
 from numpy import dot
-from numpy.linalg import inv
+from special_polygon.algo import inv
 
-def subgroup_action(sub, group):
+#TODO: remove inv mb should change structure
+def subgroup_action(N, sub, group):
 
     # Generating set of orbit representatives
     reprs = []
@@ -13,9 +14,8 @@ def subgroup_action(sub, group):
     # Constructing reduction procedure for subgroup action
     def reduced(x):
         x_i = group.reduced(x)
-        h = dot(x, inv(x_i))
+        h = dot(x, inv(x_i) % N)
         h_j = sub.reduced(h)
-
         return dot(h_j, x_i)
 
     return reprs, reduced
