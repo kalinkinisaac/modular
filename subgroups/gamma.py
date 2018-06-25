@@ -15,6 +15,7 @@ class Gamma(object):
         return repr(mat)
 
     def reduced(self, mat):
+        mat = mat % self.N
         e_hash = self.element_hash(mat)
         if e_hash not in self.cache:
             self.cache[e_hash] = self.not_cached_reduced(mat)

@@ -26,7 +26,7 @@ class GraphConstructor(object):
 
     def __init__(self, L, N, reduced, sort_key):
         self.L = L
-        self.reduce = reduced
+        self.reduced = reduced
         self.N = N
         self.sort_key = sort_key
 
@@ -81,7 +81,7 @@ class GraphConstructor(object):
 
     def action(self, element, g):
         n_matrix = g % self.N
-        return self.reduce(element.dot(n_matrix))
+        return self.reduced(element.dot(n_matrix) % self.N)
 
     def minimum(self, orbit):
         orbit.sort(key=self.sort_key)

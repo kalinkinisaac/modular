@@ -20,6 +20,9 @@ class SubGammaOne(Gamma):
     # Constructing reduction procedure
     def reduced(self, mat: np.matrix):
         a, b = mat.item(0, 0), mat.item(1, 1)
+        if a > self.N // 2:
+            a = (-a) % self.N
+            b = (-b) % self.N
         return np.matrix([[a, 0], [0, b]])
 
 
