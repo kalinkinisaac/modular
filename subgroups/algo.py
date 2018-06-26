@@ -1,17 +1,24 @@
+# TODO: this solution is not optimal. Should be replaced with faster one
 def factor(n):
     divisors = dict()
     d = 2
+
     while d*d <= n:
         while (n % d) == 0:
+
             if d not in divisors:
                 divisors[d] = 1
             else:
-                divisors[d] += 1  # supposing you want multiple factors repeated
+                divisors[d] += 1
+
             n //= d
         d += 1
+
     if n > 1:
        divisors[n] = 1
-    return divisors
+
+    return list(zip(divisors.keys(), divisors.values()))
+
 
 def inv_element(a, N):
     g, x, y = gcd_ex(a, N)
@@ -23,6 +30,7 @@ def inv_element(a, N):
 def gcd_ex(a, b):
     if a == 0:
         return b, 0, 1
+
     d, x1, y1 = gcd_ex(b % a, a)
     x = y1 - (b // a) * x1
     y = x1
@@ -33,9 +41,9 @@ def gcd(a, b):
 
 
 def get_xy(a, b, N):
-    _gcd = gcd(a, b)
-    c = gcd_ex(_gcd, N)[1]
-    return _diophantine(a // _gcd, b // _gcd, c)
+    g = gcd(a, b)
+    c = gcd_ex(g, N)[1]
+    return _diophantine(a // g, b // g, c)
 
 
 def _diophantine(a, b, c):
@@ -53,13 +61,3 @@ def _diophantine(a, b, c):
         y_0 *= -1
 
     return [x_0, y_0]
-
-# def __find_any_solution (int a, int b, int c, int & x0, int & y0, int & g)
-# 	g = gcd (abs(a), abs(b), x0, y0);
-# 	if (c % g != 0)
-# 		return false;
-# 	x0 *= c / g;
-# 	y0 *= c / g;
-# 	if (a < 0)   x0 *= -1;
-# 	if (b < 0)   y0 *= -1;
-# 	return true;

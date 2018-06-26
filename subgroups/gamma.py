@@ -1,29 +1,32 @@
-class Gamma(object):
+from .base_gamma import BaseGamma
+from .gamma_one import GammaBotOne
+from .subgroup import subgroup_action
+import numpy as np
+from constants import IDM
 
-    def __init__(self, N=2, reduced=None):
-        self.N = N
+class SubGamma(BaseGamma):
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        self.gen_reprs()
 
-        if reduced:
-            self.non_cached_reduced = reduced
+    # Trivial representatives
+    def gen_reprs(self):
+        self.reprs = [IDM]
 
-        self.reprs = []
-        self.cache = dict()
+    # Identity transformation
+    def reduced(self, mat: np.matrix):
+        return IDM
 
 
+class Gamma(BaseGamma):
 
-    def element_hash(self, mat):
-        return repr(mat)
-
-    def reduced(self, mat):
-        mat = mat % self.N
-        e_hash = self.element_hash(mat)
-        if e_hash not in self.cache:
-            self.cache[e_hash] = self.not_cached_reduced(mat)
-
-        return self.cache[e_hash]
-
-    def not_cached_reduced(self, mat):
-        return 'not set reduction procedure'
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
+        self.gen_reprs()
 
     def gen_reprs(self):
-        pass
+        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGamma(self.N), GammaBotOne(self.N))
+
+    @staticmethod
+    def sort_key(m):
+        return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]

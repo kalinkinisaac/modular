@@ -1,4 +1,4 @@
-from .gamma import Gamma
+from .base_gamma import BaseGamma
 from .isomorphism import (one2many, many2one)
 from .algo import (factor, get_xy, gcd, inv_element)
 from math import log
@@ -6,15 +6,14 @@ import numpy as np
 import itertools
 
 
-class GammaZero(Gamma):
+class GammaZero(BaseGamma):
 
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
 
         self.pair_reprs = []
         #TODO: push _fact work into factor
-        self._fact = factor(self.N)
-        self.fact = list(zip(self._fact.keys(), self._fact.values()))
+        self.fact = factor(self.N)
         self.gen_pair_reprs()
 
     def gen_pair_reprs(self):
@@ -36,7 +35,7 @@ class GammaZero(Gamma):
         return reprs
 
     def pair_reduced(self, a, b):
-        many = one2many([a, b, self.N], fact=self._fact)
+        many = one2many([a, b, self.N], fact=self.fact)
         reduced = []
         for one in many:
             reduced.append(self._pair_reduced(one))
@@ -60,6 +59,7 @@ class GammaZero(Gamma):
 
 
 class GammaBotZero(GammaZero):
+
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()

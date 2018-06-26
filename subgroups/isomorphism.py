@@ -4,12 +4,14 @@ from .algo import factor
 def one2many(one, fact=None):
     a, b, N = one
     many = []
+
     if not fact:
         fact = factor(N)
 
-    for divisor in fact:
-        n = divisor ** fact[divisor]
-        many.append([a % n, b % n, [divisor, fact[divisor]]])
+    for prime, pow in fact:
+        n = prime ** pow
+        many.append([a % n, b % n, [prime, pow]])
+
     return many
 
 def many2one(many):

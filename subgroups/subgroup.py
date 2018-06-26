@@ -1,4 +1,4 @@
-from .gamma import Gamma
+from .base_gamma import BaseGamma
 from numpy import dot
 from special_polygon.algo import inv
 

@@ -1,10 +1,10 @@
-from .gamma import Gamma
+from .base_gamma import BaseGamma
 from .gamma_zero import (GammaBotZero, GammaTopZero)
 from .subgroup import subgroup_action
 from .algo import gcd, inv_element
 import numpy as np
 
-class SubGammaOne(Gamma):
+class SubGammaOne(BaseGamma):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()
@@ -26,7 +26,7 @@ class SubGammaOne(Gamma):
         return np.matrix([[a, 0], [0, b]])
 
 
-class GammaBotOne(Gamma):
+class GammaBotOne(BaseGamma):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()
@@ -39,7 +39,7 @@ class GammaBotOne(Gamma):
         return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]
 
 
-class GammaTopOne(Gamma):
+class GammaTopOne(BaseGamma):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()
