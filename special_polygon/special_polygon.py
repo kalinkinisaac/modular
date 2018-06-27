@@ -1,12 +1,12 @@
 from graph import (BCGraph, VertexType)
 from .star_type import StarType
-import numpy as np
 from numpy import linalg as LA
 from constants import *
 from .mobius_transform import geodesic_mt, mobius_transform as mt
 from .algo import inv
+
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
+#logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
 
 def int_round(x):
     return int(round(x))
@@ -76,8 +76,7 @@ class SpecialPolygon(object):
                 self.I[v] = 0
                 s = [[ZERO, INF], [ZERO, ONE], [ONE, INF]]
                 self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
-                # if j != 0:
-                #     self.T.append(geodesic_mt([V0, V1], LA.matrix_power(G1, 3 - j)))
+
                 self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3],
                                          int_round(LA.matrix_power(G1, j - 1)).dot(G_).dot(int_round(LA.matrix_power(G1, 1 - j)))])
 
