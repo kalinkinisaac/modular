@@ -4,7 +4,7 @@ from .subgroup import subgroup_action
 from .algo import gcd, inv_element
 import numpy as np
 
-class SubGammaOne(BaseGamma):
+class SubGammaZero(BaseGamma):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()
@@ -32,7 +32,7 @@ class GammaBotOne(BaseGamma):
         self.gen_reprs()
 
     def gen_reprs(self):
-        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGammaOne(self.N), GammaBotZero(self.N))
+        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGammaZero(self.N), GammaBotZero(self.N))
 
     @staticmethod
     def sort_key(m):
@@ -45,7 +45,7 @@ class GammaTopOne(BaseGamma):
         self.gen_reprs()
 
     def gen_reprs(self):
-        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGammaOne(self.N), GammaTopZero(self.N))
+        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGammaZero(self.N), GammaTopZero(self.N))
 
     @staticmethod
     def sort_key(m):

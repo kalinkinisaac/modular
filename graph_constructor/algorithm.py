@@ -79,7 +79,7 @@ class GraphConstructor(object):
 
 
 
-    def action(self, element, g):
+    def acted(self, element, g):
         n_matrix = g % self.N
         return self.reduced(element.dot(n_matrix) % self.N)
 
@@ -89,7 +89,7 @@ class GraphConstructor(object):
 
     def g_0_orbit(self, matrix):
         matrix = matrix % self.N
-        acted = self.action(matrix, G0)
+        acted = self.acted(matrix, G0)
 
         if np.array_equal(matrix, acted):
             return [matrix]
@@ -98,12 +98,12 @@ class GraphConstructor(object):
 
     def g_1_orbit(self, matrix):
         matrix = matrix % self.N
-        acted = self.action(matrix, G1)
+        acted = self.acted(matrix, G1)
 
         if np.array_equal(matrix, acted):
             return [matrix]
         else:
-            return [matrix, acted, self.action(matrix, G1_2)]
+            return [matrix, acted, self.acted(matrix, G1_2)]
 
     def g_0_neighbors(self, matrix):
         orbit = self.g_0_orbit(matrix)

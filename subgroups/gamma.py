@@ -4,18 +4,24 @@ from .subgroup import subgroup_action
 import numpy as np
 from constants import IDM
 
-class SubGamma(BaseGamma):
+class SubGammaOne(BaseGamma):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
         self.gen_reprs()
 
     # Trivial representatives
     def gen_reprs(self):
-        self.reprs = [IDM]
+        for a in range(self.N):
+            self.reprs.append(np.matrix([[1, a], [0, 1]]))
 
     # Identity transformation
     def reduced(self, mat: np.matrix):
-        return IDM
+        a = mat.item(0, 0)
+
+        if a > self.N // 2:
+            mat = (-mat) % self.N
+
+        return mat
 
 
 class Gamma(BaseGamma):
@@ -25,7 +31,7 @@ class Gamma(BaseGamma):
         self.gen_reprs()
 
     def gen_reprs(self):
-        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGamma(self.N), GammaBotOne(self.N))
+        self.reprs, self.not_cached_reduced = subgroup_action(self.N, SubGammaOne(self.N), GammaBotOne(self.N))
 
     @staticmethod
     def sort_key(m):
