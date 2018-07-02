@@ -2,6 +2,7 @@ from constants import (IDM, G0, G1, G1_2)
 import numpy as np
 from graph import BCGraph
 from numpy_helpers import *
+from .error import ReprNotFoundError
 
 def construct_g_0_graph(gamma):
     gc = GraphConstructor(
@@ -35,32 +36,46 @@ class GraphConstructor(object):
         self.V0 = []
         self.V1 = []
 
-        for matrix in L:
-            orbit = self.g_0_orbit(matrix)
-            if np.array_equal(matrix, self.minimum(orbit)):
-                self.V0.append(matrix)
+        for mat in L:
+            orb = self.g0_orb(mat)
+            if np.array_equal(mat, self.minimum(orb)):
+                self.V0.append(mat)
 
-            orbit = self.g_1_orbit(matrix)
-            if np.array_equal(matrix, self.minimum(orbit)):
-                self.V1.append(matrix)
+            orb = self.g1_orb(mat)
+            if np.array_equal(mat, self.minimum(orb)):
+                self.V1.append(mat)
 
         self.V0.sort(key=self.sort_key)
         self.V1.sort(key=self.sort_key)
 
-        self.v02n = dict({(self.V0[i].tobytes(), i) for i in range(len(self.V0))})
-        self.v12n = dict({(self.V1[i].tobytes(), i) for i in range(len(self.V1))})
+        self._v02n = dict({(self.V0[i].tobytes(), i) for i in range(len(self.V0))})
+        self._v12n = dict({(self.V1[i].tobytes(), i) for i in range(len(self.V1))})
 
-        V0G = [list(map(lambda x: self.v12n[x.tobytes()], self.g_0_neighbors(v))) for v in self.V0]
-        V1G = [list(map(lambda x: self.v02n[x.tobytes()], self.g_1_neighbors(v))) for v in self.V1]
+        def v02n(v0):
+            b_hash = v0.tobytes()
+            if b_hash not in self._v02n.keys():
+                raise ReprNotFoundError(v0)
+            else:
+                return self._v02n[b_hash]
 
-        v0 = self.minimum(self.g_0_orbit(IDM))
-        v1 = self.minimum(self.g_1_orbit(IDM))
+        def v12n(v1):
+            b_hash = v1.tobytes()
+            if b_hash not in self._v12n.keys():
+                raise ReprNotFoundError(v1)
+            else:
+                return self._v12n[b_hash]
 
-        # Distinguished edge
-        orbit = self.g_1_orbit(v1)
-        neighbors = self.g_1_neighbors(v1)
+        V0G = [list(map(v12n, self.g0_nei(v))) for v in self.V0]
+        V1G = [list(map(v02n, self.g1_nei(v))) for v in self.V1]
 
-        j_0 = np_index(IDM, orbit)
+        v0 = self.minimum(self.g0_orb(IDM))
+        v1 = self.minimum(self.g1_orb(IDM))
+
+        # Calculating distinguished edge
+        orb = self.g1_orb(v1)
+        neighbors = self.g1_nei(v1)
+
+        j_0 = np_index(IDM, orb)
         j = 0
 
         if np_count(v0, neighbors) > 1:
@@ -74,41 +89,41 @@ class GraphConstructor(object):
         return BCGraph(
             V0=V0G,
             V1=V1G,
-            dist_edge=[self.v02n[v0.tobytes()], self.v12n[v1.tobytes()], j],
+            dist_edge=[v02n(v0), v12n(v1), j],
             sort_key=self.sort_key)
-
-
 
     def acted(self, element, g):
         n_matrix = g % self.N
         return self.reduced(element.dot(n_matrix) % self.N)
 
-    def minimum(self, orbit):
-        orbit.sort(key=self.sort_key)
-        return  orbit[0]
+    def minimum(self, orb):
+        orb.sort(key=self.sort_key)
+        return orb[0]
 
-    def g_0_orbit(self, matrix):
-        matrix = matrix % self.N
-        acted = self.acted(matrix, G0)
+    # Returns orbit of matrix
+    def g0_orb(self, mat):
+        mat = mat % self.N
+        acted = self.acted(mat, G0)
 
-        if np.array_equal(matrix, acted):
-            return [matrix]
+        if np.array_equal(mat, acted):
+            return [mat]
         else:
-            return [matrix, acted]
+            return [mat, acted]
 
-    def g_1_orbit(self, matrix):
-        matrix = matrix % self.N
-        acted = self.acted(matrix, G1)
+    def g1_orb(self, mat):
+        mat = mat % self.N
+        acted = self.acted(mat, G1)
 
-        if np.array_equal(matrix, acted):
-            return [matrix]
+        if np.array_equal(mat, acted):
+            return [mat]
         else:
-            return [matrix, acted, self.acted(matrix, G1_2)]
+            return [mat, acted, self.acted(mat, G1_2)]
 
-    def g_0_neighbors(self, matrix):
-        orbit = self.g_0_orbit(matrix)
-        return [self.minimum(self.g_1_orbit(m)) for m in orbit]
+    # Returns neighbors of vertex
+    def g0_nei(self, mat):
+        orbit = self.g0_orb(mat)
+        return [self.minimum(self.g1_orb(m)) for m in orbit]
 
-    def g_1_neighbors(self, matrix):
-        orbit = self.g_1_orbit(matrix)
-        return [self.minimum(self.g_0_orbit(m)) for m in orbit]
+    def g1_nei(self, mat):
+        orbit = self.g1_orb(mat)
+        return [self.minimum(self.g0_orb(m)) for m in orbit]

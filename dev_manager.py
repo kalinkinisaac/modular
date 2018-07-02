@@ -7,7 +7,7 @@ from subgroups.gamma_one import (GammaBotOne, GammaTopOne)
 from graph import BCGraph
 
 
-g2 = GammaBotZero(2)
+g2 = Gamma(3)
 g2_graph = construct_g_0_graph(g2)
 
 G_gr = BCGraph(V0=[[0, 1], [0, 1], [0, 1]], V1=[[0, 1, 2], [0, 1, 2]], dist_edge=[2, 0, 0])
