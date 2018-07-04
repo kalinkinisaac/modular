@@ -32,7 +32,7 @@ ax.grid(which='major', alpha=0.5)
 ax.set_xlim(-0.2, 3.8)
 ax.set_ylim(-0.2, 1.5)
 
-def draw_polygon(polygon, *args, **kwargs):
+def draw_lines(polygon, *args, **kwargs):
     pd = PolygonDrawer(ax, polygon)
     pd.draw(*args, **kwargs)
     plt.show()

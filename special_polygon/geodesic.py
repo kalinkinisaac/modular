@@ -1,5 +1,8 @@
 import numpy as np
+
+
 class Geodesic(object):
+
     DELTA = 1e-14
     def __init__(self, a, b):
         self.a = a

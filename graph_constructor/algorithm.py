@@ -4,22 +4,13 @@ from graph import BCGraph
 from numpy_helpers import *
 from .error import ReprNotFoundError
 
-def construct_g_0_graph(gamma):
+def get_graph(gamma):
     gc = GraphConstructor(
         L=gamma.reprs,
         reduced=gamma.reduced,
         sort_key=gamma.sort_key,
         N=gamma.N)
 
-
-    return gc.construct_graph()
-
-def construct_g_1_graph(gamma):
-    gc = GraphConstructor(
-        L=gamma.reprs,
-        reduced=gamma.reduced,
-        sort_key=gamma.sort_key,
-        N=gamma.N)
 
     return gc.construct_graph()
 

@@ -1,1 +1,1 @@
-from .algorithm import GraphConstructor as GConstructor, construct_g_0_graph
+from .algorithm import get_graph

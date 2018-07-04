@@ -1,31 +1,18 @@
-from special_polygon.drawer import draw_polygon
-from special_polygon import SPolygon
-from graph_constructor import construct_g_0_graph
-from subgroups.gamma import Gamma
-from subgroups.gamma_zero import (GammaBotZero, GammaTopZero)
-from subgroups.gamma_one import (GammaBotOne, GammaTopOne)
-from graph import BCGraph
+from special_polygon.drawer import draw_lines
+from special_polygon import get_all
+from graph_constructor import get_graph
+from subgroups import *
+from graph_drawer import draw_graph
 
+gamma = Gamma(4)
+graph = get_graph(gamma)
+domain, tree, involutions = get_all(graph)
 
-g2 = Gamma(3)
-g2_graph = construct_g_0_graph(g2)
+s1, s2, generators = zip(*involutions)
+print(generators)
 
-G_gr = BCGraph(V0=[[0, 1], [0, 1], [0, 1]], V1=[[0, 1, 2], [0, 1, 2]], dist_edge=[2, 0, 0])
+draw_graph(graph)
 
-sp = SPolygon(g2_graph)
-E, T, inv = sp.construct_polygon()
+draw_lines(domain, linewidth=1.0)
+draw_lines(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
 
-s1 = list(map(lambda x: x[0], inv))
-s2 = list(map(lambda x: x[1], inv))
-gs = list(map(lambda x: x[2], inv))
-
-print(gs)
-
-draw_polygon(E, linewidth=1.0)
-draw_polygon(T, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
-
-
-
-#from graph_drawer import draw_graph
-
-#draw_graph(g2_graph)
