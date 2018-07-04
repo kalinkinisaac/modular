@@ -14,3 +14,8 @@ def np_count(e, array):
             c += 1
 
     return c
+
+def inv(mat : np.matrix):
+    a, b, c, d = np.array(mat).flatten().tolist()
+
+    return (a*d - b*c)*np.matrix([[d, -b], [-c, a]], dtype=np.int)

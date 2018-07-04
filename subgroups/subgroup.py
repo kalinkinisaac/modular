@@ -1,6 +1,6 @@
 from .base_gamma import BaseGamma
 from numpy import dot
-from special_polygon.algo import inv
+from numpy_helpers import inv
 
 #TODO: remove inv mb should change structure
 def subgroup_action(N, sub, group):

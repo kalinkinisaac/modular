@@ -7,11 +7,13 @@ from matplotlib.patches import Circle
 from . import ax
 
 def draw_vertex(xy, color='w'):
-    ax.add_patch(Circle(xy, radius=0.05, linewidth=0.005,  color=color))
+    ax.add_patch(Circle(xy, radius=0.05,  color=color))
 
 def bipartite_draw_graph(graph : BCGraph):
     margin = 0.1
 
+    ax.set_xlim(0.0, 1.0)
+    ax.set_ylim(0.0, len(graph.V0)*0.2)
     x_min, x_max = ax.get_xbound()
     y_min, y_max = ax.get_ybound()
 

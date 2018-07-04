@@ -10,8 +10,6 @@ class BaseGamma(object):
         self.reprs = []
         self.cache = dict()
 
-
-
     def element_hash(self, mat):
         return repr(mat)
 
