@@ -3,14 +3,15 @@ import numpy as np
 from graph import BCGraph
 from numpy_helpers import *
 from .error import ReprNotFoundError
+from time_it import time_it
 
+@time_it
 def get_graph(gamma):
     gc = GraphConstructor(
         L=gamma.reprs,
         reduced=gamma.reduced,
         sort_key=gamma.sort_key,
         N=gamma.N)
-
 
     return gc.construct_graph()
 

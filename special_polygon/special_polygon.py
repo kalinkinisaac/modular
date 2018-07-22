@@ -2,7 +2,7 @@ from graph import BCGraph
 from .star_type import StarType
 from numpy import linalg as LA
 from constants import *
-from .mobius_transform import geodesic_mt
+from mobius_transform import geodesic_mt
 from numpy_helpers import inv
 
 import logging

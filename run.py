@@ -3,19 +3,20 @@ from special_polygon import get_all
 from graph_constructor import get_graph
 from subgroups import *
 from graph_drawer import draw_graph
+import time
 
-gamma = GammaTopOne(2)
+gamma = Gamma(100)
 graph = get_graph(gamma)
 
-draw_graph(graph)
-
-domain, tree, involutions = get_all(graph)
-
-s1, s2, generators = zip(*involutions)
-print(generators)
-
-draw_lines(domain, linewidth=1.0)
-draw_lines(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
 
 
-
+# d = time.time()
+# domain, tree, involutions = get_all(graph)
+# print("special {}".format(time.time()-d))
+#
+# s1, s2, generators = zip(*involutions)
+# print(generators)
+#
+# draw_lines(domain, linewidth=1.0)
+# draw_lines(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
+# draw_graph(graph)

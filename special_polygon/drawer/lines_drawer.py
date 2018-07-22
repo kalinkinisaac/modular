@@ -1,5 +1,5 @@
 from matplotlib.patches import Arc
-from special_polygon.geodesic import Geodesic
+from geodesic import Geodesic
 from . import ax
 
 Y_MAX_INF = 5.0
