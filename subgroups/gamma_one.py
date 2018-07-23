@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .gamma_zero import (GammaBotZero, GammaTopZero)
 from .subgroup import subgroup_action
 from .algo import gcd, inv_element
-import numpy as np
+from mmath import Mat
 
 class SubGammaZero(BaseGamma):
     def __init__(self, *args, **kwargs):
@@ -15,15 +15,15 @@ class SubGammaZero(BaseGamma):
         self.reprs = []
         for a in range(1, self.N // 2 + 1):
             if gcd(a, self.N) == 1:
-                self.reprs.append(np.matrix([[a, 0], [0, inv_element(a, self.N)]]))
+                self.reprs.append(Mat(a, 0, 0, inv_element(a, self.N)))
 
     # Constructing reduction procedure
-    def reduced(self, mat: np.matrix):
-        a, b = mat.item(0, 0), mat.item(1, 1)
+    def reduced(self, mat: Mat):
+        a, b = mat.a, mat.d
         if a > self.N // 2:
             a = (-a) % self.N
             b = (-b) % self.N
-        return np.matrix([[a, 0], [0, b]])
+        return Mat(a, 0, 0, b)
 
 
 class GammaBotOne(BaseGamma):
@@ -36,7 +36,7 @@ class GammaBotOne(BaseGamma):
 
     @staticmethod
     def sort_key(m):
-        return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]
+        return [m.c, m.d, m.a, m.b]
 
 
 class GammaTopOne(BaseGamma):
@@ -49,4 +49,4 @@ class GammaTopOne(BaseGamma):
 
     @staticmethod
     def sort_key(m):
-        return [m.item(0, 0), m.item(0, 1), m.item(1, 0), m.item(1, 1)]
+        return [m.a, m.b, m.c, m.d]

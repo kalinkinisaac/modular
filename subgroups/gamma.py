@@ -1,8 +1,7 @@
 from .base_gamma import BaseGamma
 from .gamma_one import GammaBotOne
 from .subgroup import subgroup_action
-import numpy as np
-from constants import IDM
+from mmath import Mat
 
 class SubGammaOne(BaseGamma):
     def __init__(self, *args, **kwargs):
@@ -12,11 +11,11 @@ class SubGammaOne(BaseGamma):
     # Trivial representatives
     def gen_reprs(self):
         for a in range(self.N):
-            self.reprs.append(np.matrix([[1, a], [0, 1]]))
+            self.reprs.append(Mat(1, a, 0, 1))
 
     # Identity transformation
-    def reduced(self, mat: np.matrix):
-        a = mat.item(0, 0)
+    def reduced(self, mat: Mat):
+        a = mat.a
 
         if a > self.N // 2:
             mat = (-mat) % self.N
@@ -35,4 +34,4 @@ class Gamma(BaseGamma):
 
     @staticmethod
     def sort_key(m):
-        return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]
+        return [m.c, m.d, m.a, m.b]

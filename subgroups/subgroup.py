@@ -1,5 +1,3 @@
-from .base_gamma import BaseGamma
-from numpy import dot
 from numpy_helpers import inv
 
 #TODO: remove inv mb should change structure
@@ -9,13 +7,13 @@ def subgroup_action(N, sub, group):
     reprs = []
     for h_j in sub.reprs:
         for x_i in group.reprs:
-            reprs.append(dot(h_j, x_i) % N)
+            reprs.append((h_j * x_i) % N)
 
     # Constructing reduction procedure for subgroup action
     def reduced(x):
         x_i = group.reduced(x)
-        h = dot(x, inv(x_i) % N) % N
+        h = (x * inv(x_i) % N) % N
         h_j = sub.reduced(h)
-        return dot(h_j, x_i) % N
+        return (h_j * x_i) % N
 
     return reprs, reduced

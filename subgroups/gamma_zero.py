@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .isomorphism import (one2many, many2one)
 from .algo import (factor, get_xy, gcd, inv_element)
 from math import log
-import numpy as np
+from mmath import Mat
 import itertools
 
 
@@ -12,7 +12,6 @@ class GammaZero(BaseGamma):
         super(__class__, self).__init__(*args, **kwargs)
 
         self.pair_reprs = []
-        #TODO: push _fact work into factor
         self.fact = factor(self.N)
         self.gen_pair_reprs()
 
@@ -67,17 +66,17 @@ class GammaBotZero(GammaZero):
     def gen_reprs(self):
         self.reprs = []
         for a, b, N in self.pair_reprs:
-            self.reprs.append(self.reduced(np.matrix([[0, 0], [a, b]])))
+            self.reprs.append(self.reduced(Mat(0, 0, a, b)))
 
     def not_cached_reduced(self, mat):
-        a, b = mat.item(1, 0), mat.item(1, 1)
+        a, b = mat.c, mat.d
         a, b = self.pair_reduced(a, b)[0:2]
         d, c = list(map(lambda x: x % self.N, get_xy(a, b, self.N)))
-        return np.matrix([[c, (-d)], [a, b]]) % self.N
+        return Mat(c, -d, a, b) % self.N
 
     @staticmethod
     def sort_key(m):
-        return [m.item(1, 0), m.item(1, 1), m.item(0, 0), m.item(0, 1)]
+        return [m.c, m.d, m.a, m.b]
 
 
 class GammaTopZero(GammaZero):
@@ -87,15 +86,15 @@ class GammaTopZero(GammaZero):
 
     def gen_reprs(self):
         for a, b, N in self.pair_reprs:
-            self.reprs.append(self.reduced(np.matrix([[a, b], [0, 0]])))
+            self.reprs.append(self.reduced(Mat(a, b, 0, 0)))
 
     def not_cached_reduced(self, mat):
-        a, b = mat.item(0, 0), mat.item(0, 1)
+        a, b = mat.a, mat.b
         a, b = self.pair_reduced(a, b)[0:2]
         d, c = list(map(lambda x : x % self.N, get_xy(a, b, self.N)))
-        return np.matrix([[a, b],[(-c), d]]) % self.N
+        return Mat(a, b,-c, d) % self.N
 
 
     @staticmethod
     def sort_key(m):
-        return [m.item(0, 0), m.item(0, 1), m.item(1, 0), m.item(1, 1)]
+        return [m.a, m.b, m.c, m.d]

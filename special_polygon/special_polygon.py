@@ -1,10 +1,11 @@
 from graph import BCGraph
 from .star_type import StarType
-from numpy import linalg as LA
-from constants import *
+#from numpy import linalg as LA
+#from constants import *
+from consts import *
 from mobius_transform import geodesic_mt
 from numpy_helpers import inv
-
+from mmath import *
 import logging
 #logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
 
@@ -68,13 +69,15 @@ class SpecialPolygon(object):
                 j = self.graph.dist_j
                 self.L0.append(v)
                 self.L1.append(self.v1)
-                self.G.append(np.rint(LA.matrix_power(G1, j)))
+                #self.G.append(np.rint(LA.matrix_power(G1, j)))
+                self.G.append(G1 ** j)
                 self.I[v] = 0
                 s = [[ZERO, INF], [ZERO, ONE], [ONE, INF]]
                 self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
 
-                self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3],
-                                         np.rint(LA.matrix_power(G1, j - 1)).dot(G_).dot(np.rint(LA.matrix_power(G1, 1 - j)))])
+                #self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3],
+                #                        np.rint(LA.matrix_power(G1, j - 1)).dot(G_).dot(np.rint(LA.matrix_power(G1, 1 - j)))])
+                self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3], G1 ** (j - 1) * G_ * G1 ** (1 - j)])
 
         while(self.L0):
             self.induction()
@@ -136,7 +139,7 @@ class SpecialPolygon(object):
         s2 = geodesic_mt(s2_, g)
 
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g.dot(G0).dot(inv(g))])
+        self.involutions.append([s1, s2, g * G0 * g.inv()])
 
         logging.info('1. V is univalent.\n\ts1 = {},\n\ts2 = {}\n\n==-End of induction-==\n\n'.format(str(s1), str(s2)))
 
@@ -145,14 +148,14 @@ class SpecialPolygon(object):
         s1_ = [V1, ZERO]
         s2_ = [V1, INF]
 
-        gG0 = g.dot(G0)
+        gG0 = g * G0
 
         s1 = geodesic_mt(s1_, gG0)
         s2 = geodesic_mt(s2_, gG0)
 
         self.E.extend([s1, s2])
         self.T.append(geodesic_mt([V0, V1], gG0))
-        self.involutions.append([s1, s2, gG0.dot(G1_2).dot(inv(gG0))])
+        self.involutions.append([s1, s2, gG0 * G1_2 * gG0.inv()])
 
         logging.info('2a. Star(V\'\') -- Segment,\n\ts1 = {},\n\ts2 = {}\n\n==-End of induction-==\n'.format(str(s1), str(s2)))
 
@@ -219,7 +222,6 @@ class SpecialPolygon(object):
         s2 = geodesic_mt(s0, g2)
         self.E.extend([s1, s2])
         self.involutions.append([s1, s2, g2.dot(inv(g1.dot(G0)))])
-
         logging.info('2c. Star(V__) : Racket\n\t s1 : {},\n\ts2 : {},\n\nEnd of induction\n\n'.format(str(s1), str(s2)))
 
 

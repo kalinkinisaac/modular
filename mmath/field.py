@@ -1,5 +1,7 @@
 from fractions import Fraction
 from .error import (UnsupportedTypeError, NanError)
+from math import sqrt, atan, degrees
+from cmath import phase
 
 class Field(object):
 
@@ -11,6 +13,21 @@ class Field(object):
         self.d = Fraction(d)
 
         self._is_inf = is_inf
+
+    def abs(self):
+        return abs(complex(self))
+
+    def __complex__(self):
+        return self.a + sqrt(3)*self.b + 1j*(self.c + sqrt(3)*self.d)
+
+    def real(self):
+        return Field(a=self.a, b=self.b)
+
+    def imag(self):
+        return Field(a=self.c, b=self.d)
+
+    def angle(self):
+        return degrees(phase(compile(self)))
 
     # Inverse of number, self^-1
     def inv(s):
@@ -73,8 +90,6 @@ class Field(object):
         raise UnsupportedTypeError(other)
 
     def __rmul__(self, other):
-        if type(other) == Mat:
-            return other.__mul__(self)
 
         if type(other) == Field:
             return other * self
@@ -140,6 +155,9 @@ class Field(object):
     def __str__(self):
         if self.is_inf:
             return 'inf'
+
+        if self.is_zero:
+            return '0'
 
         res = []
 

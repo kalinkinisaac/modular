@@ -1,10 +1,11 @@
-import numpy as np
-
+from mmath import Field
+from math import degrees
+from cmath import phase
 
 class Geodesic(object):
 
     DELTA = 1e-14
-    def __init__(self, a, b):
+    def __init__(self, a : Field, b : Field):
         self.a = a
         self.b = b
         self.center = 0
@@ -16,33 +17,39 @@ class Geodesic(object):
 
     def set_parameters(self):
         if self.is_vertical():
-            self.center = np.inf
-            self.radius = np.inf
+            self.center = Field.inf()
+            self.radius = Field.inf()
         else:
-            self.center = 0.5*(np.abs(self.a)**2 - np.abs(self.b)**2)/(np.real(self.a) - np.real(self.b))
-            self.radius = np.abs(self.a - self.center)
-            self.theta1 = np.angle(self.a - self.center, deg=True)
-            self.theta2 = np.angle(self.b - self.center, deg=True)
+            self.center = 0.5*(abs(complex(self.a))**2 - abs(complex(self.b))**2)/complex(self.a - self.b).real
+            self.radius = abs(complex(self.a) - self.center)
+            self.theta1 = degrees(phase(complex(self.a) - self.center))
+            self.theta2 = degrees(phase(complex(self.b) - self.center))
 
             self.theta1, self.theta2 = min(self.theta1, self.theta2), max(self.theta1, self.theta2)
 
     def is_vertical(self):
-        return (np.abs(np.real(self.a - self.b)) <= Geodesic.DELTA) or self.has_inf()
+        return (abs(complex(self.a - self.b).real) <= Geodesic.DELTA) or self.has_inf()
 
     def y_min(self):
-        return min(np.imag(self.a), np.imag(self.b))
+        if self.has_inf():
+            if self.a.is_inf:
+                return complex(self.b).imag
+            else:
+                return complex(self.a).imag
+        else:
+            return min(complex(self.a).imag, complex(self.b).imag)
 
     def has_inf(self):
-        return (np.imag(self.a) == np.inf) or (np.imag(self.b) == np.inf)
+        return self.a.is_inf or self.b.is_inf
 
     def y_max(self):
-        return max(np.imag(self.a), np.imag(self.b))
+        return max(abs(complex(self.a).imag), abs(complex(self.b).imag))
 
     def x(self):
-        if(np.isinf(self.a)):
-            return np.real(self.b)
+        if(self.a.is_inf):
+            return complex(self.b).real
         else:
-            return np.real(self.a)
+            return complex(self.a).real
 
     def __repr__(self):
         return "Geodesic from: {} to: {}.\n" \

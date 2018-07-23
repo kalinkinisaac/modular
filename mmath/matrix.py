@@ -22,17 +22,72 @@ class Mat(object):
                 return Field(a=s.a) / s.c
             else:
                 if s.c != 0:
-                    if other == -s.d * Field.one() / s.c:
-                        return Field.inf()
-                    elif other.is_inf:
+                    if other.is_inf:
                         return s.a * Field.one() / s.c
+                    elif other == -s.d * Field.one() / s.c:
+                        return Field.inf()
+
 
                 if other.is_inf:
                     return Field.inf()
 
             return (s.a * other + s.b) / (s.c * other + s.d)
+        elif type(other) == int:
+            return Mat(
+                s.a * other,
+                s.b * other,
+                s.c * other,
+                s.d * other
+            )
         else:
             UnsupportedTypeError(other)
+
+    def __mod__(self, other):
+        if type(other) == int:
+            return Mat(
+                self.a % other,
+                self.b % other,
+                self.c % other,
+                self.d % other
+            )
+
+    def __neg__(self):
+        return Mat(
+            -self.a,
+            -self.b,
+            -self.c,
+            -self.d
+        )
+
+    def __eq__(self, other):
+        return self.a == other.a and self.b == other.b and self.c == other.c and self.d == other.d
+
+    def __pow__(self, power : int, modulo=None):
+        if power == 0:
+            return Mat.identity()
+
+        if power > 0:
+            result = Mat.identity()
+            for _ in range(power):
+                result = result * self
+            return result
+
+        if power < 0:
+            result = Mat.identity()
+            for _ in range(power):
+                result = result * self
+            return result.inv()
+
+    def dot(self, other):
+        return self * other
+
+    def inv(self):
+        if self.a * self.d - self.b * self.c == 0:
+            print(self)
+            raise ZeroDivisionError()
+
+        return Mat(self.d, -self.b, -self.c, self.a) * (self.a * self.d - self.b * self.c)
+
 
     def __rmul__(self, other):
         return self * other
