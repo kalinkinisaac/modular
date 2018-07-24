@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .gamma_zero import (GammaBotZero, GammaTopZero)
 from .subgroup import subgroup_action
 from .algo import gcd, inv_element
-from mmath import Mat
+from fimath import Mat
 
 class SubGammaZero(BaseGamma):
     def __init__(self, *args, **kwargs):

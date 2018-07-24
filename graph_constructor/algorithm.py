@@ -1,28 +1,17 @@
-from consts import (IDM, G0, G1, G1_2)
 from graph import BCGraph
+from consts import *
 from .error import ReprNotFoundError
-from time_it import time_it
-from mmath import Mat
-
-@time_it
-def get_graph(gamma):
-    gc = GraphConstructor(
-        L=gamma.reprs,
-        reduced=gamma.reduced,
-        sort_key=gamma.sort_key,
-        N=gamma.N)
-
-    return gc.construct_graph()
 
 class GraphConstructor(object):
 
     def __init__(self, L, N, reduced, sort_key):
         self.L = L
-        self.reduced = reduced
         self.N = N
+        self.reduced = reduced
         self.sort_key = sort_key
 
-    def construct_graph(self):
+    # TODO: make new solution without repr hash
+    def construct(self):
         L = self.L
         self.V0 = []
         self.V1 = []
@@ -56,14 +45,13 @@ class GraphConstructor(object):
             else:
                 return self._v12n[b_hash]
 
-        print(self.g1_orb(self.V0[0]))
         V0G = [list(map(v12n, self.g0_nei(v))) for v in self.V0]
         V1G = [list(map(v02n, self.g1_nei(v))) for v in self.V1]
 
         v0 = self.minimum(self.g0_orb(IDM))
         v1 = self.minimum(self.g1_orb(IDM))
 
-        # Calculating distinguished edge
+        # Finding distinguished edge
         orb = self.g1_orb(v1)
         neighbors = self.g1_nei(v1)
 
@@ -79,8 +67,8 @@ class GraphConstructor(object):
         return BCGraph(
             V0=V0G,
             V1=V1G,
-            dist_edge=[v02n(v0), v12n(v1), j],
-            sort_key=self.sort_key)
+            dist_edge=[v02n(v0), v12n(v1), j]
+        )
 
     def acted(self, element, g):
         n_matrix = g % self.N

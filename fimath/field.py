@@ -1,7 +1,16 @@
 from fractions import Fraction
 from .error import (UnsupportedTypeError, NanError)
-from math import sqrt, atan, degrees
+from math import sqrt, degrees
 from cmath import phase
+from .re_field import ReField
+import decimal
+
+def re_field_support(func):
+    def wrapped(obj, other):
+        if type(other) == ReField:
+            other = Field(a=other.a, b=other.b)
+        return func(obj, other)
+    return wrapped
 
 class Field(object):
 
@@ -20,14 +29,20 @@ class Field(object):
     def __complex__(self):
         return self.a + sqrt(3)*self.b + 1j*(self.c + sqrt(3)*self.d)
 
+    @property
     def real(self):
-        return Field(a=self.a, b=self.b)
-
+        return ReField(a=self.a, b=self.b)
+    @property
     def imag(self):
-        return Field(a=self.c, b=self.d)
+        return ReField(a=self.c, b=self.d)
 
     def angle(self):
         return degrees(phase(compile(self)))
+
+    # def approx(self, precision=16):
+    #     decimal.getcontext().prec = precision
+    #     return decimal.Decimal(self.a.numerator)/decimal.Decimal(self.a.denominator) + \
+    #            decimal.Decimal(3).sqrt() * decimal.Decimal(self.b.numerator) / decimal.Decimal(self.b.denominator)
 
     # Inverse of number, self^-1
     def inv(s):
@@ -66,6 +81,7 @@ class Field(object):
     def __neg__(self):
         return self * -1
 
+    @re_field_support
     def __mul__(self, other):
         if type(other) == Field:
             if (self.is_inf and not other.is_zero) or (other.is_inf and not self.is_zero):
@@ -89,15 +105,30 @@ class Field(object):
 
         raise UnsupportedTypeError(other)
 
+    def __abs__(self):
+        return sqrt(float(self.real) ** 2 + float(self.imag) ** 2)
+
     def __rmul__(self, other):
+        return self * other
 
-        if type(other) == Field:
-            return other * self
-        elif type(other) == int or type(other) == Fraction:
-            return Field(a=other) * self
+    def __pow__(self, power, modulo=None):
+        if type(power) == int:
+            if power == 0:
+                return Field.one()
+
+            result = Field.one()
+            for _ in range(power):
+                result = result * self
+
+            if power > 0:
+                return result
+            else:
+                return result.inv()
+
         else:
-            raise UnsupportedTypeError(other)
+            UnsupportedTypeError(power)
 
+    @re_field_support
     def __truediv__(self, other):
         if type(other) == Field:
             if self.is_inf and not other.is_inf:
@@ -106,20 +137,28 @@ class Field(object):
                 raise NanError()
             else:
                 return self * other.inv()
+
         elif type(other) == int or type(other) == Fraction:
             return self * Field(a=Fraction(1, other))
+
         else:
             raise UnsupportedTypeError(other)
 
+    @re_field_support
     def __rtruediv__(self, other):
         if type(other) == Field:
             return other * self.inv()
+
+        elif type(other) == ReField:
+            return Field(a=other.a, b=other.b) / self
+
         elif type(other) == int or type(other) == Fraction:
             return Field(a=other) / self
+
         else:
             raise UnsupportedTypeError(other)
 
-
+    @re_field_support
     def __add__(self, other):
         if type(other) == Field:
             if self.is_inf or other.is_inf:
@@ -131,7 +170,8 @@ class Field(object):
                 c=self.c + other.c,
                 d=self.d + other.d
             )
-        elif type(other) == int or type(other) == Fraction:
+
+        elif type(other) == int or type(other) == float or type(other) == Fraction:
             return self + Field(a=other)
         else:
             raise UnsupportedTypeError(other)
@@ -145,12 +185,14 @@ class Field(object):
     def __rsub__(self, other):
         return other + (-self)
 
+    @re_field_support
     def __eq__(self, other):
         return (self.is_inf and other.is_inf) or \
                (self.a == other.a and
                 self.b == other.b and
                 self.c == other.c and
                 self.d == other.d)
+
 
     def __str__(self):
         if self.is_inf:
@@ -190,4 +232,7 @@ class Field(object):
     @classmethod
     def inf(cls):
         return Field(is_inf=True)
+
+
+
 

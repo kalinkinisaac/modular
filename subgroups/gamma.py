@@ -1,7 +1,7 @@
 from .base_gamma import BaseGamma
 from .gamma_one import GammaBotOne
 from .subgroup import subgroup_action
-from mmath import Mat
+from fimath import Mat
 
 class SubGammaOne(BaseGamma):
     def __init__(self, *args, **kwargs):

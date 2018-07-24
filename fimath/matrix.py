@@ -3,11 +3,31 @@ from .error import UnsupportedTypeError
 
 class Mat(object):
 
-    def __init__(self, a : int, b : int, c : int, d : int):
+    def __init__(self, a, b, c, d):
         self.a = a
         self.b = b
         self.c = c
         self.d = d
+
+    def moe(self, other):
+        if type(other) == list:
+            return [self._single_moe(f) for f in other]
+        elif type(other) == Field:
+            return self._single_moe(other)
+        else:
+            raise UnsupportedTypeError(other)
+
+    def dot(self, other):
+        return self * other
+
+    def det(self):
+        return self.a * self.d - self.b * self.c
+
+    def inv(self):
+        if self.a * self.d - self.b * self.c == 0:
+            raise ZeroDivisionError()
+
+        return Mat(self.d, -self.b, -self.c, self.a) * (self.a * self.d - self.b * self.c)
 
     def __mul__(s, other):
         if type(other) == __class__:
@@ -17,21 +37,6 @@ class Mat(object):
                 c =s.c * other.a + s.d * other.c,
                 d =s.c * other.b + s.d * other.d
             )
-        elif type(other) == Field:
-            if s.a * s.d == s.b * s.c:
-                return Field(a=s.a) / s.c
-            else:
-                if s.c != 0:
-                    if other.is_inf:
-                        return s.a * Field.one() / s.c
-                    elif other == -s.d * Field.one() / s.c:
-                        return Field.inf()
-
-
-                if other.is_inf:
-                    return Field.inf()
-
-            return (s.a * other + s.b) / (s.c * other + s.d)
         elif type(other) == int:
             return Mat(
                 s.a * other,
@@ -78,16 +83,24 @@ class Mat(object):
                 result = result * self
             return result.inv()
 
-    def dot(self, other):
-        return self * other
+    def _single_moe(s, other):
+        if type(other) == Field:
+            if s.a * s.d == s.b * s.c:
+                return Field(a=s.a) / s.c
+            else:
+                if s.c != 0:
+                    if other.is_inf:
+                        return s.a * Field.one() / s.c
+                    elif other == -s.d * Field.one() / s.c:
+                        return Field.inf()
 
-    def inv(self):
-        if self.a * self.d - self.b * self.c == 0:
-            print(self)
-            raise ZeroDivisionError()
 
-        return Mat(self.d, -self.b, -self.c, self.a) * (self.a * self.d - self.b * self.c)
+                if other.is_inf:
+                    return Field.inf()
 
+            return (s.a * other + s.b) / (s.c * other + s.d)
+        else:
+            raise UnsupportedTypeError(other)
 
     def __rmul__(self, other):
         return self * other

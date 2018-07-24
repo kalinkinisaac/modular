@@ -1,11 +1,7 @@
 from graph import BCGraph
 from .star_type import StarType
-#from numpy import linalg as LA
-#from constants import *
 from consts import *
-from mobius_transform import geodesic_mt
-from numpy_helpers import inv
-from mmath import *
+
 import logging
 #logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
 
@@ -29,7 +25,7 @@ class SpecialPolygon(object):
         self.v0 = self.graph.v0
         self.v1 = self.graph.v1
 
-        neighbors = self.graph.V1_neighbors(self.v1)
+        neighbors = self.graph.v1_nei(self.v1)
         star_v1 = StarType.star_type(neighbors)
 
         self.T.append([V0, V1])
@@ -45,12 +41,11 @@ class SpecialPolygon(object):
             self.involutions.append([s1, s2, G1])
 
         else:
-            self.T.extend([geodesic_mt([V0, V1], G1),
-                           geodesic_mt([V0, V1], G1_2)])
+            self.T.extend([G1.moe([V0, V1]), (G1_2).moe([V0, V1])])
             self.generators.extend([G1, G1_2])
             if star_v1 == StarType.SlingShot:
-                v_ = BCGraph.cyclic_next(self.v0, neighbors)
-                v__ = BCGraph.cyclic_next(v_, neighbors)
+                v_ = BCGraph.cyc_next(self.v0, neighbors)
+                v__ = BCGraph.cyc_next(v_, neighbors)
 
                 self.L0.extend([self.v0, v_, v__])
                 self.L1.extend([self.v1] * 3)
@@ -67,16 +62,16 @@ class SpecialPolygon(object):
             else:
                 v = self.unique(neighbors)
                 j = self.graph.dist_j
+
                 self.L0.append(v)
                 self.L1.append(self.v1)
-                #self.G.append(np.rint(LA.matrix_power(G1, j)))
                 self.G.append(G1 ** j)
                 self.I[v] = 0
+
                 s = [[ZERO, INF], [ZERO, ONE], [ONE, INF]]
+
                 self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
 
-                #self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3],
-                #                        np.rint(LA.matrix_power(G1, j - 1)).dot(G_).dot(np.rint(LA.matrix_power(G1, 1 - j)))])
                 self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3], G1 ** (j - 1) * G_ * G1 ** (1 - j)])
 
         while(self.L0):
@@ -87,38 +82,58 @@ class SpecialPolygon(object):
 
 
     def induction(self):
-
-        logging.info('New induction step starts\n\tL0 = {}\n\tL1 = {}\n\tG =\n{}'.format(
-            str(self.L0),
-            str(self.L1),
-            '\n'.join(list(map(str, self.G)))))
+        logging.info(
+            f"""New induction step starts
+                L0 = {self.L0}
+                L1 = {self.L1}
+                G =
+                {self.G}
+            """
+        )
 
         v = self.L0.pop()
         v_ = self.L1.pop()
         g = self.G.pop()
 
-        logging.info('Popped \n\tV = {},\n\tV\' = {},\n\tg =\n{}\n\n'.format(str(v), str(v_), str(g)))
+        logging.info(
+            f"""Popped:
+                V = {v},
+                V\' = {v_},
+                g =\n{g}
+                
+            """
+        )
 
         if self.removed[v]:
-            logging.info('V was marked \" to be removed\".\n\n==-End of induction-==\n\n')
+            logging.info(
+                """V was marked \"to be removed\".
+                ==-End of induction-==
+                
+                """
+            )
             return
 
-        if self.graph.is_V0_univalent(v):
+        if self.graph.is_v0_uni(v):
             self._case_1(g)
 
         else:
-            v__ = (set(self.graph.V0_neighbors(v)) - {v_}).pop()
-            star_v__ = StarType.star_type(self.graph.V1_neighbors(v__))
+            v__ = (set(self.graph.v0_nei(v)) - {v_}).pop()
+            star_v__ = StarType.star_type(self.graph.v1_nei(v__))
 
-            logging.info('2. V has valency 2.\n\tV\'\' = {},\n\tStar(V\'\') : {}\n'.format(str(v__), str(star_v__)))
+            logging.info(
+                f"""2. V has valency 2.
+                    \tV\'\' = {v__},
+                    \tStar(V\'\') : {star_v__}
+            """)
 
             if star_v__ == StarType.Segment:
                 self._case_2a(g)
 
             else:
-                self.T.extend([geodesic_mt([V0, V1], g.dot(G0)),
-                               geodesic_mt([V0, V1], g.dot(G_)),
-                               geodesic_mt([V0, V1], g.dot(G__))])
+                self.T.extend([(g * G0).moe([V0, V1]),
+                               (g * G_).moe([V0, V1]),
+                               (g * G__).moe([V0, V1])
+                ])
 
                 if star_v__ == StarType.SlingShot:
                     self._case_2b(v, g, v__, star_v__)
@@ -135,13 +150,21 @@ class SpecialPolygon(object):
         s1_ = [V0, ZERO]
         s2_ = [V0, INF]
 
-        s1 = geodesic_mt(s1_, g)
-        s2 = geodesic_mt(s2_, g)
+        s1 = g.moe(s1_)
+        s2 = g.moe(s2_)
 
         self.E.extend([s1, s2])
         self.involutions.append([s1, s2, g * G0 * g.inv()])
 
-        logging.info('1. V is univalent.\n\ts1 = {},\n\ts2 = {}\n\n==-End of induction-==\n\n'.format(str(s1), str(s2)))
+        logging.info(
+            f"""1. V is univalent.
+                s1 = {s1},
+                s2 = {s2}
+            
+            ==-End of induction-==
+            
+            """
+        )
 
 
     def _case_2a(self, g):
@@ -150,25 +173,35 @@ class SpecialPolygon(object):
 
         gG0 = g * G0
 
-        s1 = geodesic_mt(s1_, gG0)
-        s2 = geodesic_mt(s2_, gG0)
+        s1 = gG0.moe(s1_)
+        s2 = gG0.moe(s2_)
 
         self.E.extend([s1, s2])
-        self.T.append(geodesic_mt([V0, V1], gG0))
+        self.T.append(gG0.moe([V0, V1]))
         self.involutions.append([s1, s2, gG0 * G1_2 * gG0.inv()])
 
-        logging.info('2a. Star(V\'\') -- Segment,\n\ts1 = {},\n\ts2 = {}\n\n==-End of induction-==\n'.format(str(s1), str(s2)))
+        logging.info(
+            f"""2a. Star(V\'\') -- Segment,
+            \ts1 = {s1},
+            \ts2 = {s2}
+            
+        ==-End of induction-==
+        
+            """
+        )
 
 
     def _case_2b(self, v, g, v__, star_v__):
-        self.T.extend([geodesic_mt([V0, V1], g.dot(G0)),
-                       geodesic_mt([V0, V1], g.dot(G_)),
-                       geodesic_mt([V0, V1], g.dot(G__))])
-        if star_v__ == StarType.SlingShot:
-            v1 = self.graph.cyclic_next(v, self.graph.V1_neighbors(v__))
-            v2 = self.graph.cyclic_next(v1, self.graph.V1_neighbors(v__))
+        self.T.extend([(g * G0).moe([V0, V1]),
+                       (g * G_).moe([V0, V1]),
+                       (g * G__).moe([V0, V1])
+        ])
 
-            logging.info('2b. Star(V\'\') -- Sling Shot,\n\tV1 = {},\n\tV2 = {}\n'.format(str(v1), str(v2)))
+        if star_v__ == StarType.SlingShot:
+            v1 = self.graph.cyc_next(v, self.graph.v1_nei(v__))
+            v2 = self.graph.cyc_next(v1, self.graph.v1_nei(v__))
+
+            logging.info(f'2b. Star(V\'\') -- Sling Shot,\n\tV1 = {v1},\n\tV2 = {v2}\n')
 
             for w in [v1, v2]:
                 if self.visited[w]:
@@ -186,12 +219,12 @@ class SpecialPolygon(object):
         self.L1.append(v__)
 
         if w == v1:
-            self.G.append(g.dot(G_))
+            self.G.append(g * G_)
         else:
-            self.G.append(g.dot(G__))
+            self.G.append(g * G__)
 
         self.visited[w] = True
-        logging.info('2b\'. W({}) marked as \"unvisited\".\n'.format(str(w)))
+        logging.info(f"""2b\'. W({w}) marked as \"unvisited\".""")
 
 
     def _case_2b__(self, g, v__, w, v1):
@@ -205,24 +238,37 @@ class SpecialPolygon(object):
 
 
         s0 = [ZERO, INF]
-        s1 = geodesic_mt(s0, g.dot(e))
-        s2 = geodesic_mt(s0, g_)
+        s1 = (g * e).moe(s0)
+        s2 = g_.moe(s0)
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g_.dot(G0).dot(inv(g.dot(e)))])
+        self.involutions.append([s1, s2, g_ * G0*(g*e).inv()])
         self.removed[self.L0[l]] = True
-        logging.info('2b\'\'. W({}) marked as \"visited\".\n\ts1: {},\n\ts2 : {}\n'.format(str(w), str(s1), str(s2)))
+        logging.info(
+            f"""2b\'\'. W({w}) marked as \"visited\".
+                s1: {s1},
+                s2 : {s2}
+            """
+        )
 
 
 
     def _case_2c(self, g):
         s0 = [ZERO, INF]
-        g1 = g.dot(G_)
-        g2 = g.dot(G__)
-        s1 = geodesic_mt(s0, g1)
-        s2 = geodesic_mt(s0, g2)
+        g1 = g * G_
+        g2 = g * G__
+        s1 = g1.moe(s0)
+        s2 = g2.moe(s0)
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g2.dot(inv(g1.dot(G0)))])
-        logging.info('2c. Star(V__) : Racket\n\t s1 : {},\n\ts2 : {},\n\nEnd of induction\n\n'.format(str(s1), str(s2)))
+        self.involutions.append([s1, s2, g2 * (g1 * G0).inv()])
+        logging.info(
+            f"""2c. Star(V__) : Racket
+                s1 : {s1},
+                s2 : {s2},
+            ==-End of induction-==
+            
+            
+            """
+        )
 
 
     def unique(self, triple):

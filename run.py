@@ -5,7 +5,7 @@ from subgroups import *
 from graph_drawer import draw_graph
 import time
 
-gamma = Gamma(3)
+gamma = GammaBotOne(13)
 graph = get_graph(gamma)
 
 
@@ -15,7 +15,7 @@ domain, tree, involutions = get_all(graph)
 # print("special {}".format(time.time()-d))
 #
 s1, s2, generators = zip(*involutions)
-#print(generators)
+print(generators)
 
 draw_lines(domain, linewidth=1.0)
 draw_lines(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')

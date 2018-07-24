@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .isomorphism import (one2many, many2one)
 from .algo import (factor, get_xy, gcd, inv_element)
 from math import log
-from mmath import Mat
+from fimath import Mat
 import itertools
 
 

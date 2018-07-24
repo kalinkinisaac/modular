@@ -1,4 +1,4 @@
-from mmath import Mat, Field
+from fimath import (Mat, Field)
 from fractions import Fraction
 
 IDM = Mat(1, 0, 0, 1)

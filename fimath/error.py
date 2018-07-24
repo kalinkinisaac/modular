@@ -1,11 +1,14 @@
 # Base class for mmath exceptions
-class MmathException(Exception):
+class FimathException(Exception):
     pass
 
-class UnsupportedTypeError(MmathException):
+class NotUnitDeterminant(FimathException):
+    pass
+
+class UnsupportedTypeError(FimathException):
     def __init__(self, other):
         super(__class__, self).__init__(f'Unsupported type for multiplication: {type(other)}.')
 
-class NanError(MmathException):
+class NanError(FimathException):
     def __init__(self):
         super(__class__, self).__init__(f'Not-a-number.')
