@@ -1,5 +1,6 @@
 from graph import BCGraph
 from .star_type import StarType
+from fimath.geodesic import Geodesic
 from consts import *
 
 import logging
@@ -28,20 +29,20 @@ class SpecialPolygon(object):
         neighbors = self.graph.v1_nei(self.v1)
         star_v1 = StarType.star_type(neighbors)
 
-        self.T.append([V0, V1])
+        self.T.append(Geodesic(V0, V1))
 
         if star_v1 == StarType.Segment:
             self.L0.append(self.v0)
             self.L1.append(self.v1)
             self.G.append(IDM)
             self.I.append(0)
-            s1 = [V1, INF]
-            s2 = [V1, ZERO]
+            s1 = Geodesic(V1, INF)
+            s2 = Geodesic(V1, ZERO)
             self.E.extend([s1, s2])
             self.involutions.append([s1, s2, G1])
 
         else:
-            self.T.extend([G1.moe([V0, V1]), (G1_2).moe([V0, V1])])
+            self.T.extend([G1.moe(Geodesic(V0, V1)), (G1_2).moe(Geodesic(V0, V1))])
             self.generators.extend([G1, G1_2])
             if star_v1 == StarType.SlingShot:
                 v_ = BCGraph.cyc_next(self.v0, neighbors)
@@ -68,7 +69,7 @@ class SpecialPolygon(object):
                 self.G.append(G1 ** j)
                 self.I[v] = 0
 
-                s = [[ZERO, INF], [ZERO, ONE], [ONE, INF]]
+                s = [Geodesic(ZERO, INF), Geodesic(ZERO, ONE), Geodesic(ONE, INF)]
 
                 self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
 
@@ -130,9 +131,9 @@ class SpecialPolygon(object):
                 self._case_2a(g)
 
             else:
-                self.T.extend([(g * G0).moe([V0, V1]),
-                               (g * G_).moe([V0, V1]),
-                               (g * G__).moe([V0, V1])
+                self.T.extend([(g * G0).moe(Geodesic(V0, V1)),
+                               (g * G_).moe(Geodesic(V0, V1)),
+                               (g * G__).moe(Geodesic(V0, V1))
                 ])
 
                 if star_v__ == StarType.SlingShot:
@@ -147,8 +148,8 @@ class SpecialPolygon(object):
 
 
     def _case_1(self, g):
-        s1_ = [V0, ZERO]
-        s2_ = [V0, INF]
+        s1_ = Geodesic(V0, ZERO)
+        s2_ = Geodesic(V0, INF)
 
         s1 = g.moe(s1_)
         s2 = g.moe(s2_)
@@ -168,8 +169,8 @@ class SpecialPolygon(object):
 
 
     def _case_2a(self, g):
-        s1_ = [V1, ZERO]
-        s2_ = [V1, INF]
+        s1_ = Geodesic(V1, ZERO)
+        s2_ = Geodesic(V1, INF)
 
         gG0 = g * G0
 
@@ -177,7 +178,7 @@ class SpecialPolygon(object):
         s2 = gG0.moe(s2_)
 
         self.E.extend([s1, s2])
-        self.T.append(gG0.moe([V0, V1]))
+        self.T.append(gG0.moe(Geodesic(V0, V1)))
         self.involutions.append([s1, s2, gG0 * G1_2 * gG0.inv()])
 
         logging.info(
@@ -192,9 +193,9 @@ class SpecialPolygon(object):
 
 
     def _case_2b(self, v, g, v__, star_v__):
-        self.T.extend([(g * G0).moe([V0, V1]),
-                       (g * G_).moe([V0, V1]),
-                       (g * G__).moe([V0, V1])
+        self.T.extend([(g * G0).moe(Geodesic(V0, V1)),
+                       (g * G_).moe(Geodesic(V0, V1)),
+                       (g * G__).moe(Geodesic(V0, V1))
         ])
 
         if star_v__ == StarType.SlingShot:
@@ -237,7 +238,7 @@ class SpecialPolygon(object):
             e = G__
 
 
-        s0 = [ZERO, INF]
+        s0 = Geodesic(ZERO, INF)
         s1 = (g * e).moe(s0)
         s2 = g_.moe(s0)
         self.E.extend([s1, s2])
@@ -253,7 +254,7 @@ class SpecialPolygon(object):
 
 
     def _case_2c(self, g):
-        s0 = [ZERO, INF]
+        s0 = Geodesic(ZERO, INF)
         g1 = g * G_
         g2 = g * G__
         s1 = g1.moe(s0)

@@ -12,6 +12,7 @@ def re_field_support(func):
         return func(obj, other)
     return wrapped
 
+
 class Field(object):
 
     # Field consist numbers a + b*sqrt(3) + c*i + d*i*sqrt(3)
@@ -26,12 +27,16 @@ class Field(object):
     def abs(self):
         return abs(complex(self))
 
+    def sq_abs(self):
+        return self.real ** 2 + self.imag ** 2
+
     def __complex__(self):
         return self.a + sqrt(3)*self.b + 1j*(self.c + sqrt(3)*self.d)
 
     @property
     def real(self):
         return ReField(a=self.a, b=self.b)
+
     @property
     def imag(self):
         return ReField(a=self.c, b=self.d)
@@ -193,7 +198,6 @@ class Field(object):
                 self.c == other.c and
                 self.d == other.d)
 
-
     def __str__(self):
         if self.is_inf:
             return 'inf'
@@ -232,7 +236,3 @@ class Field(object):
     @classmethod
     def inf(cls):
         return Field(is_inf=True)
-
-
-
-

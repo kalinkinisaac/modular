@@ -22,5 +22,3 @@ ax.grid(alpha=0.5)
 ax.set_xlim(-0.2, 3.8)
 ax.set_ylim(-0.2, 1.5)
 ax.autoscale(enable=True)
-
-from .lines_drawer import draw_lines

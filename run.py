@@ -1,11 +1,10 @@
-from special_polygon.drawer import draw_lines
+from geo_drawer import geo_drawer
 from special_polygon import get_all
 from graph_constructor import get_graph
 from subgroups import *
 from graph_drawer import draw_graph
-import time
 
-gamma = GammaBotOne(13)
+gamma = GammaBotOne(2)
 graph = get_graph(gamma)
 
 
@@ -15,8 +14,8 @@ domain, tree, involutions = get_all(graph)
 # print("special {}".format(time.time()-d))
 #
 s1, s2, generators = zip(*involutions)
-print(generators)
+print(domain)
 
-draw_lines(domain, linewidth=1.0)
-draw_lines(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
+geo_drawer.plot(domain, linewidth=1.0)
+geo_drawer.plot(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
 draw_graph(graph)

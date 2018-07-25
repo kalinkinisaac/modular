@@ -14,6 +14,10 @@ class ReField(object):
         return decimal.Decimal(self.a.numerator)/decimal.Decimal(self.a.denominator) + \
                decimal.Decimal(3).sqrt() * decimal.Decimal(self.b.numerator) / decimal.Decimal(self.b.denominator)
 
+    def sqrt_approx(self, precision=16):
+        decimal.getcontext().prec = precision
+        return (decimal.Decimal(self.a.numerator) / decimal.Decimal(self.a.denominator) +
+               decimal.Decimal(3).sqrt() * decimal.Decimal(self.b.numerator) / decimal.Decimal(self.b.denominator)).sqrt()
     def inv(s):
         x = s.a ** 2 + 3 * s.b ** 2
         y = 2 * (s.a * s.b)
@@ -31,10 +35,13 @@ class ReField(object):
         )
 
     def __abs__(self):
-        return abs(float(self))
+        return ReField(a=abs(self.a), b=abs(self.b))
 
     def __eq__(self, other):
-        return self.a == other.a  and self.b == other.b
+        if type(other) == ReField:
+            return self.a == other.a  and self.b == other.b
+        else:
+            raise UnsupportedTypeError(other)
 
     def __lt__(self, other):
         sign = lambda x: x and (1, -1)[x < 0]
@@ -61,7 +68,7 @@ class ReField(object):
         return float(self.approx())
 
     def __sub__(self, other):
-        return self + (-self)
+        return self + (-other)
 
     def __mul__(self, other):
         if type(other) == ReField:
@@ -69,8 +76,15 @@ class ReField(object):
                 a=self.a * other.a + 3 * self.b * other.b,
                 b=self.a * other.b + self.b * other.a
             )
+
+        elif type(other) == int or type(other) == float:
+            return self * ReField(a=other)
+
         else:
-            pass
+            raise UnsupportedTypeError(other)
+
+    def __rmul__(self, other):
+        return self * other
 
     def __pow__(self, power, modulo=None):
         if type(power) == int:

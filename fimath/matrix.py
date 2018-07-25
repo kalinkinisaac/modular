@@ -1,5 +1,6 @@
 from .field import Field
 from .error import UnsupportedTypeError
+from .geodesic import Geodesic
 
 class Mat(object):
 
@@ -12,8 +13,12 @@ class Mat(object):
     def moe(self, other):
         if type(other) == list:
             return [self._single_moe(f) for f in other]
+
         elif type(other) == Field:
             return self._single_moe(other)
+
+        elif type(other) == Geodesic:
+            return Geodesic(self._single_moe(other.a), self._single_moe((other.b)))
         else:
             raise UnsupportedTypeError(other)
 

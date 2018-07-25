@@ -1,10 +1,8 @@
-from fimath import Field
+from .field import Field
 from math import degrees
 from cmath import phase
 
 class Geodesic(object):
-
-    DELTA = 1e-14
 
     def __init__(self, a, b):
         if type(a) == int or type(a) == float:
@@ -49,34 +47,32 @@ class Geodesic(object):
             return self.a
 
     def is_vertical(self):
-        return abs((self.a - self.b).real) <= Geodesic.DELTA or self.has_inf()
+        return self.a.real == self.b.real or self.has_inf()
 
-    def y_min(self):
-        if self.has_inf():
-            if self.a.is_inf:
-                return float(self.b.imag)
-            else:
-                return float(self.a.imag)
-        else:
-            return min(float(self.a.imag), float(self.b.imag))
+
+    # def y_min(self):
+    #     if self.has_inf():
+    #         if self.a.is_inf:
+    #             return float(self.b.imag)
+    #         else:
+    #             return float(self.a.imag)
+    #     else:
+    #         return min(float(self.a.imag), float(self.b.imag))
 
     def has_inf(self):
         return self.a.is_inf or self.b.is_inf
 
-    def y_max(self):
-        return max(float(self.a.imag), float(self.b.imag))
+    # def y_max(self):
+    #     return max(float(self.a.imag), float(self.b.imag))
 
     def x(self):
         if(self.a.is_inf):
-            return float(self.b.real)
+            return self.b.real
         else:
-            return float(self.a.real)
+            return self.a.real
 
+    def __str__(self):
+        return f'<Geodesic from: {self.a} to: {self.b}>\n' \
+               f'Center: {self.center}, Radius: {self.radius}, Theta1: {self.theta1}, Theta2: {self.theta2}'
     def __repr__(self):
-        return "Geodesic from: {} to: {}.\n" \
-               "Center: {}, Radius: {}, Theta1: {}, Theta2: {}".format(self.a,
-                                                                      self.b,
-                                                                      self.center,
-                                                                      self.radius,
-                                                                      self.theta1,
-                                                                      self.theta2)
+        return f'<Geodesic from {self.a} to {self.b}>'
