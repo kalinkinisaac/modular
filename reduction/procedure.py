@@ -16,20 +16,20 @@ def is_crossing(line1 : Geodesic, line2 : Geodesic):
             if line2.is_vertical():
                 return line1.x() == line2.x()
             else:
-                return line2.left().real <= line1.x() <= line2.right().real
+                return line2.left.real <= line1.x() <= line2.right.real
 
         else:
-            return line1.left().real <= line2.x() <= line1.right().real
+            return line1.left.real <= line2.x() <= line1.right.real
     else:
         if abs(line1.center - line2.center) > line1.radius + line2.radius:
             return False
         else:
-            total_cross_x = 0.5 * (line1.center + line2.center +
-                                 (line1.radius ** 2 - line2.radius ** 2) / (line2.center - line1.center))
+            x_cross = 0.5 * (line1.center + line2.center +
+                                 (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
 
-            if complex(line1.left()).real <= total_cross_x <= complex(line1.right()).real and \
-                    complex(line2.left()).real <= total_cross_x <= complex(line2.right()).real:
+            if line1.left.real <= x_cross <= line1.right.real and line2.left.real <= x_cross <= line2.right.real:
                 return True
+
             else:
                 return False
 

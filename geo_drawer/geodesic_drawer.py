@@ -47,17 +47,15 @@ class GeodesicDrawer:
                   ymax=GeodesicDrawer.y_max(geodesic),
                   *args, **kwargs)
 
-    def not_vertical(self, geodesic : Geodesic, *args, **kwargs):
-        real_center = 0.5 * (geodesic.a.sq_abs() - geodesic.b.sq_abs()) / (geodesic.a - geodesic.b).real
-        real_sq_radius = (geodesic.a - real_center).sq_abs()
-        theta1 = degrees(phase(complex(geodesic.a - real_center)))
-        theta2 = degrees(phase(complex(geodesic.b - real_center)))
+    def not_vertical(self, geo : Geodesic, *args, **kwargs):
+        theta1 = degrees(phase(complex(geo.a - geo.center)))
+        theta2 = degrees(phase(complex(geo.b - geo.center)))
 
         theta1, theta2 = min(theta1, theta2), max(theta1, theta2)
 
-        center = float(real_center.approx(GeodesicDrawer.PRECISION))
-        radius = float(real_sq_radius.sqrt_approx(GeodesicDrawer.PRECISION))
-        print(center, radius, theta1, theta2)
+        center = float(geo.center.approx(GeodesicDrawer.PRECISION))
+        radius = float(geo.sq_radius.sqrt_approx(GeodesicDrawer.PRECISION))
+
         self.ax.add_patch(Arc(
             xy=(center,0),
             width=2*radius,

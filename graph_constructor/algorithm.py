@@ -1,5 +1,5 @@
 from graph import BCGraph
-from consts import *
+from constants import *
 from .error import ReprNotFoundError
 
 class GraphConstructor(object):

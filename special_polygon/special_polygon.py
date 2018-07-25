@@ -1,7 +1,7 @@
 from graph import BCGraph
 from .star_type import StarType
 from fimath.geodesic import Geodesic
-from consts import *
+from constants import *
 
 import logging
 #logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)

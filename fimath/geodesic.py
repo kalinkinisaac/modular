@@ -1,7 +1,6 @@
 from .field import Field
-from math import degrees
-from cmath import phase
 
+# Totally Field/ReField geodesic class
 class Geodesic(object):
 
     def __init__(self, a, b):
@@ -15,55 +14,31 @@ class Geodesic(object):
         else:
             self.b = b
 
-        self.center = 0
-        self.radius = 0
-        self.theta1 = 0
-        self.theta2 = 0
+        if self.a.real <= self.b.real:
+            self._left, self._right = self.a, self.b
+        else:
+            self._left, self._right = self.b, self.a
 
-        self.set_parameters()
-
-    def set_parameters(self):
         if self.is_vertical():
             self.center = Field.inf()
             self.radius = Field.inf()
         else:
-            self.center = 0.5*(abs(self.a)**2 - abs(self.b)**2)/float((self.a - self.b).real)
-            self.radius = abs(self.a - self.center)
-            self.theta1 = degrees(phase(complex(self.a) - self.center))
-            self.theta2 = degrees(phase(complex(self.b) - self.center))
+            self.center = 0.5 * (self.a.sq_abs() - self.b.sq_abs()) / (self.a - self.b).real
+            self.sq_radius = (self.a - self.center).sq_abs()
 
-            self.theta1, self.theta2 = min(self.theta1, self.theta2), max(self.theta1, self.theta2)
-
+    @property
     def left(self):
-        if self.a.real <= self.b.real:
-            return self.a
-        else:
-            return self.b
+        return self._left
 
+    @property
     def right(self):
-        if self.a.real <= self.b.real:
-            return self.b
-        else:
-            return self.a
+        return self._right
 
     def is_vertical(self):
         return self.a.real == self.b.real or self.has_inf()
 
-
-    # def y_min(self):
-    #     if self.has_inf():
-    #         if self.a.is_inf:
-    #             return float(self.b.imag)
-    #         else:
-    #             return float(self.a.imag)
-    #     else:
-    #         return min(float(self.a.imag), float(self.b.imag))
-
     def has_inf(self):
         return self.a.is_inf or self.b.is_inf
-
-    # def y_max(self):
-    #     return max(float(self.a.imag), float(self.b.imag))
 
     def x(self):
         if(self.a.is_inf):
@@ -72,7 +47,7 @@ class Geodesic(object):
             return self.a.real
 
     def __str__(self):
-        return f'<Geodesic from: {self.a} to: {self.b}>\n' \
-               f'Center: {self.center}, Radius: {self.radius}, Theta1: {self.theta1}, Theta2: {self.theta2}'
+        return repr(self)
+
     def __repr__(self):
         return f'<Geodesic from {self.a} to {self.b}>'
