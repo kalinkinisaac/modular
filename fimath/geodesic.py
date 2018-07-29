@@ -3,28 +3,28 @@ from .field import Field
 # Totally Field/ReField geodesic class
 class Geodesic(object):
 
-    def __init__(self, a, b):
-        if type(a) == int or type(a) == float:
-            self.a = Field(a=a)
+    def __init__(self, begin, end):
+        if type(begin) == int or type(begin) == float:
+            self.begin = Field(a=begin)
         else:
-            self.a = a
+            self.begin = begin
 
-        if type(b) == int or type(b) == float:
-            self.b = Field(a=b)
+        if type(end) == int or type(end) == float:
+            self.end = Field(a=end)
         else:
-            self.b = b
+            self.end = end
 
-        if self.a.real <= self.b.real:
-            self._left, self._right = self.a, self.b
+        if self.begin.real <= self.end.real:
+            self._left, self._right = self.begin, self.end
         else:
-            self._left, self._right = self.b, self.a
+            self._left, self._right = self.end, self.begin
 
         if self.is_vertical():
             self.center = Field.inf()
             self.radius = Field.inf()
         else:
-            self.center = 0.5 * (self.a.sq_abs() - self.b.sq_abs()) / (self.a - self.b).real
-            self.sq_radius = (self.a - self.center).sq_abs()
+            self.center = 0.5 * (self.begin.sq_abs() - self.end.sq_abs()) / (self.begin - self.end).real
+            self.sq_radius = (self.begin - self.center).sq_abs()
 
     @property
     def left(self):
@@ -35,19 +35,19 @@ class Geodesic(object):
         return self._right
 
     def is_vertical(self):
-        return self.a.real == self.b.real or self.has_inf()
+        return self.begin.real == self.end.real or self.has_inf()
 
     def has_inf(self):
-        return self.a.is_inf or self.b.is_inf
+        return self.begin.is_inf or self.end.is_inf
 
     def x(self):
-        if(self.a.is_inf):
-            return self.b.real
+        if(self.begin.is_inf):
+            return self.end.real
         else:
-            return self.a.real
+            return self.begin.real
 
     def __str__(self):
         return repr(self)
 
     def __repr__(self):
-        return f'<Geodesic from {self.a} to {self.b}>'
+        return f'<Geodesic from {self.begin} to {self.end}>'

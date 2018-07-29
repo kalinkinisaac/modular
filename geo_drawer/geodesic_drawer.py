@@ -28,7 +28,7 @@ class GeodesicDrawer:
         if geodesic.has_inf():
             self.vertical_inf(geodesic, *args, **kwargs)
 
-        elif geodesic.a.real == geodesic.b.real:
+        elif geodesic.begin.real == geodesic.end.real:
             self.vertical_not_inf(geodesic, *args, **kwargs)
 
         else:
@@ -48,8 +48,8 @@ class GeodesicDrawer:
                   *args, **kwargs)
 
     def not_vertical(self, geo : Geodesic, *args, **kwargs):
-        theta1 = degrees(phase(complex(geo.a - geo.center)))
-        theta2 = degrees(phase(complex(geo.b - geo.center)))
+        theta1 = degrees(phase(complex(geo.begin - geo.center)))
+        theta2 = degrees(phase(complex(geo.end - geo.center)))
 
         theta1, theta2 = min(theta1, theta2), max(theta1, theta2)
 
@@ -67,11 +67,11 @@ class GeodesicDrawer:
 
     @classmethod
     def y_min(cls, geodesic):
-        approx_a = geodesic.a.imag.approx(GeodesicDrawer.PRECISION)
-        approx_b = geodesic.b.imag.approx(GeodesicDrawer.PRECISION)
+        approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
+        approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
 
         if geodesic.has_inf():
-            if geodesic.a.is_inf:
+            if geodesic.begin.is_inf:
                 return approx_b
             else:
                 return approx_a
@@ -80,7 +80,7 @@ class GeodesicDrawer:
 
     @classmethod
     def y_max(cls, geodesic):
-        approx_a = geodesic.a.imag.approx(GeodesicDrawer.PRECISION)
-        approx_b = geodesic.b.imag.approx(GeodesicDrawer.PRECISION)
+        approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
+        approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
 
         return max(approx_a, approx_b)

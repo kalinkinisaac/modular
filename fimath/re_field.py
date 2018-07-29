@@ -10,7 +10,7 @@ def types_support(func):
     def wrapped(self, other):
         if type(other) in supported_types:
             other = ReField(a=other)
-        return func(other)
+        return func(self, other)
 
     return wrapped
 
@@ -72,7 +72,6 @@ class ReField(object):
     def __ge__(self, other):
         return not self < other
 
-    @types_support
     def __neg__(self):
         return ReField(a=-self.a, b=-self.b)
 

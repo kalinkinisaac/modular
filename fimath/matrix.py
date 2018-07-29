@@ -18,7 +18,7 @@ class Mat(object):
             return self._single_moe(other)
 
         elif type(other) == Geodesic:
-            return Geodesic(self._single_moe(other.a), self._single_moe((other.b)))
+            return Geodesic(self._single_moe(other.begin), self._single_moe((other.end)))
         else:
             raise UnsupportedTypeError(other)
 
