@@ -46,6 +46,9 @@ class Geodesic(object):
         else:
             return self.begin.real
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def __str__(self):
         return repr(self)
 

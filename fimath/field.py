@@ -3,7 +3,6 @@ from .error import (UnsupportedTypeError, NanError)
 from math import sqrt, degrees
 from cmath import phase
 from .re_field import ReField
-import decimal
 
 def re_field_support(func):
     def wrapped(obj, other):
@@ -23,6 +22,10 @@ class Field(object):
         self.d = Fraction(d)
 
         self._is_inf = is_inf
+
+    @classmethod
+    def from_complex(cls, c : complex):
+        return Field(a=c.real, c=c.imag)
 
     def abs(self):
         return abs(complex(self))
@@ -198,6 +201,9 @@ class Field(object):
                 self.c == other.c and
                 self.d == other.d)
 
+    def __hash__(self):
+        return hash(repr(self))
+
     def __str__(self):
         if self.is_inf:
             return 'inf'
@@ -223,6 +229,10 @@ class Field(object):
             return 'inf'
         else:
             return f'({self.a}+{self.b}s3+{self.c}j+{self.d}js3)'
+
+    @classmethod
+    def sort_key(cls, fi):
+        return [fi.imag.sign(), fi.imag.sign() * fi.imag / fi.real]
 
     # Constants
     @classmethod
