@@ -3,6 +3,9 @@ from .error import (UnsupportedTypeError, NanError)
 from math import sqrt, degrees
 from cmath import phase
 from .re_field import ReField
+from decimal import Decimal
+from numbers import Rational
+from .bases import BaseField
 
 def re_field_support(func):
     def wrapped(obj, other):
@@ -12,14 +15,48 @@ def re_field_support(func):
     return wrapped
 
 
-class Field(object):
+
+class Field(BaseField):
+
+    __slots__ = ('_real', '_imag')
+
+    def __new__(cls, real=0, *, imag=None):
+
+        self = super(Field, cls).__new__(cls)
+        if imag is None:
+            if isinstance(real, (int, Fraction)):
+                self._real = ReField(real)
+                self._imag = ReField()
+                return self
+
+            elif isinstance(real, BaseField):
+                self._real = real.real
+                self._imag = real.imag
+                return self
+
+            elif type(real) is int:
+                self._real = ReField(real)
+                self._imag = ReField()
+                return self
+
+            elif isinstance(real, (float, Decimal)):
+                self._real = ReField(real)
+                self._imag = ReField()
+                return self
+
+            else:
+                raise TypeError('argument should be int, float, Fraction, BaseReField or BaseField instance')
+
+
+
+
 
     # Field consist numbers a + b*sqrt(3) + c*i + d*i*sqrt(3)
     def __init__(self, a=Fraction(0, 1), b=Fraction(0, 1), c=Fraction(0, 1), d=Fraction(0, 1), is_inf=False):
-        self.a = Fraction(a)
-        self.b = Fraction(b)
-        self.c = Fraction(c)
-        self.d = Fraction(d)
+        self._a = Fraction(a)
+        self._b = Fraction(b)
+        self._c = Fraction(c)
+        self._d = Fraction(d)
 
         self._is_inf = is_inf
 
@@ -34,15 +71,15 @@ class Field(object):
         return self.real ** 2 + self.imag ** 2
 
     def __complex__(self):
-        return self.a + sqrt(3)*self.b + 1j*(self.c + sqrt(3)*self.d)
+        return self._a + sqrt(3) * self._b + 1j * (self._c + sqrt(3) * self._d)
 
     @property
     def real(self):
-        return ReField(a=self.a, b=self.b)
+        return ReField(a=self._a, b=self._b)
 
     @property
     def imag(self):
-        return ReField(a=self.c, b=self.d)
+        return ReField(a=self._c, b=self._d)
 
     def angle(self):
         return degrees(phase(compile(self)))
@@ -59,17 +96,17 @@ class Field(object):
         if s.is_zero:
             return Field.inf()
 
-        x = s.a ** 2 + s.c ** 2 + 3 * (s.b ** 2 + s.d ** 2)
-        y = 2 * (s.a * s.b + s.c * s.d)
+        x = s._a ** 2 + s._c ** 2 + 3 * (s._b ** 2 + s._d ** 2)
+        y = 2 * (s._a * s._b + s._c * s._d)
         den = x ** 2 - 3 * y ** 2
 
         if den == 0:
             raise ZeroDivisionError()
 
-        a = x * s.a - 3 * y * s.b
-        b = x * s.b - y * s.a
-        c = -x * s.c + 3 * y * s.d
-        d = -x * s.d + y * s.c
+        a = x * s._a - 3 * y * s._b
+        b = x * s._b - y * s._a
+        c = -x * s._c + 3 * y * s._d
+        d = -x * s._d + y * s._c
 
         return Field(
             a=Fraction(a, den),
@@ -84,7 +121,7 @@ class Field(object):
 
     @property
     def is_zero(self):
-        return not self.is_inf and not(self.a or self.b or self.c or self.d)
+        return not self.is_inf and not(self._a or self._b or self._c or self._d)
 
     def __neg__(self):
         return self * -1
@@ -98,10 +135,10 @@ class Field(object):
                 raise NanError()
             else:
                 return Field(
-                    a=self.a * other.a + 3 * self.b * other.b - self.c * other.c - 3 * self.d * other.d,
-                    b=self.a * other.b + self.b * other.a - self.c * other.d - self.d * other.c,
-                    c=self.a * other.c + self.c * other.a + 3 * self.b * other.d + 3 * self.d * other.b,
-                    d=self.a * other.d + self.d * other.a + self.b * other.c + self.c * other.b
+                    a=self._a * other.a + 3 * self._b * other.b - self._c * other.c - 3 * self._d * other.d,
+                    b=self._a * other.b + self._b * other.a - self._c * other.d - self._d * other.c,
+                    c=self._a * other.c + self._c * other.a + 3 * self._b * other.d + 3 * self._d * other.b,
+                    d=self._a * other.d + self._d * other.a + self._b * other.c + self._c * other.b
                 )
 
         if type(other) == int or type(other) == Fraction:
@@ -111,7 +148,7 @@ class Field(object):
                 raise NanError()
             return self * Field(a=other)
 
-        raise UnsupportedTypeError(other)
+        return NotImplemented
 
     def __abs__(self):
         return sqrt(float(self.real) ** 2 + float(self.imag) ** 2)
@@ -134,7 +171,7 @@ class Field(object):
                 return result.inv()
 
         else:
-            UnsupportedTypeError(power)
+            return NotImplemented
 
     @re_field_support
     def __truediv__(self, other):
@@ -144,13 +181,13 @@ class Field(object):
             elif self.is_inf and other.is_inf:
                 raise NanError()
             else:
-                return self * other.inv()
+                return self * other._inv()
 
         elif type(other) == int or type(other) == Fraction:
             return self * Field(a=Fraction(1, other))
 
         else:
-            raise UnsupportedTypeError(other)
+            return NotImplemented
 
     @re_field_support
     def __rtruediv__(self, other):
@@ -164,7 +201,7 @@ class Field(object):
             return Field(a=other) / self
 
         else:
-            raise UnsupportedTypeError(other)
+            return NotImplemented
 
     @re_field_support
     def __add__(self, other):
@@ -173,16 +210,16 @@ class Field(object):
                 return Field.inf()
 
             return Field(
-                a=self.a + other.a,
-                b=self.b + other.b,
-                c=self.c + other.c,
-                d=self.d + other.d
+                a=self._a + other.a,
+                b=self._b + other.b,
+                c=self._c + other.c,
+                d=self._d + other.d
             )
 
         elif type(other) == int or type(other) == float or type(other) == Fraction:
             return self + Field(a=other)
         else:
-            raise UnsupportedTypeError(other)
+            return NotImplemented
 
     def __radd__(self, other):
         return self + other
@@ -196,10 +233,10 @@ class Field(object):
     @re_field_support
     def __eq__(self, other):
         return (self.is_inf and other.is_inf) or \
-               (self.a == other.a and
-                self.b == other.b and
-                self.c == other.c and
-                self.d == other.d)
+               (self._a == other.a and
+                self._b == other.b and
+                self._c == other.c and
+                self._d == other.d)
 
     def __hash__(self):
         return hash(repr(self))
@@ -213,14 +250,14 @@ class Field(object):
 
         res = []
 
-        if self.a:
-            res.append(f'{self.a}')
-        if self.b:
-            res.append(f'{self.b}s3')
-        if self.c:
-            res.append(f'{self.c}j')
-        if self.d:
-            res.append(f'{self.d}js3')
+        if self._a:
+            res.append(f'{self._a}')
+        if self._b:
+            res.append(f'{self._b}s3')
+        if self._c:
+            res.append(f'{self._c}j')
+        if self._d:
+            res.append(f'{self._d}js3')
 
         return '({})'.format('+'.join(res))
 
@@ -228,7 +265,7 @@ class Field(object):
         if self.is_inf:
             return 'inf'
         else:
-            return f'({self.a}+{self.b}s3+{self.c}j+{self.d}js3)'
+            return f'({self._a}+{self._b}s3+{self._c}j+{self._d}js3)'
 
     @classmethod
     def sort_key(cls, fi):

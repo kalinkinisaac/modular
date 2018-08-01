@@ -155,7 +155,7 @@ class SpecialPolygon(object):
         s2 = g.moe(s2_)
 
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g * G0 * g.inv()])
+        self.involutions.append([s1, s2, g * G0 * g._inv()])
 
         logging.info(
             f"""1. V is univalent.
@@ -179,7 +179,7 @@ class SpecialPolygon(object):
 
         self.E.extend([s1, s2])
         self.T.append(gG0.moe(Geodesic(V0, V1)))
-        self.involutions.append([s1, s2, gG0 * G1_2 * gG0.inv()])
+        self.involutions.append([s1, s2, gG0 * G1_2 * gG0._inv()])
 
         logging.info(
             f"""2a. Star(V\'\') -- Segment,
@@ -242,7 +242,7 @@ class SpecialPolygon(object):
         s1 = (g * e).moe(s0)
         s2 = g_.moe(s0)
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g_ * G0*(g*e).inv()])
+        self.involutions.append([s1, s2, g_ * G0 * (g*e)._inv()])
         self.removed[self.L0[l]] = True
         logging.info(
             f"""2b\'\'. W({w}) marked as \"visited\".
@@ -260,7 +260,7 @@ class SpecialPolygon(object):
         s1 = g1.moe(s0)
         s2 = g2.moe(s0)
         self.E.extend([s1, s2])
-        self.involutions.append([s1, s2, g2 * (g1 * G0).inv()])
+        self.involutions.append([s1, s2, g2 * (g1 * G0)._inv()])
         logging.info(
             f"""2c. Star(V__) : Racket
                 s1 : {s1},

@@ -1,7 +1,11 @@
 from fractions import Fraction
 from .error import UnsupportedTypeError
 from .types_support import TypesSupported
-import decimal
+from decimal import Decimal, getcontext
+from .bases import BaseReField
+import operator
+import numbers
+import math
 
 # TODO: remake with +-inf
 def types_support(func):
@@ -15,30 +19,110 @@ def types_support(func):
 
     return wrapped
 
-class ReField(object):
-    # ReField consist numbers a + b*sqrt(3)
-    def __init__(self, a=Fraction(0, 1), b=Fraction(0, 1), is_inf=False):
-        self.a = Fraction(a)
-        self.b = Fraction(b)
-        self.is_inf = is_inf
+class ReField(BaseReField):
 
-    def approx(self, precision=16):
-        decimal.getcontext().prec = precision
-        return (decimal.Decimal(self.a.numerator)/decimal.Decimal(self.a.denominator) +
-               decimal.Decimal(3).sqrt() * decimal.Decimal(self.b.numerator) / decimal.Decimal(self.b.denominator))
+    __slots__ = ('_a', '_b')
 
-    def sqrt_approx(self, precision=16):
-        decimal.getcontext().prec = precision
-        return (decimal.Decimal(self.a.numerator) / decimal.Decimal(self.a.denominator) +
-               decimal.Decimal(3).sqrt() * decimal.Decimal(self.b.numerator) / decimal.Decimal(self.b.denominator)).sqrt()
+    def __new__(cls, a=0, *, b=None):
 
-    def inv(s):
+        self = super(ReField, cls).__new__(cls)
+
+        if b is None:
+
+            if type(a) is int:
+                self._a = Fraction(a)
+                self._b = Fraction(0)
+                return self
+
+            elif type(a) is Fraction:
+                self._a = a
+                self._b = Fraction(0)
+                return self
+
+            elif isinstance(a, BaseReField):
+                self._a = a.a
+                self._b = a.b
+
+            elif isinstance(a, (float, Decimal)):
+                self._a = Fraction(a)
+                self._b = Fraction(0)
+                return self
+
+            else:
+                raise TypeError('argument should be int, float, Fraction or BaseReField instance')
+
+        else:
+
+            if type(a) is Fraction is type(b):
+                self._a = a
+                self._b = b
+                return self
+
+            elif isinstance(a, (int, float, Decimal)) and isinstance(b, (int, float, Decimal)):
+                self._a = Fraction(a)
+                self._b = Fraction(b)
+                return self
+
+            else:
+                raise TypeError('both argument should be int, float or Fraction instances')
+
+
+    # # ReField consist numbers a + b*sqrt(3)
+    # def __init__(self, a=Fraction(0, 1), b=Fraction(0, 1), is_inf=False):
+    #     self._a = Fraction(a)
+    #     self._b = Fraction(b)
+    #     self.is_inf = is_inf
+    @property
+    def a(self):
+        return self._a
+
+    @property
+    def b(self):
+        return self._b
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.a}+{self.b}s3)'
+
+    def __str__(self):
+        return f'({self.a}+{self.b}s3)'
+
+    def _operator_fallbacks(monomorphic_operator, fallback_operator):
+
+        def forward(a, b):
+            if isinstance(b, BaseReField):
+                return monomorphic_operator(a, b)
+            elif type(b) is int:
+                return fallback_operator(a, ReField(b))
+            elif type(b) is float:
+                return fallback_operator(float(a), b)
+            else:
+                return NotImplemented
+
+        forward.__name__ = '__' + fallback_operator.__name__ + '__'
+        forward.__doc__ = monomorphic_operator.__doc__
+
+        def reverse(b, a):
+            if isinstance(a, BaseReField):
+                # Includes ints.
+                return monomorphic_operator(a, b)
+            elif type(a) is float:
+                return fallback_operator(a, float(b))
+            else:
+                return NotImplemented
+
+        reverse.__name__ = '__r' + fallback_operator.__name__ + '__'
+        reverse.__doc__ = monomorphic_operator.__doc__
+
+        return forward, reverse
+
+
+    def _inv(s):
         x = s.a ** 2 + 3 * s.b ** 2
         y = 2 * (s.a * s.b)
         den = x ** 2 - 3 * y ** 2
 
         if den == 0:
-            return ReField(is_inf=True)
+            raise ZeroDivisionError
 
         a = x * s.a - 3 * y * s.b
         b = x * s.b - y * s.a
@@ -60,77 +144,66 @@ class ReField(object):
     def __abs__(self):
         return ReField(a=abs(self.a), b=abs(self.b))
 
-    @types_support
+    def _add(l, r):
+        return ReField(a=l.a + r.a, b=l.b + r.b)
+
+    __add__, __radd__ = _operator_fallbacks(_add, operator.add)
+
+    def _sub(l, r):
+        return ReField(a=l.a - r.a, b=l.b - r.b)
+
+    __sub__, __rsub = _operator_fallbacks(_sub, operator.sub)
+
+    def _mul(l, r):
+        return ReField(
+            a=l.a * r.a + 3 * l.b * r.b,
+            b=l.a * r.b + l.b * r.a
+        )
+
+    __mul__, __rmul__ = _operator_fallbacks(_mul, operator.mul)
+
     def __eq__(self, other):
         if type(other) == ReField:
-            return self.a == other.a  and self.b == other.b and self.is_inf == other.is_inf
+            return self.a == other.a  and self.b == other.b
+        elif isinstance(other, (int, float)):
+            return self.a == other
         else:
-            raise UnsupportedTypeError(other)
-    @types_support
-    def __lt__(self, other):
-        if self.is_inf or other.is_inf:
-            if self.is_inf:
-                return False
+            return NotImplemented
+
+    def _richcmp(self, other, op):
+        if isinstance(other, BaseReField):
+            return op(math.copysign(1, self.a - other.a) * (self.a - other.a) ** 2,
+                   3 * math.copysign(1, other.b - self.b) * (other.b - self.b) ** 2)
+        if type(other) is int:
+            return op(math.copysign(1, self.a - other) * (self.a - other) ** 2,
+                      3 * math.copysign(1, -self.b) * (self.b) ** 2)
+        elif isinstance(other, float):
+            if math.isnan(other) or math.isinf(other):
+                return op(0.0, other)
             else:
-                return other.is_inf
+                return op(self, ReField(other))
         else:
-            sign = lambda x: x and (1, -1)[x < 0]
-            return sign(self.a - other.a) * (self.a - other.a) ** 2 < 3 * sign(other.b - self.b) * (other.b - self.b) ** 2
+            return NotImplemented
 
-    @types_support
-    def __le__(self, other):
-        return self == other or self < other
 
-    @types_support
-    def __gt__(self, other):
-        return not self <= other
+    def __lt__(l, r):
+        return l._richcmp(r, operator.lt)
 
-    @types_support
-    def __ge__(self, other):
-        return not self < other
+    def __le__(l, r):
+        return l._richcmp(r, operator.le)
+
+    def __gt__(l, r):
+        return l._richcmp(r, operator.gt)
+
+    def __ge__(l, r):
+        return l._richcmp(r, operator.ge)
 
     def __neg__(self):
         return ReField(a=-self.a, b=-self.b)
 
-    @types_support
-    def __add__(self, other):
-        return ReField(
-            a=self.a + other.a,
-            b=self.b + other.b
-        )
-
-    def __float__(self):
-        return float(self.approx())
-
-    @types_support
-    def __sub__(self, other):
-        return self + (-other)
-
-    @types_support
-    def __mul__(self, other):
-        if type(other) == ReField:
-            if self.is_inf or other.is_inf:
-                if self == ReField.zero() or other == ReField.zero():
-                    return ZeroDivisionError()
-                else:
-                    return ReField(is_inf=True)
-            return ReField(
-                a=self.a * other.a + 3 * self.b * other.b,
-                b=self.a * other.b + self.b * other.a
-            )
-
-        elif type(other) == int or type(other) == float:
-            return self * ReField(a=other)
-
-        else:
-            raise UnsupportedTypeError(other)
-
-    def __rmul__(self, other):
-        return self * other
-
     def __pow__(self, power, modulo=None):
-        if type(power) == int:
-            if power == 0:
+        if type(power) is int:
+            if power is 0:
                 return ReField.one()
 
             result = ReField.one()
@@ -140,20 +213,33 @@ class ReField(object):
             if power > 0:
                 return result
             else:
-                return result.inv()
+                return result._inv()
 
         else:
-            UnsupportedTypeError(power)
+            return NotImplemented
 
-    @types_support
     def __truediv__(self, other):
-        return self * other.inv()
+        if isinstance(other, (int, float, Decimal)):
+            return self * ReField(other)._inv()
+        elif isinstance(other, BaseReField):
+            return self * other._inv()
+        else:
+            return NotImplemented
 
+    # This is disgusting. TODO: replace with better solution
     def __hash__(self):
         return hash(repr(self))
 
-    def __repr__(self):
-        return f'({self.a}+{self.b}s3)'
+    def approx(self, precision=16):
+        getcontext().prec = precision
+        return (Decimal(self.a.numerator) / Decimal(self.a.denominator) +
+               Decimal(3).sqrt() * Decimal(self.b.numerator) / Decimal(self.b.denominator))
+
+    def sqrt_approx(self, precision=16):
+        getcontext().prec = precision
+        return (Decimal(self.a.numerator) / Decimal(self.a.denominator) +
+               Decimal(3).sqrt() * Decimal(self.b.numerator) / Decimal(self.b.denominator)).sqrt()
+
 
     @classmethod
     def one(cls):
