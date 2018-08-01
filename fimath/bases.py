@@ -25,12 +25,10 @@ class BaseReField(object):
         return self.a + self.b * math.sqrt(3)
 
 class BaseField(numbers.Complex):
-    __metaclass__ = abc.ABCMeta
 
     __slots__ = ()
 
     @property
-    @abc.abstractmethod
     def is_inf(self):
         raise NotImplementedError
 

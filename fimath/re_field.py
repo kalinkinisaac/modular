@@ -66,12 +66,6 @@ class ReField(BaseReField):
             else:
                 raise TypeError('both argument should be int, float or Fraction instances')
 
-
-    # # ReField consist numbers a + b*sqrt(3)
-    # def __init__(self, a=Fraction(0, 1), b=Fraction(0, 1), is_inf=False):
-    #     self._a = Fraction(a)
-    #     self._b = Fraction(b)
-    #     self.is_inf = is_inf
     @property
     def a(self):
         return self._a
@@ -200,6 +194,9 @@ class ReField(BaseReField):
 
     def __neg__(self):
         return ReField(a=-self.a, b=-self.b)
+
+    def __bool__(self):
+        return self.a or self.b
 
     def __pow__(self, power, modulo=None):
         if type(power) is int:
