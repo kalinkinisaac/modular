@@ -4,7 +4,7 @@ from graph_constructor import get_graph
 from subgroups import *
 from graph_drawer import draw_graph
 
-gamma = GammaBotOne(2)
+gamma = GammaBotZero(4)
 graph = get_graph(gamma)
 
 domain, tree, involutions = get_all(graph)

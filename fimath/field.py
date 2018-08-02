@@ -95,7 +95,7 @@ class Field(BaseField):
         return self.real ** 2 + self.imag ** 2
 
     def __complex__(self):
-        return self.real + 1j * self.imag
+        return complex(self.real, self.imag)
 
     def conjugate(self):
         return Field(real=self.real, imag=-self.imag)
@@ -127,19 +127,28 @@ class Field(BaseField):
         return forward, reverse
 
     def _add(l, r):
-        return Field(real=l.real + r.real, imag=l.imag + r.imag)
+        if l.is_inf or r.is_inf:
+            return Field(is_inf=True)
+        else:
+            return Field(real=l.real + r.real, imag=l.imag + r.imag)
 
     __add__, __radd__ = _operator_fallbacks(_add, operator.add)
 
 
     def _sub(l, r):
-        return Field(real=l.real - r.imag, imag=l.imag - r.imag)
+        return Field(real=l.real - r.real, imag=l.imag - r.imag)
 
     __sub__, __rsub__ = _operator_fallbacks(_sub, operator.sub)
 
 
     def _mul(l, r):
-        return Field(real=l.real * r.real - l.imag * r.imag, imag=l.real * r.imag + l.imag * r.real)
+        if l.is_inf or r.is_inf:
+            if l == 0 or r == 0:
+                raise ZeroDivisionError('NANANANAN')
+            else:
+                return Field(is_inf=True)
+        else:
+            return Field(real=l.real * r.real - l.imag * r.imag, imag=l.real * r.imag + l.imag * r.real)
 
     __mul__, __rmul__ = _operator_fallbacks(_mul, operator.mul)
 
@@ -154,10 +163,13 @@ class Field(BaseField):
         return degrees(phase(compile(self)))
 
     def _inv(self):
-        return Field(
-            real=self.real / self.sq_abs(),
-            imag=-self.imag / self.sq_abs()
-        )
+        if self.sq_abs() == 0:
+            return Field(is_inf=True)
+        else:
+            return Field(
+                real=self.real / self.sq_abs(),
+                imag=-self.imag / self.sq_abs()
+            )
 
     @property
     def is_inf(self):

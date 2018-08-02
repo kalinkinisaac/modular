@@ -1,4 +1,4 @@
-from .field import Field
+from .field import (Field, ReField)
 
 # Totally Field/ReField geodesic class
 class Geodesic(object):
@@ -23,7 +23,8 @@ class Geodesic(object):
             self.center = Field.inf()
             self.radius = Field.inf()
         else:
-            self.center = 0.5 * (self.begin.sq_abs() - self.end.sq_abs()) / (self.begin - self.end).real
+            # TODO: remove this shit
+            self.center = (Field(0.5) * (self.begin.sq_abs() - self.end.sq_abs()) / (self.begin - self.end).real).real
             self.sq_radius = (self.begin - self.center).sq_abs()
 
     @property

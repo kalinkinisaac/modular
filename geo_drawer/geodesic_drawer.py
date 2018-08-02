@@ -2,6 +2,7 @@ from matplotlib.patches import Arc
 from fimath.geodesic import Geodesic
 from math import degrees
 from cmath import phase
+from fimath import Field
 
 class GeodesicDrawer:
 

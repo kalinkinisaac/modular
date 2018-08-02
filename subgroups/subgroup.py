@@ -10,7 +10,7 @@ def subgroup_action(N, sub, group):
     # Constructing reduction procedure for subgroup action
     def reduced(x):
         x_i = group.reduced(x)
-        h = (x * x_i._inv() % N) % N
+        h = (x * x_i.inv() % N) % N
         h_j = sub.reduced(h)
         return (h_j * x_i) % N
 
