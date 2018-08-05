@@ -8,7 +8,6 @@ from decimal import Decimal
 import numbers
 from .bases import BaseField
 import operator
-from numbers import Real
 
 def re_field_support(func):
     def wrapped(obj, other):
@@ -86,7 +85,8 @@ class Field(BaseField):
         if self.is_inf:
             return 'inf'
         else:
-            return f'({self.real}+1j{self.imag})'
+            #return f'({self.real}+1j{self.imag})'
+            return repr(self.__complex__())
 
     def abs(self):
         return abs(complex(self))
@@ -136,7 +136,10 @@ class Field(BaseField):
 
 
     def _sub(l, r):
-        return Field(real=l.real - r.real, imag=l.imag - r.imag)
+        if l.is_inf or r.is_inf:
+            return Field(is_inf=True)
+        else:
+            return Field(real=l.real - r.real, imag=l.imag - r.imag)
 
     __sub__, __rsub__ = _operator_fallbacks(_sub, operator.sub)
 
@@ -144,7 +147,7 @@ class Field(BaseField):
     def _mul(l, r):
         if l.is_inf or r.is_inf:
             if l == 0 or r == 0:
-                raise ZeroDivisionError('NANANANAN')
+                raise ZeroDivisionError('Nan')
             else:
                 return Field(is_inf=True)
         else:
@@ -215,12 +218,17 @@ class Field(BaseField):
             return (self.is_inf and other.is_inf) or \
                    (self.real == other.real and
                     self.imag == other.imag)
+        elif isinstance(other, (int, float, Decimal)):
+            if self.is_inf:
+                return math.isinf(other)
+            else:
+                return self.real == other
+
         elif isinstance(other, numbers.Complex):
             return (self.is_inf and other.imag == float('inf')) or \
                    (self.real == other.real and
                     self.imag == other.imag)
-        elif isinstance(other, (int, float, Decimal)):
-            return self.real == other
+
 
     def __hash__(self):
         return hash(repr(self))
@@ -231,6 +239,7 @@ class Field(BaseField):
     def sort_key(cls, fi):
         return [fi.imag.sign(), fi.imag.sign() * fi.imag / fi.real]
 
+# TODO: remove from there
     # Constants
     @classmethod
     def zero(cls):

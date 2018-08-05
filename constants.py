@@ -1,4 +1,4 @@
-from fimath import (Mat, Field, ReField)
+from fimath import (Mat, Field, ReField, inf)
 from fractions import Fraction
 
 IDM = Mat(1, 0, 0, 1)
@@ -15,7 +15,7 @@ G__ = Mat(1, 0, -1, 1)
 
 ZERO = Field(0)
 ONE = Field(1)
-INF = Field.inf()
+INF = inf
 
 V0 = Field(1j)
 V1 = Field(ReField(1/2), ReField(b=1/2))

@@ -1,7 +1,8 @@
 from .field import Field
 from .error import UnsupportedTypeError
 from .geodesic import Geodesic
-
+from . import inf
+# TODO: make using fallbacks
 class Mat(object):
 
     def __init__(self, a, b, c, d):
@@ -34,23 +35,23 @@ class Mat(object):
 
         return Mat(self.d, -self.b, -self.c, self.a) * (self.a * self.d - self.b * self.c)
 
-    def __mul__(s, other):
-        if type(other) == __class__:
+    def __mul__(l, r):
+        if type(r) == __class__:
             return Mat(
-                a =s.a * other.a + s.b * other.c,
-                b =s.a * other.b + s.b * other.d,
-                c =s.c * other.a + s.d * other.c,
-                d =s.c * other.b + s.d * other.d
+                a =l.a * r.a + l.b * r.c,
+                b =l.a * r.b + l.b * r.d,
+                c =l.c * r.a + l.d * r.c,
+                d =l.c * r.b + l.d * r.d
             )
-        elif type(other) == int:
+        elif type(r) == int:
             return Mat(
-                s.a * other,
-                s.b * other,
-                s.c * other,
-                s.d * other
+                l.a * r,
+                l.b * r,
+                l.c * r,
+                l.d * r
             )
         else:
-            UnsupportedTypeError(other)
+            UnsupportedTypeError(r)
 
     def __mod__(self, other):
         if type(other) == int:
@@ -91,17 +92,17 @@ class Mat(object):
     def _single_moe(s, other):
         if type(other) == Field:
             if s.a * s.d == s.b * s.c:
-                return Field(a=s.a) / s.c
+                return Field(s.a) / s.c
             else:
                 if s.c != 0:
                     if other.is_inf:
                         return s.a * Field.one() / s.c
                     elif other == -s.d * Field.one() / s.c:
-                        return Field.inf()
+                        return inf
 
 
                 if other.is_inf:
-                    return Field.inf()
+                    return inf
 
             return (s.a * other + s.b) / (s.c * other + s.d)
         else:

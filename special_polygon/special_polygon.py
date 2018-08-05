@@ -13,6 +13,7 @@ class SpecialPolygon(object):
         self.graph = graph
 
     def construct_polygon(self):
+        logging.info('Graph constructing procedure started')
         self.L0 = []
         self.L1 = []
         self.G = []
@@ -32,6 +33,8 @@ class SpecialPolygon(object):
         self.T.append(Geodesic(V0, V1))
 
         if star_v1 == StarType.Segment:
+            logging.info('V1 is a segment.')
+
             self.L0.append(self.v0)
             self.L1.append(self.v1)
             self.G.append(IDM)
@@ -39,12 +42,14 @@ class SpecialPolygon(object):
             s1 = Geodesic(V1, INF)
             s2 = Geodesic(V1, ZERO)
             self.E.extend([s1, s2])
+            logging.info(f's1: {s1}\ns2: {s2}')
             self.involutions.append([s1, s2, G1])
 
         else:
             self.T.extend([G1.moe(Geodesic(V0, V1)), (G1_2).moe(Geodesic(V0, V1))])
             self.generators.extend([G1, G1_2])
             if star_v1 == StarType.SlingShot:
+                logging.info('V1 is a sling shot.')
                 v_ = BCGraph.cyc_next(self.v0, neighbors)
                 v__ = BCGraph.cyc_next(v_, neighbors)
 
@@ -61,6 +66,7 @@ class SpecialPolygon(object):
                 self.visited[v__] = True
 
             else:
+                logging.info('V1 is a racket.')
                 v = self.unique(neighbors)
                 j = self.graph.dist_j
 
@@ -72,9 +78,10 @@ class SpecialPolygon(object):
                 s = [Geodesic(ZERO, INF), Geodesic(ZERO, ONE), Geodesic(ONE, INF)]
 
                 self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
-
+                logging.info(f's1: {s[(j + 1) % 3]}\ns2: {s[(j + 2) % 3]}')
                 self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3], G1 ** (j - 1) * G_ * G1 ** (1 - j)])
 
+        logging.info('==-Preparing finished-==')
         while(self.L0):
             self.induction()
 
@@ -83,14 +90,7 @@ class SpecialPolygon(object):
 
 
     def induction(self):
-        logging.info(
-            f"""New induction step starts
-                L0 = {self.L0}
-                L1 = {self.L1}
-                G =
-                {self.G}
-            """
-        )
+        logging.info(f'New induction step starts\nL0 = {self.L0}\nL1 = {self.L1}\nG =\n{self.G}')
 
         v = self.L0.pop()
         v_ = self.L1.pop()

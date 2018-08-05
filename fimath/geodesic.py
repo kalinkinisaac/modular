@@ -1,16 +1,17 @@
 from .field import (Field, ReField)
+from . import inf
 
 # Totally Field/ReField geodesic class
 class Geodesic(object):
 
     def __init__(self, begin, end):
         if type(begin) == int or type(begin) == float:
-            self.begin = Field(a=begin)
+            self.begin = Field(begin)
         else:
             self.begin = begin
 
         if type(end) == int or type(end) == float:
-            self.end = Field(a=end)
+            self.end = Field(end)
         else:
             self.end = end
 
@@ -20,8 +21,8 @@ class Geodesic(object):
             self._left, self._right = self.end, self.begin
 
         if self.is_vertical():
-            self.center = Field.inf()
-            self.radius = Field.inf()
+            self.center = inf
+            self.radius = inf
         else:
             # TODO: remove this shit
             self.center = (Field(0.5) * (self.begin.sq_abs() - self.end.sq_abs()) / (self.begin - self.end).real).real
@@ -52,6 +53,12 @@ class Geodesic(object):
 
     def __str__(self):
         return repr(self)
+
+    def __eq__(self, other):
+        if type(other) == Geodesic:
+            return self.begin == other.begin and self.end == other.end
+        else:
+            return NotImplemented
 
     def __repr__(self):
         return f'<Geodesic from {self.begin} to {self.end}>'

@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 from matplotlib.patches import Arc
 from fimath.geodesic import Geodesic
 from math import degrees
@@ -12,6 +13,9 @@ class GeodesicDrawer:
 
     def __init__(self, ax):
         self.ax = ax
+
+    def show(self):
+        plt.show()
 
     def plot(self, geodesics, *args, **kwargs):
         if type(geodesics) == list:

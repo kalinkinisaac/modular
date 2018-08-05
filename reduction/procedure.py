@@ -1,12 +1,80 @@
 from fimath.geodesic import Geodesic
+from .sort import cyclic_sorted
+from geo_drawer import geo_drawer
+from fimath import Mat
 
-def procedure(poly, invs, z, w):
-    line = Geodesic(w, z)
-    poly = cyclic_sorted(poly)
+class Decompositor(object):
+    def __init__(self, polygon, involutions, z, w):
+        self._poly = polygon
+        self._cur_poly = []
+        self.involutions = involutions
+        self.line = Geodesic(w, z)
+        self.decomposition = []
+        self.mul_dec = Mat.identity()
+        self.previous_edge = None
+        self._involution_dict = None
+        self.crossing = True
+
+    def decompose(self):
+        self.prepare_involutions()
+
+        geo_drawer.plot(self.line, color='yellow')
+
+        self._poly = cyclic_sorted(self._poly)
+        self._cur_poly = self._poly[::]
+
+        previous_edges = get_cross_edges(self._cur_poly, self.line)
+
+        if len(previous_edges) != 1:
+            raise Exception('Number of crossed edges is not equal to 1')
+
+        self.previous_edge = previous_edges[0]
+
+
+        while self.crossing:
+            self.iteration()
+
+        return self.decomposition
+
+    def iteration(self):
+
+        g_i = self.mul_dec * self.get_involution(self.previous_edge).inv() * self.mul_dec.inv()
+        #g_i = self.get_involution(self.previous_edge).inv()
+        self.decomposition.append(g_i)
+        self.mul_dec = g_i * self.mul_dec
+
+        for i in range(len(self._cur_poly)):
+            self._cur_poly[i] = g_i.moe(self._cur_poly[i])
+
+        geo_drawer.plot(self._cur_poly, color='grey')
+
+        crossed = get_cross_edges(self._cur_poly, self.line)
+
+        if len(crossed) != 2:
+            self.crossing = False
+            return
+
+        if crossed[0] == self.previous_edge:
+            self.previous_edge = crossed[1]
+        else:
+            self.previous_edge = crossed[0]
 
 
 
-# O(n^2)
+    def prepare_involutions(self):
+        self._involution_dict = dict()
+
+        for a, b, g in self.involutions:
+            self._involution_dict[a] = g
+            self._involution_dict[b] = g.inv()
+
+    def get_involution(self, edge):
+        edge_ = self._poly[self._cur_poly.index(edge)]
+        return self._involution_dict[edge_]
+
+
+
+# O(n)
 def get_cross_edges(polygon, line : Geodesic):
     edges = []
     for edge in polygon:
@@ -26,60 +94,15 @@ def is_crossing(line1 : Geodesic, line2 : Geodesic):
         else:
             return line1.left.real <= line2.x() <= line1.right.real
     else:
-        if abs(line1.center - line2.center) > line1.radius + line2.radius:
+        # if abs(line1.center - line2.center) > line1.sq_radius + line2.sq_radius:
+        #     return False
+        # else:
+        x_cross = 0.5 * (line1.center + line2.center +
+                             (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
+
+        if line1.left.real <= x_cross <= line1.right.real and line2.left.real <= x_cross <= line2.right.real:
+            return True
+
+        else:
             return False
-        else:
-            x_cross = 0.5 * (line1.center + line2.center +
-                                 (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
 
-            if line1.left.real <= x_cross <= line1.right.real and line2.left.real <= x_cross <= line2.right.real:
-                return True
-
-            else:
-                return False
-
-# O(n*log(n))
-def cyclic_sorted(geos):
-    geo_list = geos2tuples(geos)
-    transfer = tuples2dict(geo_list)
-
-    sorted = []
-
-    geo = geo_list[0]
-
-    for _ in geos:
-        sorted.append(geo)
-
-        start, end = geo
-
-        variants = transfer[end]
-        next = variants[0] if variants[1] == start else variants[1]
-
-        geo = (end, next)
-
-    return tuples2geos(sorted)
-
-def tuples2dict(tuples):
-    transfer = dict()
-    for l, r in tuples:
-        if l not in transfer:
-            transfer[l] = [r]
-        else:
-            transfer[l].append(r)
-        if r not in transfer:
-            transfer[r] = [l]
-        else:
-            transfer[r].append(l)
-    return transfer
-
-def geos2tuples(geos):
-    tuples = []
-    for geo in geos:
-        tuples.append((geo.begin, geo.end))
-    return tuples
-
-def tuples2geos(tuples):
-    geos = []
-    for pair in tuples:
-        geos.append(Geodesic(pair[0], pair[1]))
-    return geos
