@@ -1,5 +1,4 @@
 from fractions import Fraction
-from .error import (UnsupportedTypeError, NanError)
 from math import sqrt, degrees, isinf
 import math
 from cmath import phase
@@ -8,14 +7,6 @@ from decimal import Decimal
 import numbers
 from .bases import BaseField
 import operator
-
-def re_field_support(func):
-    def wrapped(obj, other):
-        if type(other) == ReField:
-            other = Field(a=other.a, b=other.b)
-        return func(obj, other)
-    return wrapped
-
 
 
 class Field(BaseField):
@@ -78,15 +69,17 @@ class Field(BaseField):
     def imag(self):
         return self._imag
 
-    def __str__(self):
-        return self.__repr__()
-
     def __repr__(self):
         if self.is_inf:
             return 'inf'
         else:
             #return f'({self.real}+1j{self.imag})'
             return repr(self.__complex__())
+
+    def __str__(self):
+        return self.__repr__()
+
+
 
     def abs(self):
         return abs(complex(self))

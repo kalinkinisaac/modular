@@ -19,7 +19,7 @@ class SubGammaZero(BaseGamma):
 
     # Constructing reduction procedure
     def reduced(self, mat: Mat):
-        a, b = mat.a, mat.d
+        a, b = mat._a, mat._d
         if a > self.N // 2:
             a = (-a) % self.N
             b = (-b) % self.N

@@ -2,6 +2,36 @@ import abc
 import math
 import numbers
 
+class BaseMat(object):
+    __metaclass__ = abc.ABCMeta
+
+    __slots__ = ()
+
+    @property
+    @abc.abstractmethod
+    def a(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def b(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def c(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def d(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def inv(self):
+        raise NotImplementedError
+
+
 class BaseReField(object):
     __metaclass__ = abc.ABCMeta
 

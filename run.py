@@ -6,7 +6,7 @@ from subgroups import *
 from reduction import decompose
 from fimath import Mat, Field
 
-gamma = GammaTopZero(24)
+gamma = GammaBotZero(24)
 graph = get_graph(gamma)
 
 domain, tree, involutions = get_all(graph)
@@ -19,7 +19,7 @@ geo_drawer.plot(domain, linewidth=1.0)
 geo_drawer.plot(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
 
 p = Field(0.5+2j)
-m = Mat(0,1,-1,0)
+m = Mat(1,0,24,1)
 decomposition = decompose(polygon=domain, involutions=involutions, z=p, w=m.moe(p))
 # dec = '\n'.join(map(str, decompose(polygon=domain, involutions=involutions, z=p, w=m.moe(p))))
 # print(f'Decompostion of matrix\n{m}\n\n{dec}')

@@ -1,23 +1,9 @@
 from fractions import Fraction
-from .error import UnsupportedTypeError
-from .types_support import TypesSupported
 from decimal import Decimal, getcontext
 from .bases import BaseReField
 import operator
-import numbers
 import math
 
-# TODO: remake with +-inf
-def types_support(func):
-
-    supported_types = {int, float}
-
-    def wrapped(self, other):
-        if type(other) in supported_types:
-            other = ReField(a=other)
-        return func(self, other)
-
-    return wrapped
 
 class ReField(BaseReField):
 

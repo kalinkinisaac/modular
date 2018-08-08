@@ -15,7 +15,7 @@ class SubGammaOne(BaseGamma):
 
     # Identity transformation
     def reduced(self, mat: Mat):
-        a = mat.a
+        a = mat._a
 
         if a > self.N // 2:
             mat = (-mat) % self.N
