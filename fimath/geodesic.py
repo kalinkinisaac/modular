@@ -20,6 +20,11 @@ class Geodesic(object):
         else:
             self._left, self._right = self.end, self.begin
 
+        if self.begin.imag <= self.end.imag:
+            self._bot, self._top = self.begin, self.end
+        else:
+            self._bot, self._top = self.end, self.begin
+
         if self.is_vertical():
             self.center = inf
             self.radius = inf
@@ -35,6 +40,14 @@ class Geodesic(object):
     @property
     def right(self):
         return self._right
+
+    @property
+    def top(self):
+        return self._top
+
+    @property
+    def bot(self):
+        return self._bot
 
     def is_vertical(self):
         return self.begin.real == self.end.real or self.has_inf()
@@ -62,3 +75,11 @@ class Geodesic(object):
 
     def __repr__(self):
         return f'<Geodesic from {self.begin} to {self.end}>'
+
+def reversed(geo : Geodesic):
+    return Geodesic(geo.end, geo.begin)
+
+def unoriented_eq(l : Geodesic, r : Geodesic):
+    return l == r or l == reversed(r)
+
+__all__ = ['Geodesic', 'reversed', 'unoriented_eq']
