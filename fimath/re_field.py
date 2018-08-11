@@ -96,7 +96,7 @@ class ReField(BaseReField):
         return forward, reverse
 
 
-    def _inv(s):
+    def inv(s):
         x = s.a ** 2 + 3 * s.b ** 2
         y = 2 * (s.a * s.b)
         den = x ** 2 - 3 * y ** 2
@@ -196,16 +196,16 @@ class ReField(BaseReField):
             if power > 0:
                 return result
             else:
-                return result._inv()
+                return result.inv()
 
         else:
             return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, (int, float, Decimal)):
-            return self * ReField(other)._inv()
+            return self * ReField(other).inv()
         elif isinstance(other, BaseReField):
-            return self * other._inv()
+            return self * other.inv()
         else:
             return NotImplemented
 

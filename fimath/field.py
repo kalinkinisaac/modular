@@ -25,12 +25,15 @@ class Field(BaseField):
             return self
 
         elif imag is None:
-            if isinstance(real, ReField):
+            if isinstance(real, Field):
+                return real
+
+            elif isinstance(real, ReField):
                 self._real = real
                 self._imag = ReField()
                 return self
 
-            if isinstance(real, (int, Fraction)):
+            elif isinstance(real, (int, Fraction)):
                 self._real = ReField(real)
                 self._imag = ReField()
                 return self
@@ -63,10 +66,16 @@ class Field(BaseField):
 
     @property
     def real(self):
+        if self.is_inf:
+            raise NotImplementedError('Infinity has not real')
+
         return self._real
 
     @property
     def imag(self):
+        if self.is_inf:
+            raise NotImplementedError('Infinity has not imag')
+
         return self._imag
 
     def __repr__(self):
@@ -88,7 +97,7 @@ class Field(BaseField):
         return self.real ** 2 + self.imag ** 2
 
     def __complex__(self):
-        return complex(self.real, self.imag)
+        return complex(float(self.real), float(self.imag))
 
     def conjugate(self):
         return Field(real=self.real, imag=-self.imag)
@@ -150,7 +159,7 @@ class Field(BaseField):
 
 
     def _div(l, r):
-        return l * r._inv()
+        return l * r.inv()
 
     __truediv__, __rtruediv__ = _operator_fallbacks(_div, operator.truediv)
 
@@ -158,7 +167,7 @@ class Field(BaseField):
     def angle(self):
         return degrees(phase(compile(self)))
 
-    def _inv(self):
+    def inv(self):
         if self.sq_abs() == 0:
             return Field(is_inf=True)
         else:
@@ -208,9 +217,11 @@ class Field(BaseField):
 
     def __eq__(self, other):
         if isinstance(other, BaseField):
-            return (self.is_inf and other.is_inf) or \
-                   (self.real == other.real and
-                    self.imag == other.imag)
+            if self.is_inf or other.is_inf:
+                return self.is_inf and other.is_inf
+            else:
+                return (self.real == other.real and
+                        self.imag == other.imag)
         elif isinstance(other, (int, float, Decimal)):
             if self.is_inf:
                 return math.isinf(other)

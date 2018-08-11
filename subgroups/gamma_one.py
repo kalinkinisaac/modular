@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .gamma_zero import (GammaBotZero, GammaTopZero)
 from .subgroup import subgroup_action
 from .algo import gcd, inv_element
-from fimath import Mat
+from fimath import Matrix
 
 class SubGammaZero(BaseGamma):
     def __init__(self, *args, **kwargs):
@@ -15,15 +15,15 @@ class SubGammaZero(BaseGamma):
         self.reprs = []
         for a in range(1, self.N // 2 + 1):
             if gcd(a, self.N) == 1:
-                self.reprs.append(Mat(a, 0, 0, inv_element(a, self.N)))
+                self.reprs.append(Matrix(a, 0, 0, inv_element(a, self.N)))
 
     # Constructing reduction procedure
-    def reduced(self, mat: Mat):
+    def reduced(self, mat: Matrix):
         a, b = mat._a, mat._d
         if a > self.N // 2:
             a = (-a) % self.N
             b = (-b) % self.N
-        return Mat(a, 0, 0, b)
+        return Matrix(a, 0, 0, b)
 
 
 class GammaBotOne(BaseGamma):

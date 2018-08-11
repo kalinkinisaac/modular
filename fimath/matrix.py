@@ -1,17 +1,17 @@
-from .bases import BaseMat
+from .bases import BaseMatrix
 from .field import Field
 from .re_field import ReField
 from .geodesic import Geodesic
 import operator
 
-class Mat(BaseMat):
+class Matrix(BaseMatrix):
 
     __slots__ = ('_a', '_b', '_c', '_d')
 
     def __new__(cls, a=1, b=0, c=0, d=1):
-        self = super(Mat, cls).__new__(cls)
+        self = super(Matrix, cls).__new__(cls)
 
-        if isinstance(a, BaseMat):
+        if isinstance(a, BaseMatrix):
             self._a = a.a
             self._b = a.b
             self._c = a.c
@@ -53,7 +53,7 @@ class Mat(BaseMat):
     def _operator_fallbacks(monomorphic_operator, fallback_operator):
 
         def forward(a, b):
-            if isinstance(b, (BaseMat, int)):
+            if isinstance(b, (BaseMatrix, int)):
                 return monomorphic_operator(a, b)
             else:
                 return NotImplemented
@@ -62,7 +62,7 @@ class Mat(BaseMat):
         forward.__doc__ = monomorphic_operator.__doc__
 
         def reverse(b, a):
-            if isinstance(a, BaseMat):
+            if isinstance(a, BaseMatrix):
                 return monomorphic_operator(a, b)
             else:
                 return NotImplemented
@@ -95,18 +95,18 @@ class Mat(BaseMat):
         if self._a * self._d - self._b * self._c == 0:
             raise ZeroDivisionError()
 
-        return Mat(self._d, -self._b, -self._c, self._a) * self.det()
+        return Matrix(self._d, -self._b, -self._c, self._a) * self.det()
 
     def _mul(l, r):
-        if isinstance(r, BaseMat):
-            return Mat(
+        if isinstance(r, BaseMatrix):
+            return Matrix(
                 l._a * r.a + l._b * r.c,
                 l._a * r.b + l._b * r.d,
                 l._c * r.a + l._d * r.c,
                 l._c * r.b + l._d * r.d
             )
         elif type(r) == int:
-            return Mat(
+            return Matrix(
                 l._a * r,
                 l._b * r,
                 l._c * r,
@@ -118,7 +118,7 @@ class Mat(BaseMat):
 
     def __mod__(self, other):
         if type(other) == int:
-            return Mat(
+            return Matrix(
                 self._a % other,
                 self._b % other,
                 self._c % other,
@@ -128,7 +128,7 @@ class Mat(BaseMat):
             return NotImplemented
 
     def __neg__(self):
-        return Mat(
+        return Matrix(
             -self._a,
             -self._b,
             -self._c,
@@ -141,16 +141,16 @@ class Mat(BaseMat):
     def __pow__(self, power : int, modulo=None):
         if type(power) == int:
             if power == 0:
-                return Mat()
+                return Matrix()
 
             if power > 0:
-                result = Mat()
+                result = Matrix()
                 for _ in range(power):
                     result = result * self
                 return result
 
             if power < 0:
-                result = Mat()
+                result = Matrix()
                 for _ in range(power):
                     result = result * self
                 return result.inv()
@@ -180,4 +180,4 @@ class Mat(BaseMat):
     # Constants
     @classmethod
     def identity(cls):
-        return Mat(a=1, b=0, c=0, d=1)
+        return Matrix(a=1, b=0, c=0, d=1)

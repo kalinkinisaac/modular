@@ -30,10 +30,10 @@ class GeodesicDrawer:
 
     def _plot(self, geodesic : Geodesic, *args, **kwargs):
         # Check if geodesic is vertical
-        if geodesic.has_inf():
+        if geodesic.has_inf:
             self.vertical_inf(geodesic, *args, **kwargs)
 
-        elif geodesic.begin.real == geodesic.end.real:
+        elif geodesic.is_vertical:
             self.vertical_not_inf(geodesic, *args, **kwargs)
 
         else:
@@ -41,16 +41,16 @@ class GeodesicDrawer:
 
 
     def vertical_inf(self, geodesic : Geodesic,  *args, **kwargs):
-        self.ax.vlines(x=geodesic.x(),
-                  ymin=GeodesicDrawer.y_min(geodesic),
-                  ymax=GeodesicDrawer.Y_MAX_INF,
-                  *args, **kwargs)
+        self.ax.vlines(x=geodesic.vertical_x,
+                       ymin=GeodesicDrawer.y_min(geodesic),
+                       ymax=GeodesicDrawer.Y_MAX_INF,
+                       *args, **kwargs)
 
     def vertical_not_inf(self, geodesic : Geodesic, *args, **kwargs):
-        self.ax.vlines(x=geodesic.x(),
-                  ymin=GeodesicDrawer.y_min(geodesic),
-                  ymax=GeodesicDrawer.y_max(geodesic),
-                  *args, **kwargs)
+        self.ax.vlines(x=geodesic.vertical_x,
+                       ymin=GeodesicDrawer.y_min(geodesic),
+                       ymax=GeodesicDrawer.y_max(geodesic),
+                       *args, **kwargs)
 
     def not_vertical(self, geo : Geodesic, *args, **kwargs):
         theta1 = degrees(phase(complex(geo.begin - geo.center)))
@@ -72,15 +72,14 @@ class GeodesicDrawer:
 
     @classmethod
     def y_min(cls, geodesic):
-        approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
-        approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
-
-        if geodesic.has_inf():
+        if geodesic.has_inf:
             if geodesic.begin.is_inf:
-                return approx_b
+                return geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
             else:
-                return approx_a
+                return geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
         else:
+            approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
+            approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
             return min(approx_a, approx_b)
 
     @classmethod

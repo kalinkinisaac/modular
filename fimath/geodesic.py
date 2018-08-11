@@ -1,37 +1,76 @@
 from .field import (Field, ReField)
+from .bases import BaseGeodesic
 from . import inf
 
 # Totally Field/ReField geodesic class
-class Geodesic(object):
+class Geodesic(BaseGeodesic):
 
-    def __init__(self, begin, end):
-        if type(begin) == int or type(begin) == float:
-            self.begin = Field(begin)
-        else:
-            self.begin = begin
+    __slots__ = ('_begin', '_end', '_left', '_right', '_top', '_bot', '_is_vertical', '_vertical_x', '_has_inf', '_center', '_sq_radius')
 
-        if type(end) == int or type(end) == float:
-            self.end = Field(end)
-        else:
-            self.end = end
+    def __new__(cls, begin, end):
 
-        if self.begin.real <= self.end.real:
-            self._left, self._right = self.begin, self.end
-        else:
-            self._left, self._right = self.end, self.begin
+        self = super(Geodesic, cls).__new__(cls)
+        self._begin = Field(begin)
+        self._end = Field(end)
+        self._is_vertical = False
+        self._has_inf = False
 
-        if self.begin.imag <= self.end.imag:
-            self._bot, self._top = self.begin, self.end
-        else:
-            self._bot, self._top = self.end, self.begin
+        if self._begin == self._end:
+            raise ValueError('geodesic begin can not be equal to end')
 
-        if self.is_vertical():
-            self.center = inf
-            self.radius = inf
+        if self._begin.is_inf:
+            self._is_vertical = True
+            self._has_inf = True
+            self._vertical_x = self._end.real
+
+            self._left = self._end
+            self._right = self._begin
+            self._top = self._begin
+            self._bot = self._end
+
+
+        elif self._end.is_inf:
+            self._is_vertical = True
+            self._has_inf = True
+            self._vertical_x = self._begin.real
+
+            self._left = self._begin
+            self._right = self._end
+            self._top = self._end
+            self._bot = self._begin
+
         else:
-            # TODO: remove this shit
-            self.center = (Field(0.5) * (self.begin.sq_abs() - self.end.sq_abs()) / (self.begin - self.end).real).real
-            self.sq_radius = (self.begin - self.center).sq_abs()
+            if self._begin.real == self._end.real:
+                self._is_vertical = True
+                self._vertical_x = self._begin.real
+
+            if self._begin.real < self._end.real:
+                self._left = self._begin
+                self._right = self._end
+            else:
+                self._left = self._end
+                self._right = self._begin
+
+            if self._begin.imag < self._end.imag:
+                self._top = self._end
+                self._bot = self._begin
+            else:
+                self._top = self._begin
+                self._bot = self._end
+
+        if not self._is_vertical:
+            self._center = ReField(0.5) * (self._begin.sq_abs() - self._end.sq_abs()) / (self._begin - self._end).real
+            self._sq_radius = (self._begin - self._center).sq_abs()
+
+        return self
+
+    @property
+    def begin(self):
+        return self._begin
+
+    @property
+    def end(self):
+        return self._end
 
     @property
     def left(self):
@@ -49,23 +88,44 @@ class Geodesic(object):
     def bot(self):
         return self._bot
 
+    @property
     def is_vertical(self):
-        return self.begin.real == self.end.real or self.has_inf()
+        return self._is_vertical
 
+    @property
     def has_inf(self):
-        return self.begin.is_inf or self.end.is_inf
+        return self._has_inf
 
-    def x(self):
-        if(self.begin.is_inf):
-            return self.end.real
-        else:
-            return self.begin.real
+    @property
+    def vertical_x(self):
+        if not self._is_vertical:
+            raise NotImplementedError('geodesic is not vertical')
+
+        return self._vertical_x
+
+    @property
+    def center(self):
+        if self._is_vertical:
+            raise NotImplementedError('geodesic is vertical')
+
+        return self._center
+
+    @property
+    def sq_radius(self):
+        if self._is_vertical:
+            raise NotImplementedError('geodesic is vertical')
+
+        return self._sq_radius
+
+    def __repr__(self):
+        return f'{self.__class__.__name__}(from: {self._begin} to: {self._end})'
+
+    def __str__(self):
+        return f'Geodesic from {self.begin} to {self.end}>'
 
     def __hash__(self):
         return hash(repr(self))
 
-    def __str__(self):
-        return repr(self)
 
     def __eq__(self, other):
         if type(other) == Geodesic:
@@ -73,8 +133,7 @@ class Geodesic(object):
         else:
             return NotImplemented
 
-    def __repr__(self):
-        return f'<Geodesic from {self.begin} to {self.end}>'
+
 
 def reversed(geo : Geodesic):
     return Geodesic(geo.end, geo.begin)

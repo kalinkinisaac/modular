@@ -2,7 +2,49 @@ import abc
 import math
 import numbers
 
-class BaseMat(object):
+class BaseGeodesic(object):
+    __metaclass__ = abc.ABCMeta
+
+    __slots__ = ()
+
+    @property
+    @abc.abstractmethod
+    def begin(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def end(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def left(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def right(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def top(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def bot(self):
+        raise NotImplementedError
+
+    @property
+    @abc.abstractmethod
+    def is_vertical(self):
+        raise NotImplementedError
+
+
+
+class BaseMatrix(object):
     __metaclass__ = abc.ABCMeta
 
     __slots__ = ()
@@ -48,7 +90,7 @@ class BaseReField(object):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _inv(self):
+    def inv(self):
         raise NotImplementedError
 
     def __float__(self):

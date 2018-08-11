@@ -1,7 +1,7 @@
 from fimath.geodesic import Geodesic, unoriented_eq
 from .sort import cyclic_sorted
 from geo_drawer import geo_drawer
-from fimath import Mat
+from fimath import Matrix
 
 class Decompositor(object):
     def __init__(self, polygon, involutions, z, w):
@@ -10,7 +10,7 @@ class Decompositor(object):
         self.involutions = involutions
         self.line = Geodesic(w, z)
         self.decomposition = []
-        self.mul_dec = Mat.identity()
+        self.mul_dec = Matrix.identity()
         self.previous_edge = None
         self._involution_dict = None
         self.crossing = True
@@ -51,15 +51,30 @@ class Decompositor(object):
         geo_drawer.plot(self._cur_poly, color='grey')
 
         crossed = get_cross_edges(self._cur_poly, self.line)
+        crossed = list(filter(lambda e: not unoriented_eq(e, self.previous_edge), crossed))
 
-        if len(crossed) != 2:
+        if not crossed:
             self.crossing = False
-            return
 
-        if unoriented_eq(crossed[0], self.previous_edge):
-            self.previous_edge = crossed[1]
-        else:
+        elif len(crossed) == 1:
             self.previous_edge = crossed[0]
+
+        elif len(crossed) == 2:
+            # Decision: which way should we go
+            # Trying first
+            first_poly = self._cur_poly[::]
+            for i in range(len(first_poly)):
+                first_poly[i] = g_i.moe(first_poly[i])
+            _crossed = get_cross_edges(self._cur_poly, self.line)
+            _crossed = list(filter(lambda e: not unoriented_eq(e, crossed[0]), _crossed))
+
+            if _crossed:
+                self.previous_edge = crossed[0]
+            else:
+                self.previous_edge = crossed[1]
+
+        else:
+            raise Exception('there are more than 2 crossing edges')
 
 
 
@@ -86,8 +101,8 @@ def get_cross_edges(polygon, line : Geodesic):
 
 # O(1)
 def is_crossing(line1 : Geodesic, line2 : Geodesic):
-    l1_is_vert = line1.is_vertical()
-    l2_is_vert = line2.is_vertical()
+    l1_is_vert = line1.is_vertical
+    l2_is_vert = line2.is_vertical
 
     if l1_is_vert or l2_is_vert:
 
@@ -95,13 +110,16 @@ def is_crossing(line1 : Geodesic, line2 : Geodesic):
             line1, line2 = line2, line1
 
         if l2_is_vert:
-            return line1.x() == line2.x() and (line1.bot.imag <= line2.begin.imag <= line1.top.imag or
-                                               line1.bot.imag <= line2.end.imag <= line1.top.imag)
+            return line1.vertical_x == line2.vertical_x and (line1.bot.imag <= line2.begin.imag <= line1.top.imag or
+                                                                 line1.bot.imag <= line2.end.imag <= line1.top.imag)
         else:
-            x_cross = line1.x()
+            x_cross = line1.vertical_x
             if line2.left.real <= x_cross <= line2.right.real:
                 sq_y = line2.sq_radius - (line2.center - x_cross) ** 2
-                return line1.bot.imag ** 2 <= sq_y <= line1.top.imag ** 2
+                if line1.has_inf:
+                    return line1.bot.imag ** 2 <= sq_y
+                else:
+                    return line1.bot.imag ** 2 <= sq_y <= line1.top.imag ** 2
             else:
                 return False
 

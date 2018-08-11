@@ -79,7 +79,7 @@ class GraphConstructor(object):
         return orb[0]
 
     # Returns orbit of matrix
-    def g0_orb(self, mat : Mat):
+    def g0_orb(self, mat : Matrix):
         mat = mat % self.N
         acted = self.acted(mat, G0)
 
@@ -88,7 +88,7 @@ class GraphConstructor(object):
         else:
             return [mat, acted]
 
-    def g1_orb(self, mat : Mat):
+    def g1_orb(self, mat : Matrix):
         mat = mat % self.N
         acted = self.acted(mat, G1)
 
@@ -98,10 +98,10 @@ class GraphConstructor(object):
             return [mat, acted, self.acted(mat, G1_2)]
 
     # Returns neighbors of vertex
-    def g0_nei(self, mat : Mat):
+    def g0_nei(self, mat : Matrix):
         orbit = self.g0_orb(mat)
         return [self.minimum(self.g1_orb(m)) for m in orbit]
 
-    def g1_nei(self, mat : Mat):
+    def g1_nei(self, mat : Matrix):
         orbit = self.g1_orb(mat)
         return [self.minimum(self.g0_orb(m)) for m in orbit]

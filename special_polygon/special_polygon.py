@@ -4,7 +4,7 @@ from fimath.geodesic import Geodesic
 from constants import *
 
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
+#logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
 
 
 class SpecialPolygon(object):
@@ -76,10 +76,16 @@ class SpecialPolygon(object):
                 self.I[v] = 0
 
                 s = [Geodesic(ZERO, INF), Geodesic(ZERO, ONE), Geodesic(ONE, INF)]
-
-                self.E.extend([s[(j + 1) % 3], s[(j + 2) % 3]])
-                logging.info(f's1: {s[(j + 1) % 3]}\ns2: {s[(j + 2) % 3]}')
-                self.involutions.append([s[(j + 1) % 3], s[(j + 2) % 3], G1 ** (j - 1) * G_ * G1 ** (1 - j)])
+                s1 = s[(j + 1) % 3]
+                s2 = s[(j + 2) % 3]
+                g = (G1 ** (-j + 1) * G_ * G1 ** (-1 + j)).inv()
+                # TODO: remake
+                self.E.extend([s1, s2])
+                logging.info(f'\ns1: {s1}\ns2: {s2}')
+                if g.moe(s1) == s2:
+                    self.involutions.append([s1, s2, g])
+                else:
+                    self.involutions.append([s1, s2, g.inv()])
 
         logging.info('==-Preparing finished-==')
         while(self.L0):

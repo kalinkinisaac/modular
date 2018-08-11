@@ -1,7 +1,7 @@
 from .base_gamma import BaseGamma
 from .gamma_one import GammaBotOne
 from .subgroup import subgroup_action
-from fimath import Mat
+from fimath import Matrix
 
 class SubGammaOne(BaseGamma):
     def __init__(self, *args, **kwargs):
@@ -11,10 +11,10 @@ class SubGammaOne(BaseGamma):
     # Trivial representatives
     def gen_reprs(self):
         for a in range(self.N):
-            self.reprs.append(Mat(1, a, 0, 1))
+            self.reprs.append(Matrix(1, a, 0, 1))
 
     # Identity transformation
-    def reduced(self, mat: Mat):
+    def reduced(self, mat: Matrix):
         a = mat._a
 
         if a > self.N // 2:

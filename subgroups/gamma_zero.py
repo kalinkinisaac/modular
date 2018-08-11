@@ -2,7 +2,7 @@ from .base_gamma import BaseGamma
 from .isomorphism import (one2many, many2one)
 from .algo import (factor, get_xy, gcd, inv_element)
 from math import log
-from fimath import Mat
+from fimath import Matrix
 import itertools
 
 
@@ -66,13 +66,13 @@ class GammaBotZero(GammaZero):
     def gen_reprs(self):
         self.reprs = []
         for a, b, N in self.pair_reprs:
-            self.reprs.append(self.reduced(Mat(0, 0, a, b)))
+            self.reprs.append(self.reduced(Matrix(0, 0, a, b)))
 
     def not_cached_reduced(self, mat):
         a, b = mat.c, mat.d
         a, b = self.pair_reduced(a, b)[0:2]
         d, c = list(map(lambda x: x % self.N, get_xy(a, b, self.N)))
-        return Mat(c, -d, a, b) % self.N
+        return Matrix(c, -d, a, b) % self.N
 
     @staticmethod
     def sort_key(m):
@@ -86,13 +86,13 @@ class GammaTopZero(GammaZero):
 
     def gen_reprs(self):
         for a, b, N in self.pair_reprs:
-            self.reprs.append(self.reduced(Mat(a, b, 0, 0)))
+            self.reprs.append(self.reduced(Matrix(a, b, 0, 0)))
 
     def not_cached_reduced(self, mat):
         a, b = mat.a, mat.b
         a, b = self.pair_reduced(a, b)[0:2]
         d, c = list(map(lambda x : x % self.N, get_xy(a, b, self.N)))
-        return Mat(a, b,-c, d) % self.N
+        return Matrix(a, b, -c, d) % self.N
 
 
     @staticmethod

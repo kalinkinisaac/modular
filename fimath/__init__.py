@@ -5,9 +5,9 @@ inf = Field(is_inf=True)
 
 from .re_field import ReField
 from .geodesic import Geodesic
-from .matrix import Mat
+from .matrix import Matrix
 
 
 
 
-__all__ = ['Mat', 'Field', 'ReField', 'Geodesic']
+__all__ = ['Matrix', 'Field', 'ReField', 'Geodesic']
