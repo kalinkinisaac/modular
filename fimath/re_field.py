@@ -60,6 +60,9 @@ class ReField(BaseReField):
     def b(self):
         return self._b
 
+    def __hash__(self):
+        return hash((self._a, self._b))
+
     def __repr__(self):
         return f'{self.__class__.__name__}({self.a}+{self.b}s3)'
 
@@ -83,8 +86,9 @@ class ReField(BaseReField):
 
         def reverse(b, a):
             if isinstance(a, BaseReField):
-                # Includes ints.
                 return monomorphic_operator(a, b)
+            elif type(a) is int:
+                return fallback_operator(ReField(a), b)
             elif type(a) is float:
                 return fallback_operator(a, float(b))
             else:
@@ -114,9 +118,9 @@ class ReField(BaseReField):
 
     def sign(self):
 
-        if self > ReField.zero():
+        if self > 0:
             return 1
-        elif self < ReField.zero():
+        elif self < 0:
             return -1
         else:
             return 0
@@ -187,9 +191,9 @@ class ReField(BaseReField):
     def __pow__(self, power, modulo=None):
         if type(power) is int:
             if power is 0:
-                return ReField.one()
+                return 1
 
-            result = ReField.one()
+            result = 1
             for _ in range(power):
                 result = result * self
 
@@ -209,10 +213,6 @@ class ReField(BaseReField):
         else:
             return NotImplemented
 
-    # This is disgusting. TODO: replace with better solution
-    def __hash__(self):
-        return hash(repr(self))
-
     def approx(self, precision=16):
         getcontext().prec = precision
         return (Decimal(self.a.numerator) / Decimal(self.a.denominator) +
@@ -222,12 +222,3 @@ class ReField(BaseReField):
         getcontext().prec = precision
         return (Decimal(self.a.numerator) / Decimal(self.a.denominator) +
                Decimal(3).sqrt() * Decimal(self.b.numerator) / Decimal(self.b.denominator)).sqrt()
-
-
-    @classmethod
-    def one(cls):
-        return ReField(a=1, b=0)
-
-    @classmethod
-    def zero(cls):
-        return ReField(a=0, b=0)

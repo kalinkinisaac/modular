@@ -1,5 +1,8 @@
-from fimath import (Matrix, Field, ReField, inf)
-from fractions import Fraction
+from .field import Field
+from .re_field import ReField
+from .matrix import Matrix
+
+inf = Field(is_inf=True)
 
 IDM = Matrix(1, 0, 0, 1)
 G0 = Matrix(0, -1, 1, 0)

@@ -78,6 +78,10 @@ class Field(BaseField):
 
         return self._imag
 
+
+    def __hash__(self):
+        return hash((self._real, self._imag, self._is_inf))
+
     def __repr__(self):
         if self.is_inf:
             return 'inf'
@@ -195,9 +199,9 @@ class Field(BaseField):
     def __pow__(self, power, modulo=None):
         if type(power) == int:
             if power == 0:
-                return Field.one()
+                return 1
 
-            result = Field.one()
+            result = 1
             for _ in range(power):
                 result = result * self
 
@@ -234,25 +238,6 @@ class Field(BaseField):
                     self.imag == other.imag)
 
 
-    def __hash__(self):
-        return hash(repr(self))
 
 
-
-    @classmethod
-    def sort_key(cls, fi):
-        return [fi.imag.sign(), fi.imag.sign() * fi.imag / fi.real]
-
-# TODO: remove from there
-    # Constants
-    @classmethod
-    def zero(cls):
-        return Field()
-
-    @classmethod
-    def one(cls):
-        return Field(1)
-
-    @classmethod
-    def inf(cls):
-        return Field(is_inf=True)
+__all__ = ['Field']

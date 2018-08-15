@@ -1,15 +1,12 @@
 from matplotlib import pyplot as plt
 from matplotlib.patches import Arc
 from fimath.geodesic import Geodesic
-from math import degrees
+from math import (degrees, sqrt)
 from cmath import phase
-from fimath import Field
 
-class GeodesicDrawer:
+class GeodesicDrawer(object):
 
-    PRECISION = 16
-    Y_MAX_INF = 5.0
-    ax = None
+    Y_MAX_INF = 2.5
 
     def __init__(self, ax):
         self.ax = ax
@@ -29,40 +26,40 @@ class GeodesicDrawer:
             raise TypeError()
 
     def _plot(self, geodesic : Geodesic, *args, **kwargs):
-        # Check if geodesic is vertical
-        if geodesic.has_inf:
-            self.vertical_inf(geodesic, *args, **kwargs)
+        if type(geodesic) != Geodesic:
+            raise TypeError('input should be Geodesic')
 
-        elif geodesic.is_vertical:
-            self.vertical_not_inf(geodesic, *args, **kwargs)
-
+        if geodesic.is_vertical:
+            if geodesic.has_inf:
+                self._vertical_inf(geodesic, *args, **kwargs)
+            else:
+                self._vertical_not_inf(geodesic, *args, **kwargs)
         else:
-            self.not_vertical(geodesic, *args, **kwargs)
+            self._not_vertical(geodesic, *args, **kwargs)
 
-
-    def vertical_inf(self, geodesic : Geodesic,  *args, **kwargs):
+    def _vertical_inf(self, geodesic : Geodesic, *args, **kwargs):
         self.ax.vlines(x=geodesic.vertical_x,
-                       ymin=GeodesicDrawer.y_min(geodesic),
+                       ymin=self._y_min(geodesic),
                        ymax=GeodesicDrawer.Y_MAX_INF,
                        *args, **kwargs)
 
-    def vertical_not_inf(self, geodesic : Geodesic, *args, **kwargs):
+    def _vertical_not_inf(self, geodesic : Geodesic, *args, **kwargs):
         self.ax.vlines(x=geodesic.vertical_x,
-                       ymin=GeodesicDrawer.y_min(geodesic),
-                       ymax=GeodesicDrawer.y_max(geodesic),
+                       ymin=self._y_min(geodesic),
+                       ymax=self._y_max(geodesic),
                        *args, **kwargs)
 
-    def not_vertical(self, geo : Geodesic, *args, **kwargs):
-        theta1 = degrees(phase(complex(geo.begin - geo.center)))
-        theta2 = degrees(phase(complex(geo.end - geo.center)))
+    def _not_vertical(self, geo : Geodesic, *args, **kwargs):
+        theta1 = degrees(phase(geo.begin - geo.center))
+        theta2 = degrees(phase(geo.end - geo.center))
 
         theta1, theta2 = min(theta1, theta2), max(theta1, theta2)
 
-        center = float(geo.center.approx(GeodesicDrawer.PRECISION))
-        radius = float(geo.sq_radius.sqrt_approx(GeodesicDrawer.PRECISION))
+        center = float(geo.center)
+        radius = sqrt(float(geo.sq_radius))
 
         self.ax.add_patch(Arc(
-            xy=(center,0),
+            xy=(center, 0),
             width=2*radius,
             height=2*radius,
             theta1=theta1,
@@ -70,21 +67,20 @@ class GeodesicDrawer:
             *args, **kwargs
         ))
 
-    @classmethod
-    def y_min(cls, geodesic):
+    def _y_min(self, geodesic):
         if geodesic.has_inf:
             if geodesic.begin.is_inf:
-                return geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
+                return float(geodesic.end.imag)
             else:
-                return geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
+                return float(geodesic.begin.imag)
         else:
-            approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
-            approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
+            approx_a = float(geodesic.begin.imag)
+            approx_b = float(geodesic.end.imag)
+
             return min(approx_a, approx_b)
 
-    @classmethod
-    def y_max(cls, geodesic):
-        approx_a = geodesic.begin.imag.approx(GeodesicDrawer.PRECISION)
-        approx_b = geodesic.end.imag.approx(GeodesicDrawer.PRECISION)
+    def _y_max(self, geodesic):
+        approx_a = float(geodesic.begin.imag)
+        approx_b = float(geodesic.end.imag)
 
         return max(approx_a, approx_b)

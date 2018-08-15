@@ -17,32 +17,6 @@ class BaseGeodesic(object):
     def end(self):
         raise NotImplementedError
 
-    @property
-    @abc.abstractmethod
-    def left(self):
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def right(self):
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def top(self):
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def bot(self):
-        raise NotImplementedError
-
-    @property
-    @abc.abstractmethod
-    def is_vertical(self):
-        raise NotImplementedError
-
-
 
 class BaseMatrix(object):
     __metaclass__ = abc.ABCMeta

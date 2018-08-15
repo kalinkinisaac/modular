@@ -1,11 +1,12 @@
-from .field import (Field, ReField)
+from .field import Field
+from .re_field import ReField
 from .bases import BaseGeodesic
-from . import inf
 
-# Totally Field/ReField geodesic class
+# Totally Field geodesic class
 class Geodesic(BaseGeodesic):
 
-    __slots__ = ('_begin', '_end', '_left', '_right', '_top', '_bot', '_is_vertical', '_vertical_x', '_has_inf', '_center', '_sq_radius')
+    __slots__ = ('_begin', '_end', '_left', '_right', '_top', '_bot', '_is_vertical', '_vertical_x', '_has_inf',
+                 '_center', '_sq_radius')
 
     def __new__(cls, begin, end):
 
@@ -59,7 +60,8 @@ class Geodesic(BaseGeodesic):
                 self._bot = self._end
 
         if self._bot.imag < 0:
-            raise ValueError('geodesic has point below real axis')
+            raise ValueError('geodesic should not have point below real axis')
+
         if not self._is_vertical:
             self._center = ReField(0.5) * (self._begin.sq_abs() - self._end.sq_abs()) / (self._begin - self._end).real
             self._sq_radius = (self._begin - self._center).sq_abs()

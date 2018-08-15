@@ -1,10 +1,10 @@
 from graph import BCGraph
 from .star_type import StarType
 from fimath.geodesic import Geodesic, unoriented_eq
-from constants import *
+from fimath.constants import *
 
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
+logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.DEBUG)
 
 
 class SpecialPolygon(object):
@@ -13,7 +13,7 @@ class SpecialPolygon(object):
         self.graph = graph
 
     def construct_polygon(self):
-        logging.info('Graph constructing procedure started')
+        logging.debug('graph constructing procedure started')
         self.L0 = []
         self.L1 = []
         self.G = []
@@ -33,7 +33,7 @@ class SpecialPolygon(object):
         self.T.append(Geodesic(V0, V1))
 
         if star_v1 == StarType.Segment:
-            logging.info('V1 is a segment.')
+            logging.debug('case 0.1: Start V1 is a segment.')
 
             self.L0.append(self.v0)
             self.L1.append(self.v1)
@@ -42,14 +42,17 @@ class SpecialPolygon(object):
             s1 = Geodesic(V1, INF)
             s2 = Geodesic(V1, ZERO)
             self.E.extend([s1, s2])
-            logging.info(f's1: {s1}\ns2: {s2}')
             self.involutions.append([s1, s2, G1])
+
+            logging.debug(f'added edges:\ns1: {s1}\ns2: {s2}')
 
         else:
             self.T.extend([G1.moe(Geodesic(V0, V1)), (G1_2).moe(Geodesic(V0, V1))])
             self.generators.extend([G1, G1_2])
+
             if star_v1 == StarType.SlingShot:
-                logging.info('V1 is a sling shot.')
+                logging.debug('case 0.2: Star V1 is a sling shot.')
+
                 v_ = BCGraph.cyc_next(self.v0, neighbors)
                 v__ = BCGraph.cyc_next(v_, neighbors)
 
@@ -66,7 +69,8 @@ class SpecialPolygon(object):
                 self.visited[v__] = True
 
             else:
-                logging.info('V1 is a racket.')
+                logging.debug('case 0.3: Star V1 is a racket')
+
                 v = self.unique(neighbors)
                 j = self.graph.dist_j
 
@@ -79,46 +83,33 @@ class SpecialPolygon(object):
                 s1 = s[(j + 1) % 3]
                 s2 = s[(j + 2) % 3]
                 g = (G1 ** (j - 1) * G_ * G1 ** (1 - j))
-                # TODO: remake
-                self.E.extend([s1, s2])
-                logging.info(f'\ns1: {s1}\ns2: {s2}')
-                if unoriented_eq(g.moe(s1), s2):
-                    self.involutions.append([s1, s2, g])
-                else:
-                    print('WARN: spec.poly: went to else')
-                    self.involutions.append([s1, s2, g.inv()])
 
-        logging.info('==-Preparing finished-==')
+                self.E.extend([s1, s2])
+                self.involutions.append([s1, s2, g])
+                logging.debug(f'added edges:\ns1 = {s1}\ns2 = {s2}')
+
+
+        logging.debug('initial prepararion finished')
+
         while(self.L0):
             self.induction()
+            logging.debug('end of induction')
 
         return self.E, self.T, self.involutions
 
 
 
     def induction(self):
-        logging.info(f'New induction step starts\nL0 = {self.L0}\nL1 = {self.L1}\nG =\n{self.G}')
+        logging.debug(f'new induction\nL0 = {self.L0}\nL1 = {self.L1}\nG =\n{self.G}')
 
         v = self.L0.pop()
         v_ = self.L1.pop()
         g = self.G.pop()
 
-        logging.info(
-            f"""Popped:
-                V = {v},
-                V\' = {v_},
-                g =\n{g}
-                
-            """
-        )
+        logging.debug(f'popped:\nV = {v},\nV\' = {v_},\ng =\n{g}')
 
         if self.removed[v]:
-            logging.info(
-                """V was marked \"to be removed\".
-                ==-End of induction-==
-                
-                """
-            )
+            logging.debug('V was marked \"to be removed\"\nend of induction')
             return
 
         if self.graph.is_v0_uni(v):
@@ -128,11 +119,7 @@ class SpecialPolygon(object):
             v__ = (set(self.graph.v0_nei(v)) - {v_}).pop()
             star_v__ = StarType.star_type(self.graph.v1_nei(v__))
 
-            logging.info(
-                f"""2. V has valency 2.
-                    \tV\'\' = {v__},
-                    \tStar(V\'\') : {star_v__}
-            """)
+            logging.debug(f'case 2: V has valency 2\tV\'\' = {v__}')
 
             if star_v__ == StarType.Segment:
                 self._case_2a(g)
@@ -150,6 +137,7 @@ class SpecialPolygon(object):
                     self._case_2c(g)
 
                 else:
+                    # nearly impossible
                     raise Exception('There is not such case')
 
 
@@ -164,15 +152,7 @@ class SpecialPolygon(object):
         self.E.extend([s1, s2])
         self.involutions.append([s1, s2, g * G0 * g.inv()])
 
-        logging.info(
-            f"""1. V is univalent.
-                s1 = {s1},
-                s2 = {s2}
-            
-            ==-End of induction-==
-            
-            """
-        )
+        logging.debug(f'case 1: V is univalent\nadded edges:\ns1 = {s1},\ns2 = {s2}')
 
 
     def _case_2a(self, g):
@@ -188,15 +168,7 @@ class SpecialPolygon(object):
         self.T.append(gG0.moe(Geodesic(V0, V1)))
         self.involutions.append([s1, s2, gG0 * G1_2 * gG0.inv()])
 
-        logging.info(
-            f"""2a. Star(V\'\') -- Segment,
-            \ts1 = {s1},
-            \ts2 = {s2}
-            
-        ==-End of induction-==
-        
-            """
-        )
+        logging.debug(f'case 2a: Star V\'\' is a segment\nadded edges:\ns1 = {s1},\ns2 = {s2}')
 
 
     def _case_2b(self, v, g, v__, star_v__):
@@ -209,16 +181,13 @@ class SpecialPolygon(object):
             v1 = self.graph.cyc_next(v, self.graph.v1_nei(v__))
             v2 = self.graph.cyc_next(v1, self.graph.v1_nei(v__))
 
-            logging.info(f'2b. Star(V\'\') -- Sling Shot,\n\tV1 = {v1},\n\tV2 = {v2}\n')
+            logging.debug(f'case 2b: Star V\'\' is a sling shot,\nV1 = {v1},\nV2 = {v2}')
 
             for w in [v1, v2]:
                 if self.visited[w]:
                     self._case_2b__(g, v__, w, v1)
                 else:
                     self._case_2b_(g, v__, w, v1)
-
-
-            logging.info('==-End of induction-==\n\n')
 
 
     def _case_2b_(self, g, v__, w, v1):
@@ -232,7 +201,7 @@ class SpecialPolygon(object):
             self.G.append(g * G__)
 
         self.visited[w] = True
-        logging.info(f"""2b\'. W({w}) marked as \"unvisited\".""")
+        logging.debug(f'case 2b\': W({w}) marked as \"unvisited\"')
 
 
     def _case_2b__(self, g, v__, w, v1):
@@ -251,12 +220,7 @@ class SpecialPolygon(object):
         self.E.extend([s1, s2])
         self.involutions.append([s1, s2, g_ * G0 * (g*e).inv()])
         self.removed[self.L0[l]] = True
-        logging.info(
-            f"""2b\'\'. W({w}) marked as \"visited\".
-                s1: {s1},
-                s2 : {s2}
-            """
-        )
+        logging.debug(f'case 2b\'\': W({w}) marked as \"visited\"\nadded edges:\ns1: {s1},\ns2 : {s2}')
 
 
 
@@ -268,15 +232,7 @@ class SpecialPolygon(object):
         s2 = g2.moe(s0)
         self.E.extend([s1, s2])
         self.involutions.append([s1, s2, g2 * (g1 * G0).inv()])
-        logging.info(
-            f"""2c. Star(V__) : Racket
-                s1 : {s1},
-                s2 : {s2},
-            ==-End of induction-==
-            
-            
-            """
-        )
+        logging.debug(f'case 2c: Star V__ is a racket\nadded edges:\ns1 : {s1},\ns2 : {s2}')
 
 
     def unique(self, triple):
