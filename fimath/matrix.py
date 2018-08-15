@@ -43,11 +43,14 @@ class Matrix(BaseMatrix):
     def d(self):
         return self._d
 
+    def __hash__(self):
+        return hash((self._a, self._b, self._c, self._d))
+
     def __repr__(s):
         return f'{s.__class__.__name__}([{s._a} {s._b}]\n\t[{s._c} {s._d}]'
 
     def __str__(s):
-        return f'[{s._a} {s._b}]\n[{s._c} {s._d}]'
+        return f'[[{s._a}, {s._b}],\n [{s._c}, {s._d}]]'
 
 
     def _operator_fallbacks(monomorphic_operator, fallback_operator):
@@ -146,13 +149,13 @@ class Matrix(BaseMatrix):
             if power > 0:
                 result = Matrix()
                 for _ in range(power):
-                    result = result * self
+                    result *= self
                 return result
 
             if power < 0:
                 result = Matrix()
-                for _ in range(power):
-                    result = result * self
+                for _ in range(-power):
+                    result *= self
                 return result.inv()
         else:
             return NotImplemented

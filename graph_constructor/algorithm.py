@@ -28,22 +28,20 @@ class GraphConstructor(object):
         self.V0.sort(key=self.sort_key)
         self.V1.sort(key=self.sort_key)
 
-        self._v02n = dict({(repr(self.V0[i]), i) for i in range(len(self.V0))})
-        self._v12n = dict({(repr(self.V1[i]), i) for i in range(len(self.V1))})
+        self._v02n = dict({(self.V0[i], i) for i in range(len(self.V0))})
+        self._v12n = dict({(self.V1[i], i) for i in range(len(self.V1))})
 
         def v02n(v0):
-            b_hash = repr(v0)
-            if b_hash not in self._v02n.keys():
+            if v0 not in self._v02n.keys():
                 raise ReprNotFoundError(v0)
             else:
-                return self._v02n[b_hash]
+                return self._v02n[v0]
 
         def v12n(v1):
-            b_hash = repr(v1)
-            if b_hash not in self._v12n.keys():
+            if v1 not in self._v12n.keys():
                 raise ReprNotFoundError(v1)
             else:
-                return self._v12n[b_hash]
+                return self._v12n[v1]
 
         V0G = [list(map(v12n, self.g0_nei(v))) for v in self.V0]
         V1G = [list(map(v02n, self.g1_nei(v))) for v in self.V1]

@@ -1,10 +1,10 @@
 from graph import BCGraph
 from .star_type import StarType
-from fimath.geodesic import Geodesic
+from fimath.geodesic import Geodesic, unoriented_eq
 from constants import *
 
 import logging
-#logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
+logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log',level=logging.INFO)
 
 
 class SpecialPolygon(object):
@@ -78,13 +78,14 @@ class SpecialPolygon(object):
                 s = [Geodesic(ZERO, INF), Geodesic(ZERO, ONE), Geodesic(ONE, INF)]
                 s1 = s[(j + 1) % 3]
                 s2 = s[(j + 2) % 3]
-                g = (G1 ** (-j + 1) * G_ * G1 ** (-1 + j)).inv()
+                g = (G1 ** (j - 1) * G_ * G1 ** (1 - j))
                 # TODO: remake
                 self.E.extend([s1, s2])
                 logging.info(f'\ns1: {s1}\ns2: {s2}')
-                if g.moe(s1) == s2:
+                if unoriented_eq(g.moe(s1), s2):
                     self.involutions.append([s1, s2, g])
                 else:
+                    print('WARN: spec.poly: went to else')
                     self.involutions.append([s1, s2, g.inv()])
 
         logging.info('==-Preparing finished-==')

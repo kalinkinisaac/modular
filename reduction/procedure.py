@@ -26,8 +26,6 @@ class Decompositor(object):
         previous_edges = get_cross_edges(self._cur_poly, self.line)
 
         if len(previous_edges) != 1:
-            geo_drawer.plot(self._cur_poly)
-            return
             raise Exception('Number of crossed edges is not equal to 1')
 
         self.previous_edge = previous_edges[0]
@@ -76,8 +74,6 @@ class Decompositor(object):
         else:
             raise Exception('there are more than 2 crossing edges')
 
-
-
     def prepare_involutions(self):
         self._involution_dict = dict()
 
@@ -88,8 +84,6 @@ class Decompositor(object):
     def get_involution(self, edge):
         edge_ = self._poly[self._cur_poly.index(edge)]
         return self._involution_dict[edge_]
-
-
 
 # O(n)
 def get_cross_edges(polygon, line : Geodesic):
@@ -124,9 +118,10 @@ def is_crossing(line1 : Geodesic, line2 : Geodesic):
                 return False
 
     else:
-        # if abs(line1.center - line2.center) > line1.sq_radius + line2.sq_radius:
-        #     return False
-        # else:
+
+        if line1.center == line2.center:
+            return line1.sq_radius == line2.sq_radius
+
         x_cross = 0.5 * (line1.center + line2.center +
                              (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
 

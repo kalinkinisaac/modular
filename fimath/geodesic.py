@@ -58,6 +58,8 @@ class Geodesic(BaseGeodesic):
                 self._top = self._begin
                 self._bot = self._end
 
+        if self._bot.imag < 0:
+            raise ValueError('geodesic has point below real axis')
         if not self._is_vertical:
             self._center = ReField(0.5) * (self._begin.sq_abs() - self._end.sq_abs()) / (self._begin - self._end).real
             self._sq_radius = (self._begin - self._center).sq_abs()
