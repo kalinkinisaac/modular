@@ -21,15 +21,15 @@ class App(QMainWindow):
         self.width = 640
         self.height = 400
         self.title = 'Modular'
+
+        self.statusBar = QStatusBar()
+
         self.initUI()
 
     def initUI(self):
         self.grid = QGridLayout()
 
         self.grid.addWidget(self.create_gamma_section(), 0, 0)
-
-
-
 
         self.grid.addWidget(self.create_graph_section(), 1, 0)
         # self.grid.addWidget(self.create_domain_section(), 0, 2)
@@ -39,7 +39,7 @@ class App(QMainWindow):
         widget.setLayout(self.grid)
         self.setCentralWidget(widget)
 
-        self.statusBar = QStatusBar()
+
         self.setStatusBar(self.statusBar)
 
         self.setWindowTitle(self.title)
@@ -86,11 +86,9 @@ class App(QMainWindow):
         hbox = QHBoxLayout()
         hbox.addStretch()
 
-        self.figure = matplotlib.figure.Figure()
-        self.canvas = FigureCanvas(self.figure)
-        self.canvas = PlotCanvas()
+        canvas = PlotCanvas()
         # self.toolbar = NavigationToolbar(self.canvas, self)
-        hbox.addWidget(self.canvas, Qt.AlignLeft)
+        hbox.addWidget(canvas, Qt.AlignLeft)
         groupBox.setLayout(hbox)
         return groupBox
 
@@ -99,7 +97,6 @@ class App(QMainWindow):
 
     def create_generators_section(self):
         pass
-
 
     def on_construct_graph_button_clicked(self):
         QCoreApplication.quit()

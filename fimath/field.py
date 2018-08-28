@@ -1,5 +1,5 @@
 from fractions import Fraction
-from math import sqrt, degrees, isinf
+from math import sqrt, degrees
 import math
 from cmath import phase
 from .re_field import ReField
@@ -13,7 +13,7 @@ class Field(BaseField):
 
     __slots__ = ('_real', '_imag', '_is_inf')
 
-    def __new__(cls, real=0, imag=None, *, is_inf = False):
+    def __new__(cls, real=0, imag=None, *, is_inf=False):
 
         self = super(Field, cls).__new__(cls)
         self._is_inf = False
@@ -78,7 +78,6 @@ class Field(BaseField):
 
         return self._imag
 
-
     def __hash__(self):
         return hash((self._real, self._imag, self._is_inf))
 
@@ -86,13 +85,11 @@ class Field(BaseField):
         if self.is_inf:
             return 'inf'
         else:
-            #return f'({self.real}+1j{self.imag})'
+            # return f'({self.real}+1j{self.imag})'
             return repr(self.__complex__())
 
     def __str__(self):
         return self.__repr__()
-
-
 
     def abs(self):
         return abs(complex(self))
@@ -140,7 +137,6 @@ class Field(BaseField):
 
     __add__, __radd__ = _operator_fallbacks(_add, operator.add)
 
-
     def _sub(l, r):
         if l.is_inf or r.is_inf:
             return Field(is_inf=True)
@@ -148,7 +144,6 @@ class Field(BaseField):
             return Field(real=l.real - r.real, imag=l.imag - r.imag)
 
     __sub__, __rsub__ = _operator_fallbacks(_sub, operator.sub)
-
 
     def _mul(l, r):
         if l.is_inf or r.is_inf:
@@ -161,15 +156,13 @@ class Field(BaseField):
 
     __mul__, __rmul__ = _operator_fallbacks(_mul, operator.mul)
 
-
     def _div(l, r):
         return l * r.inv()
 
     __truediv__, __rtruediv__ = _operator_fallbacks(_div, operator.truediv)
 
-
     def angle(self):
-        return degrees(phase(compile(self)))
+        return degrees(phase(complex(self)))
 
     def inv(self):
         if self.sq_abs() == 0:
@@ -191,10 +184,8 @@ class Field(BaseField):
     def __neg__(self):
         return Field(real=-self.real, imag=-self.imag)
 
-
     def __abs__(self):
         return sqrt(float(self.real) ** 2 + float(self.imag) ** 2)
-
 
     def __pow__(self, power, modulo=None):
         if type(power) == int:
@@ -236,8 +227,6 @@ class Field(BaseField):
             return (self.is_inf and other.imag == float('inf')) or \
                    (self.real == other.real and
                     self.imag == other.imag)
-
-
 
 
 __all__ = ['Field']
