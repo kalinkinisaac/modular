@@ -83,13 +83,14 @@ class App(QMainWindow):
     def create_graph_section(self):
         groupBox = QGroupBox("Graph visualization")
 
-        hbox = QHBoxLayout()
-        hbox.addStretch()
+        vbox = QVBoxLayout()
+        vbox.addStretch()
 
         canvas = PlotCanvas()
-        # self.toolbar = NavigationToolbar(self.canvas, self)
-        hbox.addWidget(canvas, Qt.AlignLeft)
-        groupBox.setLayout(hbox)
+        toolbar = NavigationToolbar(canvas, self)
+        vbox.addWidget(canvas, Qt.AlignLeft)
+        vbox.addWidget(toolbar, Qt.AlignLeft)
+        groupBox.setLayout(vbox)
         return groupBox
 
     def create_domain_section(self):
