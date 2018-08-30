@@ -1,8 +1,16 @@
 import matplotlib.pyplot as plt
+from .graph_drawer import GraphDrawer, GraphCanvas
+from .config import fig_config, ax_config
 
-fig = plt.figure(num=1, figsize=(4, 3), dpi=240, facecolor='gray', edgecolor='k')
-ax = fig.add_subplot(111)
-ax.set_axis_off()
-ax.set_aspect('equal')
+def draw_graph(graph, _show=True):
+    fig = plt.figure(**fig_config)
+    ax = ax_config(fig.add_subplot(111))
 
-from .graph_drawer import bipartite_draw_graph as draw_graph
+    gd = GraphDrawer(ax)
+    gd.draw(graph)
+
+    if _show:
+        plt.show()
+
+
+__all__ = ['draw_graph', 'GraphDrawer', 'GraphCanvas']
