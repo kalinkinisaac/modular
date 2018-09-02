@@ -3,6 +3,8 @@ from matplotlib.patches import Arc
 from fimath.geodesic import Geodesic
 from math import (degrees, sqrt)
 from cmath import phase
+from mpl_canvas import PlotCanvas
+from .config import fig_config, ax_config
 
 
 class GeodesicDrawer(object):
@@ -88,3 +90,16 @@ class GeodesicDrawer(object):
         approx_b = float(geodesic.end.imag)
 
         return max(approx_a, approx_b)
+
+
+class GeodesicCanvas(PlotCanvas):
+    def __init__(self, parent=None, geodesics=None):
+        super(__class__, self).__init__(parent=parent, **fig_config)
+        self._geodesics = geodesics
+        self.ax = self.figure.add_subplot(111)
+        ax_config(self.ax)
+
+
+    def cla(self):
+        self.ax.clear()
+        ax_config(self.ax)

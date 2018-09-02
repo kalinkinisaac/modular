@@ -1,7 +1,9 @@
 from .subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
 from graph_drawer import GraphDrawer
+import graph_drawer.config as graph_config
 from geo_drawer import GeodesicDrawer
+import geo_drawer.config as geo_config
 from special_polygon import get_all
 
 
@@ -33,7 +35,7 @@ class Api(object):
     def calc_domain(self, *args, **kwargs):
         if self._graph:
             self._domain, self._tree, self._involutions = get_all(self._graph)
-            self._generators = zip(*self._involutions)[2]
+            self._generators = list(zip(*self._involutions))[2]
         else:
             raise Exception('graph is not set')
 

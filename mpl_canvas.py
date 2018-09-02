@@ -2,8 +2,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt5.QtWidgets import QSizePolicy
 
-from graph_drawer import fig_config, ax_config
-
 
 class PlotCanvas(FigureCanvas):
 
@@ -22,13 +20,13 @@ class PlotCanvas(FigureCanvas):
 
 
 class MplCanvas(PlotCanvas):
-    def __init__(self, parent=None, graph=None):
+    def __init__(self, parent=None, fig_config=None, ax_config=None):
         super(__class__, self).__init__(parent=parent, **fig_config)
-        self._graph = graph
         self.ax = self.figure.add_subplot(111)
-        ax_config(self.ax)
+        self._ax_config = ax_config
+        self._ax_config(self.ax)
 
 
     def cla(self):
         self.ax.clear()
-        ax_config(self.ax)
+        self._ax_config(self.ax)

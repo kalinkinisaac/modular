@@ -6,7 +6,7 @@ from PyQt5.QtCore import Qt, QCoreApplication, pyqtSlot
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 
-from mpl_canvas import MplCanvas
+from plotter.qt_canvas import MplCanvas
 
 
 class App(QMainWindow):
@@ -113,20 +113,19 @@ class App(QMainWindow):
         pass
 
     def on_construct_graph_button_clicked(self):
-        self.api.on_subgroup_calc(
+        self.api.on_sub_calc(
             subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
-            n=int(self.line_edit.text()),
-            canvas=self.graph_canvas
+            n=int(self.line_edit.text())
         )
 
     @pyqtSlot(object)
     def handle_status_message(self, message):
         self.statusBar.showMessage(message, 2000)
 
-    @pyqtSlot(object)
+    @pyqtSlot()
     def handle_graph_draw_finished(self):
         self.graph_canvas.draw()
 
-    @pyqtSlot(object)
+    @pyqtSlot()
     def handle_domain_draw_finished(self):
         self.domain_canvas.draw()
