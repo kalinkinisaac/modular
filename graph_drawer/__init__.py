@@ -1,10 +1,12 @@
 import matplotlib.pyplot as plt
-from .graph_drawer import GraphDrawer, GraphCanvas
+from .graph_drawer import GraphDrawer
+from mpl_canvas import MplCanvas
 from .config import fig_config, ax_config
 
 def draw_graph(graph, _show=True):
     fig = plt.figure(**fig_config)
-    ax = ax_config(fig.add_subplot(111))
+    ax = fig.add_subplot(111)
+    ax_config(ax)
 
     gd = GraphDrawer(ax)
     gd.draw(graph)
@@ -13,4 +15,4 @@ def draw_graph(graph, _show=True):
         plt.show()
 
 
-__all__ = ['draw_graph', 'GraphDrawer', 'GraphCanvas']
+__all__ = ['draw_graph', 'GraphDrawer']

@@ -4,17 +4,19 @@ from fimath.geodesic import Geodesic
 from math import (degrees, sqrt)
 from cmath import phase
 
+
 class GeodesicDrawer(object):
 
     Y_MAX_INF = 2.5
 
     def __init__(self, ax):
-        self.ax = ax
+        self._ax = ax
 
+    # TODO: remove or make static
     def show(self):
         plt.show()
 
-    def plot(self, geodesics, *args, **kwargs):
+    def draw(self, geodesics, *args, **kwargs):
         if type(geodesics) == list:
             for geodesic in geodesics:
                 self._plot(geodesic, *args, **kwargs)
@@ -23,11 +25,11 @@ class GeodesicDrawer(object):
                 self._plot(geodesics, *args, **kwargs)
 
         else:
-            raise TypeError()
+            raise TypeError('geodesic should be Geodesic or list instance')
 
-    def _plot(self, geodesic : Geodesic, *args, **kwargs):
+    def _plot(self, geodesic: Geodesic, *args, **kwargs):
         if type(geodesic) != Geodesic:
-            raise TypeError('input should be Geodesic')
+            raise TypeError('geodesic should be Geodesic instance')
 
         if geodesic.is_vertical:
             if geodesic.has_inf:
@@ -37,19 +39,19 @@ class GeodesicDrawer(object):
         else:
             self._not_vertical(geodesic, *args, **kwargs)
 
-    def _vertical_inf(self, geodesic : Geodesic, *args, **kwargs):
-        self.ax.vlines(x=geodesic.vertical_x,
-                       ymin=self._y_min(geodesic),
-                       ymax=GeodesicDrawer.Y_MAX_INF,
-                       *args, **kwargs)
+    def _vertical_inf(self, geodesic: Geodesic, *args, **kwargs):
+        self._ax.vlines(x=geodesic.vertical_x,
+                        ymin=GeodesicDrawer._y_min(geodesic),
+                        ymax=GeodesicDrawer.Y_MAX_INF,
+                        *args, **kwargs)
 
-    def _vertical_not_inf(self, geodesic : Geodesic, *args, **kwargs):
-        self.ax.vlines(x=geodesic.vertical_x,
-                       ymin=self._y_min(geodesic),
-                       ymax=self._y_max(geodesic),
-                       *args, **kwargs)
+    def _vertical_not_inf(self, geodesic: Geodesic, *args, **kwargs):
+        self._ax.vlines(x=geodesic.vertical_x,
+                        ymin=GeodesicDrawer._y_min(geodesic),
+                        ymax=GeodesicDrawer._y_max(geodesic),
+                        *args, **kwargs)
 
-    def _not_vertical(self, geo : Geodesic, *args, **kwargs):
+    def _not_vertical(self, geo: Geodesic, *args, **kwargs):
         theta1 = degrees(phase(geo.begin - geo.center))
         theta2 = degrees(phase(geo.end - geo.center))
 
@@ -58,7 +60,7 @@ class GeodesicDrawer(object):
         center = float(geo.center)
         radius = sqrt(float(geo.sq_radius))
 
-        self.ax.add_patch(Arc(
+        self._ax.add_patch(Arc(
             xy=(center, 0),
             width=2*radius,
             height=2*radius,
@@ -67,7 +69,8 @@ class GeodesicDrawer(object):
             *args, **kwargs
         ))
 
-    def _y_min(self, geodesic):
+    @staticmethod
+    def _y_min(geodesic):
         if geodesic.has_inf:
             if geodesic.begin.is_inf:
                 return float(geodesic.end.imag)
@@ -79,7 +82,8 @@ class GeodesicDrawer(object):
 
             return min(approx_a, approx_b)
 
-    def _y_max(self, geodesic):
+    @staticmethod
+    def _y_max(geodesic):
         approx_a = float(geodesic.begin.imag)
         approx_b = float(geodesic.end.imag)
 

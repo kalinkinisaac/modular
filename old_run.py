@@ -15,8 +15,8 @@ s1, s2, generators = zip(*involutions)
 
 print(f'Generators: {list(map(lambda m: m.inv(), generators))}')
 print(f'Involutions: {involutions}')
-geo_drawer.plot(domain, linewidth=1.0)
-geo_drawer.plot(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
+geo_drawer.draw(domain, linewidth=1.0)
+geo_drawer.draw(tree, color='red', alpha=0.8, linewidth=0.75, linestyle='--')
 #draw_graph(graph)
 p = Field(0.5+1.5j)
 m = Matrix(6, 13,

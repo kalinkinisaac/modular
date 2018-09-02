@@ -2,8 +2,7 @@ from graph import BCGraph
 from matplotlib import collections as mc
 from matplotlib.path import Path
 import matplotlib.patches as patches
-from plot_canvas import PlotCanvas
-from .config import fig_config
+
 
 class GraphDrawer(object):
     def __init__(self, ax):
@@ -15,7 +14,7 @@ class GraphDrawer(object):
     def draw(self, graph: BCGraph):
         margin = 0.1
 
-        self._ax.set_xlim(0.0, 1.0)
+        self._ax.set_xlim(0, 1)
         self._ax.set_ylim(0.0, len(graph.V0) * 0.2)
         x_min, x_max = self._ax.get_xbound()
         y_min, y_max = self._ax.get_ybound()
@@ -84,18 +83,4 @@ class GraphDrawer(object):
     @staticmethod
     def has_parallel(nei):
         return len(set(nei)) != len(nei)
-
-class GraphCanvas(PlotCanvas):
-    def __init__(self, parent=None, graph=None):
-        super(__class__, self).__init__(parent=parent, **fig_config)
-        self._graph = graph
-        self.plot()
-
-    def plot(self):
-        ax = self.figure.add_subplot(111)
-
-        gd = GraphDrawer(ax)
-        gd.draw(self._graph)
-
-        self.draw()
 

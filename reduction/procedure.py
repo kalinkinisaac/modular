@@ -18,7 +18,7 @@ class Decompositor(object):
     def decompose(self):
         self.prepare_involutions()
 
-        geo_drawer.plot(self.line, color='yellow')
+        geo_drawer.draw(self.line, color='yellow')
 
         self._poly = cyclic_sorted(self._poly)
         self._cur_poly = self._poly[::]
@@ -46,7 +46,7 @@ class Decompositor(object):
         for i in range(len(self._cur_poly)):
             self._cur_poly[i] = g_i.moe(self._cur_poly[i])
 
-        geo_drawer.plot(self._cur_poly, color='grey')
+        geo_drawer.draw(self._cur_poly, color='grey')
 
         crossed = get_cross_edges(self._cur_poly, self.line)
         crossed = list(filter(lambda e: not unoriented_eq(e, self.previous_edge), crossed))
