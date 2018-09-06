@@ -2,7 +2,7 @@ from .field import Field
 from .re_field import ReField
 from .bases import BaseGeodesic
 
-# Totally Field geodesic class
+
 class Geodesic(BaseGeodesic):
 
     __slots__ = ('_begin', '_end', '_left', '_right', '_top', '_bot', '_is_vertical', '_vertical_x', '_has_inf',
@@ -28,7 +28,6 @@ class Geodesic(BaseGeodesic):
             self._right = self._begin
             self._top = self._begin
             self._bot = self._end
-
 
         elif self._end.is_inf:
             self._is_vertical = True
@@ -130,19 +129,18 @@ class Geodesic(BaseGeodesic):
     def __hash__(self):
         return hash(repr(self))
 
-
     def __eq__(self, other):
         if type(other) == Geodesic:
             return self.begin == other.begin and self.end == other.end
         else:
             return NotImplemented
 
+    def __reversed__(self):
+        return Geodesic(self.end, self.begin)
 
 
-def reversed(geo : Geodesic):
-    return Geodesic(geo.end, geo.begin)
+def undirected_eq(lhs, rhs):
+    return lhs == rhs or lhs == reversed(rhs)
 
-def unoriented_eq(l : Geodesic, r : Geodesic):
-    return l == r or l == reversed(r)
 
-__all__ = ['Geodesic', 'reversed', 'unoriented_eq']
+__all__ = ['Geodesic', 'undirected_eq']

@@ -2,6 +2,7 @@ import abc
 import math
 import numbers
 
+
 class BaseGeodesic(object):
     __metaclass__ = abc.ABCMeta
 
@@ -70,19 +71,82 @@ class BaseReField(object):
     def __float__(self):
         return self.a + self.b * math.sqrt(3)
 
+
 class BaseField(numbers.Complex):
 
     __slots__ = ()
+
+    @property
+    def real(self):
+        raise NotImplementedError
+
+    @property
+    def imag(self):
+        raise NotImplementedError
 
     @property
     def is_inf(self):
         raise NotImplementedError
 
     def __complex__(self):
-        if self.is_inf:
-            return complex('inf')
-        else:
-            return complex(
-                self.a + self.b * math.sqrt(3),
-                self.c + self.d * math.sqrt(3)
-            )
+        raise NotImplementedError
+
+    def __add__(self, other):
+        """self + other"""
+        raise NotImplementedError
+
+    def __radd__(self, other):
+        """other + self"""
+        raise NotImplementedError
+
+    def __neg__(self):
+        """-self"""
+        raise NotImplementedError
+
+    def __pos__(self):
+        """+self"""
+        raise NotImplementedError
+
+    def __sub__(self, other):
+        """self - other"""
+        return self + -other
+
+    def __rsub__(self, other):
+        """other - self"""
+        return -self + other
+
+    def __mul__(self, other):
+        """self * other"""
+        raise NotImplementedError
+
+    def __rmul__(self, other):
+        """other * self"""
+        raise NotImplementedError
+
+    def __truediv__(self, other):
+        """self / other: Should promote to float when necessary."""
+        raise NotImplementedError
+
+    def __rtruediv__(self, other):
+        """other / self"""
+        raise NotImplementedError
+
+    def __pow__(self, exponent):
+        """self**exponent; should promote to float or complex when necessary."""
+        raise NotImplementedError
+
+    def __rpow__(self, base):
+        """base ** self"""
+        raise NotImplementedError
+
+    def __abs__(self):
+        """Returns the Real distance from 0. Called for abs(self)."""
+        raise NotImplementedError
+
+    def conjugate(self):
+        """(x+y*i).conjugate() returns (x-y*i)."""
+        raise NotImplementedError
+
+    def __eq__(self, other):
+        """self == other"""
+        raise NotImplementedError

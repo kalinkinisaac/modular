@@ -1,6 +1,6 @@
 from graph import BCGraph
 from .star_type import StarType
-from fimath.geodesic import Geodesic, unoriented_eq
+from fimath.geodesic import Geodesic, undirected_eq
 from fimath.constants import *
 
 import logging

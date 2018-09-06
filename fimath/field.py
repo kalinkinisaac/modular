@@ -1,11 +1,11 @@
 from fractions import Fraction
 from math import sqrt, degrees
-import math
 from cmath import phase
-from .re_field import ReField
 from decimal import Decimal
-import numbers
+from .re_field import ReField
 from .bases import BaseField
+import numbers
+import math
 import operator
 
 
@@ -176,10 +176,6 @@ class Field(BaseField):
     @property
     def is_inf(self):
         return self._is_inf
-
-    @property
-    def is_zero(self):
-        return not self.is_inf and not(self.real or self.imag)
 
     def __neg__(self):
         return Field(real=-self.real, imag=-self.imag)

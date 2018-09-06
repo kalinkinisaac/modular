@@ -85,7 +85,7 @@
 #lines.dash_capstyle : butt          ## butt|round|projecting
 #lines.solid_joinstyle : round       ## miter|round|bevel
 #lines.solid_capstyle : projecting   ## butt|round|projecting
-lines.antialiased : True         ## render lines in antialiased (no jaggies)
+#lines.antialiased : True         ## render lines in antialiased (no jaggies)
 
 ## The three standard dash patterns.  These are scaled by the linewidth.
 #lines.dashed_pattern : 3.7, 1.6
@@ -100,11 +100,11 @@ lines.antialiased : True         ## render lines in antialiased (no jaggies)
 ## circles.  See
 ## http://matplotlib.org/api/artist_api.html#module-matplotlib.patches
 ## information on patch properties
-patch.linewidth        : 1        ## edge width in points.
-patch.facecolor        : C0
-patch.edgecolor        : black   ## if forced, or patch is not filled
-patch.force_edgecolor  : False   ## True to always use edgecolor
-patch.antialiased      : True    ## render patches in antialiased (no jaggies)
+#patch.linewidth        : 1        ## edge width in points.
+#patch.facecolor        : C0
+#patch.edgecolor        : black   ## if forced, or patch is not filled
+#patch.force_edgecolor  : False   ## True to always use edgecolor
+#patch.antialiased      : True    ## render patches in antialiased (no jaggies)
 
 #### HATCHES
 #hatch.color     : black
@@ -201,7 +201,7 @@ patch.antialiased      : True    ## render patches in antialiased (no jaggies)
 ## settings for axes and ticks. Special text sizes can be defined
 ## relative to font.size, using the following values: xx-small, x-small,
 ## small, medium, large, x-large, xx-large, larger, or smaller
-#font.size           : 10.0
+font.size           : 5.0
 #font.serif          : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif
 #font.sans-serif     : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif
 #font.cursive        : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive
@@ -212,7 +212,7 @@ patch.antialiased      : True    ## render patches in antialiased (no jaggies)
 ## text properties used by text.Text.  See
 ## http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
 ## information on text properties
-#text.color          : black
+#text.color          : red
 
 #### LaTeX customizations. See http://wiki.scipy.org/Cookbook/Matplotlib/UsingTex
 #text.usetex         : False  ## use latex for all text handling. The following fonts
@@ -250,7 +250,7 @@ patch.antialiased      : True    ## render patches in antialiased (no jaggies)
 #text.hinting_factor : 8 ## Specifies the amount of softness for hinting in the
                          ## horizontal direction.  A value of 1 will hint to full
                          ## pixels.  A value of 2 will hint to half pixels etc.
-#text.antialiased : True ## If True (default), the text will be antialiased.
+text.antialiased : True ## If True (default), the text will be antialiased.
                          ## This only affects the Agg backend.
 
 ## The following settings allow you to select the fonts in math mode.
@@ -279,12 +279,12 @@ patch.antialiased      : True    ## render patches in antialiased (no jaggies)
 ## default face and edge color, default tick sizes,
 ## default fontsizes for ticklabels, and so on.  See
 ## http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-axes.facecolor      : gray   ## axes background color
+#axes.facecolor      : white   ## axes background color
 #axes.edgecolor      : black   ## axes edge color
 #axes.linewidth      : 0.8     ## edge linewidth
-axes.grid           : False   ## display grid or not
-#axes.grid.axis      : both    ## which axis the grid should apply to
-#axes.grid.which     : major   ## gridlines at major, minor or both ticks
+axes.grid           : True   ## display grid or not
+axes.grid.axis      : both    ## which axis the grid should apply to
+axes.grid.which     : major   ## gridlines at major, minor or both ticks
 #axes.titlesize      : large   ## fontsize of the axes title
 #axes.titleweight    : normal  ## font weight of title
 #axes.titlepad       : 6.0     ## pad between axes and title in points
@@ -394,10 +394,10 @@ axes.grid           : False   ## display grid or not
 #ytick.alignment      : center_baseline ## alignment of yticks
 
 #### GRIDS
-#grid.color       :   b0b0b0    ## grid color
-#grid.linestyle   :   --
-#grid.linewidth   :   0.8       ## in points
-#grid.alpha       :   0.5       ## transparency, between 0.0 and 1.0
+grid.color       :   gray    ## grid color
+grid.linestyle   :   --
+grid.linewidth   :   0.5       ## in points
+grid.alpha       :   1.0       ## transparency, between 0.0 and 1.0
 
 #### Legend
 #legend.loc           : best
@@ -445,7 +445,7 @@ figure.frameon : True         ## enable figure frame
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout
-figure.autolayout : True    ## When True, automatically adjust subplot
+figure.autolayout : True     ## When True, automatically adjust subplot
                                ## parameters to make the plot fit the figure
                                ## using `tight_layout`
 #figure.constrained_layout.use: False ## When True, automatically make plot

@@ -1,12 +1,16 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5.QtWidgets import QSizePolicy
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 import os
+
+graph_style_path = f'{os.getcwd()}/plotter/graph.mplstyle'
+domain_style_path = f'{os.getcwd()}/plotter/domain.mplstyle'
+
 
 class MplCanvas(FigureCanvasQTAgg):
 
-    def __init__(self, parent=None, style=f'{os.getcwd()}/plotter/graph.mplstyle', *args, **kwargs):
+    def __init__(self, parent=None, style='ggplot', *args, **kwargs):
+        self._style = style
         with plt.style.context(style):
             self.fig = plt.Figure()
 
@@ -15,27 +19,31 @@ class MplCanvas(FigureCanvasQTAgg):
 
             self.ax = self.figure.add_subplot(111)
             self.ax.set_aspect('equal')
-
+            self.config()
 
             FigureCanvasQTAgg.setSizePolicy(self,
                                             QSizePolicy.Expanding,
                                             QSizePolicy.Expanding)
 
     def cla(self):
-        self.ax.clear()
+        with plt.style.context(self._style):
+            self.ax.clear()
+            self.config()
 
-    def plot(self):
-        raise NotImplementedError
+    def config(self):
+        pass
 
 
-# class MplCanvas(PlotCanvas):
-#     def __init__(self, parent=None, fig_config=None, ax_config=None):
-#         super(__class__, self).__init__(parent=parent, **fig_config)
-#         self.ax = self.figure.add_subplot(111)
-#         self._ax_config = ax_config
-#         self._ax_config(self.ax)
-#
-#
-#     def cla(self):
-#         self.ax.clear()
-#         self._ax_config(self.ax)
+class GraphCanvas(MplCanvas):
+
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(style=graph_style_path, *args, **kwargs)
+
+    def config(self):
+        self.ax.axis('off')
+
+
+class DomainCanvas(MplCanvas):
+
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(style=domain_style_path, *args, **kwargs)

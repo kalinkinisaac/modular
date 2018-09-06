@@ -22,4 +22,3 @@ INF = inf
 
 V0 = Field(1j)
 V1 = Field(ReField(1/2), ReField(b=1/2))
-

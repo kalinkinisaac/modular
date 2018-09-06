@@ -1,9 +1,7 @@
 from .subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
-from graph_drawer import GraphDrawer
-import graph_drawer.config as graph_config
-from geo_drawer import GeodesicDrawer
-import geo_drawer.config as geo_config
+from plotter.graph_plotter import GraphPlotter
+from plotter.geodesic_plotter import GeodesicPlotter
 from special_polygon import get_all
 
 
@@ -28,9 +26,8 @@ class Api(object):
 
     def plot_graph_on_canvas(self, canvas, *args, **kwargs):
         canvas.cla()
-        gd = GraphDrawer(canvas.ax)
+        gd = GraphPlotter(canvas.ax)
         gd.draw(self._graph)
-
 
     def calc_domain(self, *args, **kwargs):
         if self._graph:
@@ -41,5 +38,5 @@ class Api(object):
 
     def plot_domain_on_canvas(self, canvas, *args, **kwargs):
         canvas.cla()
-        geo_drawer = GeodesicDrawer(canvas.ax)
+        geo_drawer = GeodesicPlotter(canvas.ax)
         geo_drawer.draw(self._domain)

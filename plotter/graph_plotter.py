@@ -13,9 +13,9 @@ class GraphPlotter(object):
 
     def draw(self, graph: BCGraph):
         margin = 0.1
-
-        self._ax.set_xlim(0, 1)
-        self._ax.set_ylim(0.0, len(graph.V0) * 0.2)
+        max_size = max(1.0, len(graph.V0) * 0.2)
+        self._ax.set_xlim(0, max_size)
+        self._ax.set_ylim(0.0, max_size)
         x_min, x_max = self._ax.get_xbound()
         y_min, y_max = self._ax.get_ybound()
 
@@ -48,13 +48,13 @@ class GraphPlotter(object):
                 ex, ey = white[nei[0]]
                 mid1 = ((sx + ex)/2, (sy + ey)/2 + 0.05)
                 mid2 = ((sx + ex) / 2, (sy + ey) / 2 - 0.05)
-                verts1 = [
+                vertices_1 = [
                     black[i],
                     mid1,
                     mid1,
                     white[nei[0]]
                 ]
-                verts2 = [
+                vertices_2 = [
                     black[i],
                     mid2,
                     mid2,
@@ -65,8 +65,8 @@ class GraphPlotter(object):
                          Path.CURVE4,
                          Path.CURVE4,
                          ]
-                path1 = Path(verts1, codes)
-                path2 = Path(verts2, codes)
+                path1 = Path(vertices_1, codes)
+                path2 = Path(vertices_2, codes)
 
                 patch1 = patches.PathPatch(path1, facecolor='none', lw=2, zorder=-10)
                 patch2 = patches.PathPatch(path2, facecolor='none', lw=2, zorder=-10)
@@ -83,4 +83,3 @@ class GraphPlotter(object):
     @staticmethod
     def has_parallel(nei):
         return len(set(nei)) != len(nei)
-

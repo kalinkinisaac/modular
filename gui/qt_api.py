@@ -47,6 +47,7 @@ class SubgroupThread(QThread):
         self.domain_canvas = domain_canvas
         self.args = args
         self.kwargs = kwargs
+        # remove args
 
     def run(self):
         self.statusMessage.emit('Calculating subgroup data')

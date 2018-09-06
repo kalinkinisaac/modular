@@ -1,6 +1,5 @@
-from fimath.geodesic import Geodesic, unoriented_eq
+from fimath.geodesic import Geodesic, undirected_eq
 from .sort import cyclic_sorted
-from geo_drawer import geo_drawer
 from fimath import Matrix
 
 class Decompositor(object):
@@ -17,8 +16,6 @@ class Decompositor(object):
 
     def decompose(self):
         self.prepare_involutions()
-
-        geo_drawer.draw(self.line, color='yellow')
 
         self._poly = cyclic_sorted(self._poly)
         self._cur_poly = self._poly[::]
@@ -49,7 +46,7 @@ class Decompositor(object):
         geo_drawer.draw(self._cur_poly, color='grey')
 
         crossed = get_cross_edges(self._cur_poly, self.line)
-        crossed = list(filter(lambda e: not unoriented_eq(e, self.previous_edge), crossed))
+        crossed = list(filter(lambda e: not undirected_eq(e, self.previous_edge), crossed))
 
         if not crossed:
             self.crossing = False
@@ -64,7 +61,7 @@ class Decompositor(object):
             for i in range(len(first_poly)):
                 first_poly[i] = g_i.moe(first_poly[i])
             _crossed = get_cross_edges(self._cur_poly, self.line)
-            _crossed = list(filter(lambda e: not unoriented_eq(e, crossed[0]), _crossed))
+            _crossed = list(filter(lambda e: not undirected_eq(e, crossed[0]), _crossed))
 
             if _crossed:
                 self.previous_edge = crossed[0]

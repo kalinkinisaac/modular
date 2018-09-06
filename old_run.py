@@ -1,4 +1,4 @@
-from geo_drawer import geo_drawer
+
 from special_polygon import get_all
 from graph_constructor import get_graph
 from subgroups import *
@@ -33,4 +33,4 @@ for m in decomposition:
 print(r)
 
 
-geo_drawer.show()
+#geo_drawer.show()

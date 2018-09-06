@@ -2,11 +2,11 @@ from .qt_api import QtApi
 from .subgroups_names import ClassicalSubgroups
 
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QCoreApplication, pyqtSlot
+from PyQt5.QtCore import Qt, QRect, pyqtSlot
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
 
-from plotter.qt_canvas import MplCanvas
+from plotter.qt_canvas import MplCanvas, GraphCanvas, DomainCanvas
 
 
 class App(QMainWindow):
@@ -21,23 +21,49 @@ class App(QMainWindow):
         self.title = 'Modular'
         self.statusBar = QStatusBar()
         self.subgroups_combo = None
-        self.graph_canvas = MplCanvas(parent=self)
-        self.domain_canvas = MplCanvas(parent=self)
+        self.graph_canvas = GraphCanvas(parent=self)
+        self.domain_canvas = DomainCanvas(parent=self)
+
+        self.minimumCanvasHeight = 550
         self.initUI()
 
     def initUI(self):
-        self.grid = QGridLayout()
+        self.centralWidget = QWidget(self)
+        layout = QVBoxLayout(self.centralWidget)
+
+        # self.grid.addWidget(self.create_generators_section(), 0, 3)
+
+        self.scrollArea = QScrollArea(self.centralWidget)
+        self.scrollArea.setWidgetResizable(True)
+        self.scrollArea.setMinimumWidth(self.width)
+        self.scrollArea.setFrameShape(QFrame.NoFrame)
+        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scrollArea.horizontalScrollBar().setEnabled(False)
+
+        layout.addWidget(self.scrollArea)
+
+        self.scrollAreaWidgetContents = QWidget()
+        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 400))
+        # self.scrollAreaWidgetContents.setSizePolicy(QSizePolicy., QSizePolicy.Preferred)
+        # self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+
+        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+
+
+
+        self.grid = QGridLayout(self.scrollAreaWidgetContents)
+
+#        self.grid.setFixedSize(self.grid.sizeHint())
 
         self.grid.addWidget(self.create_gamma_section(), 0, 0)
 
         self.grid.addWidget(self.create_graph_section(), 1, 0)
         self.grid.addWidget(self.create_domain_section(), 2, 0)
-        # self.grid.addWidget(self.create_generators_section(), 0, 3)
 
-        widget = QWidget()
-        widget.setLayout(self.grid)
-        self.setCentralWidget(widget)
+        self.scrollAreaWidgetContents.setLayout(self.grid)
 
+        self.setCentralWidget(self.centralWidget)
 
         self.setStatusBar(self.statusBar)
 
@@ -85,13 +111,14 @@ class App(QMainWindow):
         vbox = QVBoxLayout()
         vbox.addStretch()
 
+
         toolbar = NavigationToolbar(self.graph_canvas, self)
 
         vbox.addWidget(self.graph_canvas, Qt.AlignLeft)
         vbox.addWidget(toolbar, Qt.AlignLeft)
 
         groupBox.setLayout(vbox)
-
+        groupBox.setMinimumHeight(self.minimumCanvasHeight)
         return groupBox
 
     def create_domain_section(self):
@@ -106,7 +133,7 @@ class App(QMainWindow):
         vbox.addWidget(toolbar, Qt.AlignLeft)
 
         groupBox.setLayout(vbox)
-
+        groupBox.setMinimumHeight(self.minimumCanvasHeight)
         return groupBox
 
     def create_generators_section(self):
