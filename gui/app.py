@@ -1,19 +1,24 @@
 from .qt_api import QtApi
-from .subgroups_names import ClassicalSubgroups
+from subgroups_names import ClassicalSubgroups
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRect, pyqtSlot
+from PyQt5.QtGui import QFontDatabase
 
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar
+from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from plotter.qt_canvas import MplCanvas, GraphCanvas, DomainCanvas
+from plotter.qt_canvas import GraphCanvas, DomainCanvas
 
 
 class App(QMainWindow):
 
     def __init__(self):
         super(__class__, self).__init__()
-        self.api = QtApi(self)
+        self.api = QtApi(
+            handleStatusMessage=self.handleStatusMessage,
+            handleChewed=self.handleChewed,
+            handleDigested=self.handleDigested
+        )
         self.left = 10
         self.top = 10
         self.width = 640
@@ -23,6 +28,7 @@ class App(QMainWindow):
         self.subgroups_combo = None
         self.graph_canvas = GraphCanvas(parent=self)
         self.domain_canvas = DomainCanvas(parent=self)
+        self.generators_text_edit = None
 
         self.minimumCanvasHeight = 550
         self.initUI()
@@ -30,8 +36,6 @@ class App(QMainWindow):
     def initUI(self):
         self.centralWidget = QWidget(self)
         layout = QVBoxLayout(self.centralWidget)
-
-        # self.grid.addWidget(self.create_generators_section(), 0, 3)
 
         self.scrollArea = QScrollArea(self.centralWidget)
         self.scrollArea.setWidgetResizable(True)
@@ -45,8 +49,6 @@ class App(QMainWindow):
 
         self.scrollAreaWidgetContents = QWidget()
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 400))
-        # self.scrollAreaWidgetContents.setSizePolicy(QSizePolicy., QSizePolicy.Preferred)
-        # self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
 
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
@@ -54,12 +56,10 @@ class App(QMainWindow):
 
         self.grid = QGridLayout(self.scrollAreaWidgetContents)
 
-#        self.grid.setFixedSize(self.grid.sizeHint())
-
         self.grid.addWidget(self.create_gamma_section(), 0, 0)
-
         self.grid.addWidget(self.create_graph_section(), 1, 0)
         self.grid.addWidget(self.create_domain_section(), 2, 0)
+        self.grid.addWidget(self.create_generators_section(), 3, 0)
 
         self.scrollAreaWidgetContents.setLayout(self.grid)
 
@@ -98,7 +98,7 @@ class App(QMainWindow):
         hbox.addWidget(self.subgroups_combo)
         hbox.addWidget(lbl2)
         hbox.addWidget(self.line_edit)
-        hbox.addWidget(button)
+        hbox.addWidget(button, Qt.AlignCenter, Qt.AlignRight)
         hbox.addStretch()
 
         groupBox.setLayout(hbox)
@@ -122,7 +122,7 @@ class App(QMainWindow):
         return groupBox
 
     def create_domain_section(self):
-        groupBox = QGroupBox("Domain and tree visualization")
+        groupBox = QGroupBox("Independent set of generators")
 
         vbox = QVBoxLayout()
         vbox.addStretch()
@@ -137,22 +137,55 @@ class App(QMainWindow):
         return groupBox
 
     def create_generators_section(self):
-        pass
+        groupBox = QGroupBox("Domain and tree visualization")
+
+        vbox = QVBoxLayout()
+        vbox.addStretch()
+
+        self.generators_text_edit = QTextEdit(self)
+        try:
+            self.generators_text_edit.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
+        except:
+            pass
+        finally:
+            self.generators_text_edit.setFontPointSize(16)
+        self.generators_text_edit.setReadOnly(True)
+        self.generators_text_edit.setMaximumHeight(240)
+
+
+        vbox.addWidget(self.generators_text_edit, Qt.AlignLeft, Qt.AlignTop)
+
+        groupBox.setLayout(vbox)
+        groupBox.setMinimumHeight(self.minimumCanvasHeight)
+        return groupBox
 
     def on_construct_graph_button_clicked(self):
-        self.api.on_sub_calc(
+        self.api.digest(
             subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
-            n=int(self.line_edit.text())
+            n=int(self.line_edit.text()),
+            graph_canvas=self.graph_canvas,
+            domain_canvas=self.domain_canvas
         )
+        try:
+            pass
+        except ValueError:
+            self.statusBar.showMessage('Type number N in text field on top', 5000)
+        except:
+            self.statusBar.showMessage('Unknown error', 5000)
 
     @pyqtSlot(object)
-    def handle_status_message(self, message):
+    def handleStatusMessage(self, message):
         self.statusBar.showMessage(message, 2000)
 
     @pyqtSlot()
-    def handle_graph_draw_finished(self):
+    def handleChewed(self):
         self.graph_canvas.draw()
 
-    @pyqtSlot()
-    def handle_domain_draw_finished(self):
+    @pyqtSlot(str)
+    def handleDigested(self, generators: str):
         self.domain_canvas.draw()
+
+        if self.generators_text_edit:
+            self.generators_text_edit.setText(generators)
+
+

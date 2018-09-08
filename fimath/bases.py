@@ -48,6 +48,29 @@ class BaseMatrix(object):
     def inv(self):
         raise NotImplementedError
 
+    @staticmethod
+    def _operator_fallbacks(monomorphic_operator, fallback_operator):
+
+        def forward(a, b):
+            if isinstance(b, (BaseMatrix, int)):
+                return monomorphic_operator(a, b)
+            else:
+                return NotImplemented
+
+        forward.__name__ = '__' + fallback_operator.__name__ + '__'
+        forward.__doc__ = monomorphic_operator.__doc__
+
+        def reverse(b, a):
+            if isinstance(a, BaseMatrix):
+                return monomorphic_operator(a, b)
+            else:
+                return NotImplemented
+
+        reverse.__name__ = '__r' + fallback_operator.__name__ + '__'
+        reverse.__doc__ = monomorphic_operator.__doc__
+
+        return forward, reverse
+
 
 class BaseReField(object):
     __metaclass__ = abc.ABCMeta

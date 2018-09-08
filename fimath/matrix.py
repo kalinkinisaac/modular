@@ -47,34 +47,22 @@ class Matrix(BaseMatrix):
         return hash((self._a, self._b, self._c, self._d))
 
     def __repr__(s):
-        return f'{s.__class__.__name__}([{s._a} {s._b}]\n\t[{s._c} {s._d}]'
+        return f'{s.__class__.__name__}([{s._a} {s._b}]\n\t[{s._c} {s._d}])'
 
+    # fancy look __str__
     def __str__(s):
-        return f'[[{s._a}, {s._b}],\n [{s._c}, {s._d}]]'
+        len_a = len(str(s._a))
+        len_b = len(str(s._b))
+        len_c = len(str(s._c))
+        len_d = len(str(s._d))
 
-
-    def _operator_fallbacks(monomorphic_operator, fallback_operator):
-
-        def forward(a, b):
-            if isinstance(b, (BaseMatrix, int)):
-                return monomorphic_operator(a, b)
-            else:
-                return NotImplemented
-
-        forward.__name__ = '__' + fallback_operator.__name__ + '__'
-        forward.__doc__ = monomorphic_operator.__doc__
-
-        def reverse(b, a):
-            if isinstance(a, BaseMatrix):
-                return monomorphic_operator(a, b)
-            else:
-                return NotImplemented
-
-        reverse.__name__ = '__r' + fallback_operator.__name__ + '__'
-        reverse.__doc__ = monomorphic_operator.__doc__
-
-        return forward, reverse
-
+        length = max(
+            len_a + len_b,
+            len_c + len_d
+        )
+        top_spaces = ' ' * (length + 1 - len_a - len_b)
+        bot_spaces = ' ' * (length + 1 - len_c - len_d)
+        return f'[{s._a}{top_spaces}{s._b}]\n[{s._c}{bot_spaces}{s._d}]'
 
     def moe(self, other):
         if type(other) == list:
@@ -97,7 +85,7 @@ class Matrix(BaseMatrix):
     def inv(self):
         if self._a * self._d - self._b * self._c == 0:
             raise ZeroDivisionError()
-
+        # TODO: replace with true_div
         return Matrix(self._d, -self._b, -self._c, self._a) * self.det()
 
     def _mul(l, r):
@@ -116,7 +104,7 @@ class Matrix(BaseMatrix):
                 l._d * r
             )
 
-    __mul__, __rmul__ = _operator_fallbacks(_mul, operator.mul)
+    __mul__, __rmul__ = BaseMatrix._operator_fallbacks(_mul, operator.mul)
 
 
     def __mod__(self, other):

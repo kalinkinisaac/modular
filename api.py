@@ -1,4 +1,4 @@
-from .subgroups_names import ClassicalSubgroups
+from subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
@@ -40,3 +40,6 @@ class Api(object):
         canvas.cla()
         geo_drawer = GeodesicPlotter(canvas.ax)
         geo_drawer.draw(self._domain)
+
+    def get_generators_str(self):
+        return '\n\n'.join(list(map(str, self._generators)))
