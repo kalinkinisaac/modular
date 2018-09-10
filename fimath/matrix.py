@@ -168,7 +168,12 @@ class Matrix(BaseMatrix):
         else:
             return NotImplemented
 
-    # Constants
-    @classmethod
-    def identity(cls):
-        return Matrix(a=1, b=0, c=0, d=1)
+    @staticmethod
+    def beautify(matrices):
+        if not matrices:
+            return ''
+
+        top_line = '  '.join(list(map(lambda x: str(x).split('\n')[0], matrices)))
+        bot_line = ', '.join(list(map(lambda x: str(x).split('\n')[1], matrices)))
+
+        return f'{top_line}\n{bot_line}'

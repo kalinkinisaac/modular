@@ -3,7 +3,7 @@ from subgroups_names import ClassicalSubgroups
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRect, pyqtSlot
-from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtGui import QFontDatabase, QFontMetrics
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
@@ -14,6 +14,7 @@ class App(QMainWindow):
 
     def __init__(self):
         super(__class__, self).__init__()
+
         self.api = QtApi(
             handleStatusMessage=self.handleStatusMessage,
             handleChewed=self.handleChewed,
@@ -28,7 +29,7 @@ class App(QMainWindow):
         self.subgroups_combo = None
         self.graph_canvas = GraphCanvas(parent=self)
         self.domain_canvas = DomainCanvas(parent=self)
-        self.generators_text_edit = None
+        self.generatorsTextEdit = None
 
         self.minimumCanvasHeight = 550
         self.initUI()
@@ -56,10 +57,10 @@ class App(QMainWindow):
 
         self.grid = QGridLayout(self.scrollAreaWidgetContents)
 
-        self.grid.addWidget(self.create_gamma_section(), 0, 0)
-        self.grid.addWidget(self.create_graph_section(), 1, 0)
-        self.grid.addWidget(self.create_domain_section(), 2, 0)
-        self.grid.addWidget(self.create_generators_section(), 3, 0)
+        self.grid.addWidget(self.createGammaSection(), 0, 0)
+        self.grid.addWidget(self.createGraphSection(), 1, 0)
+        self.grid.addWidget(self.createDomainSection(), 2, 0)
+        self.grid.addWidget(self.createGeneratorsSection(), 3, 0)
 
         self.scrollAreaWidgetContents.setLayout(self.grid)
 
@@ -71,7 +72,7 @@ class App(QMainWindow):
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.show()
 
-    def create_gamma_section(self):
+    def createGammaSection(self):
         groupBox = QGroupBox("Subgroup selection")
 
 
@@ -88,9 +89,9 @@ class App(QMainWindow):
         self.line_edit = QLineEdit()
         self.line_edit.setFixedWidth(40)
 
-        button = QPushButton('Construct graph')
-        button.setFixedSize(button.sizeHint())
-        button.clicked.connect(self.on_construct_graph_button_clicked)
+        applyButton = QPushButton('Apply')
+        applyButton.setFixedSize(applyButton.sizeHint())
+        applyButton.clicked.connect(self.onApplyButtonClicked)
 
         hbox = QHBoxLayout()
 
@@ -98,14 +99,14 @@ class App(QMainWindow):
         hbox.addWidget(self.subgroups_combo)
         hbox.addWidget(lbl2)
         hbox.addWidget(self.line_edit)
-        hbox.addWidget(button, Qt.AlignCenter, Qt.AlignRight)
+        hbox.addWidget(applyButton, Qt.AlignCenter, Qt.AlignRight)
         hbox.addStretch()
 
         groupBox.setLayout(hbox)
 
         return groupBox
 
-    def create_graph_section(self):
+    def createGraphSection(self):
         groupBox = QGroupBox("Graph visualization")
 
         vbox = QVBoxLayout()
@@ -121,8 +122,8 @@ class App(QMainWindow):
         groupBox.setMinimumHeight(self.minimumCanvasHeight)
         return groupBox
 
-    def create_domain_section(self):
-        groupBox = QGroupBox("Independent set of generators")
+    def createDomainSection(self):
+        groupBox = QGroupBox("Domain and tree visualization")
 
         vbox = QVBoxLayout()
         vbox.addStretch()
@@ -136,30 +137,45 @@ class App(QMainWindow):
         groupBox.setMinimumHeight(self.minimumCanvasHeight)
         return groupBox
 
-    def create_generators_section(self):
-        groupBox = QGroupBox("Domain and tree visualization")
+    def createGeneratorsSection(self):
+        groupBox = QGroupBox("Independent set of generators")
+        groupBoxLayout = QHBoxLayout(groupBox)
 
-        vbox = QVBoxLayout()
+        scrollArea = QScrollArea(groupBox)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setMinimumHeight(150)
+        scrollArea.setFrameShape(QFrame.NoFrame)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.verticalScrollBar().setEnabled(False)
+
+        groupBoxLayout.addWidget(scrollArea)
+
+        scrollAreaWidgetContents = QWidget()
+        scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 400))
+
+        scrollArea.setWidget(scrollAreaWidgetContents)
+
+        vbox = QVBoxLayout(scrollAreaWidgetContents)
         vbox.addStretch()
 
-        self.generators_text_edit = QTextEdit(self)
-        try:
-            self.generators_text_edit.setFont(QFontDatabase.systemFont(QFontDatabase.FixedFont))
-        except:
-            pass
-        finally:
-            self.generators_text_edit.setFontPointSize(16)
-        self.generators_text_edit.setReadOnly(True)
-        self.generators_text_edit.setMaximumHeight(240)
+        self.generatorsTextEdit = QTextEdit(self)
+        self.monospaceFont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
 
+        self.generatorsTextEdit.setFont(self.monospaceFont)
 
-        vbox.addWidget(self.generators_text_edit, Qt.AlignLeft, Qt.AlignTop)
+        # self.generatorsTextEdit.setFontPointSize(16)
 
-        groupBox.setLayout(vbox)
-        groupBox.setMinimumHeight(self.minimumCanvasHeight)
+        self.generatorsTextEdit.setReadOnly(True)
+
+        vbox.addWidget(self.generatorsTextEdit, Qt.AlignCenter, Qt.AlignTop)
+
+        # scrollAreaWidgetContents.addWidget(self.generators_text_edit, Qt.AlignLeft, Qt.AlignTop)
+
+        groupBox.setMinimumSize(groupBox.sizeHint())
         return groupBox
 
-    def on_construct_graph_button_clicked(self):
+    def onApplyButtonClicked(self):
         self.api.digest(
             subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
             n=int(self.line_edit.text()),
@@ -185,7 +201,16 @@ class App(QMainWindow):
     def handleDigested(self, generators: str):
         self.domain_canvas.draw()
 
-        if self.generators_text_edit:
-            self.generators_text_edit.setText(generators)
+        if self.generatorsTextEdit:
+            self.generatorsTextEdit.setText(generators)
+            fontMetrics = QFontMetrics(self.monospaceFont)
+            textSize = fontMetrics.size(0, generators)
+
+            textWidth = textSize.width() + 30  # constant may need to be tweaked
+            textHeight = textSize.height() + 30  # constant may need to be tweaked
+
+            self.generatorsTextEdit.setMinimumSize(textWidth, textHeight)  # good if you want to insert this into a layout
+            self.generatorsTextEdit.resize(textWidth, textHeight)
+
 
 

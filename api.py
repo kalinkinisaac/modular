@@ -3,7 +3,7 @@ from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
 from special_polygon import get_all
-
+from fimath import Matrix
 
 class Api(object):
 
@@ -42,4 +42,4 @@ class Api(object):
         geo_drawer.draw(self._domain)
 
     def get_generators_str(self):
-        return '\n\n'.join(list(map(str, self._generators)))
+        return Matrix.beautify(self._generators)

@@ -27,7 +27,7 @@ decomposition = decompose(polygon=domain, involutions=involutions, z=p, w=w)
 dec = '\n'.join(map(str, decomposition))
 print(f'Decompostion of matrix\n{m}\n\n{dec}')
 print('check')
-r = Matrix.identity()
+r = Matrix()
 for m in decomposition:
     r *= m
 print(r)

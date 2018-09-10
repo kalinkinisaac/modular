@@ -9,7 +9,7 @@ class Decompositor(object):
         self.involutions = involutions
         self.line = Geodesic(w, z)
         self.decomposition = []
-        self.mul_dec = Matrix.identity()
+        self.mul_dec = Matrix()
         self.previous_edge = None
         self._involution_dict = None
         self.crossing = True
