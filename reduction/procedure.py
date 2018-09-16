@@ -2,7 +2,7 @@ from fimath.geodesic import Geodesic, undirected_eq
 from .sort import cyclic_sorted
 from fimath import Matrix
 
-class Decompositor(object):
+class Decomposer(object):
     def __init__(self, polygon, involutions, z, w):
         self._poly = polygon
         self._cur_poly = []
@@ -29,12 +29,12 @@ class Decompositor(object):
 
 
         while self.crossing:
-            self.iteration()
+            self._iteration()
 
         return self.decomposition
 
-    def iteration(self):
-        _g_i = self.get_involution(self.previous_edge).inv()
+    def _iteration(self):
+        _g_i = self._get_involution(self.previous_edge).inv()
         g_i = self.mul_dec * _g_i * self.mul_dec.inv()
 
         self.decomposition.append(_g_i)
@@ -43,7 +43,7 @@ class Decompositor(object):
         for i in range(len(self._cur_poly)):
             self._cur_poly[i] = g_i.moe(self._cur_poly[i])
 
-        geo_drawer.draw(self._cur_poly, color='grey')
+        # geo_drawer.draw(self._cur_poly, color='grey')
 
         crossed = get_cross_edges(self._cur_poly, self.line)
         crossed = list(filter(lambda e: not undirected_eq(e, self.previous_edge), crossed))
@@ -78,7 +78,7 @@ class Decompositor(object):
             self._involution_dict[a] = g
             self._involution_dict[b] = g.inv()
 
-    def get_involution(self, edge):
+    def _get_involution(self, edge):
         edge_ = self._poly[self._cur_poly.index(edge)]
         return self._involution_dict[edge_]
 

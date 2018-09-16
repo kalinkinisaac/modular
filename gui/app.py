@@ -18,7 +18,8 @@ class App(QMainWindow):
         self.api = QtApi(
             handleStatusMessage=self.handleStatusMessage,
             handleChewed=self.handleChewed,
-            handleDigested=self.handleDigested
+            handleDigested=self.handleDigested,
+            handleDecomposed=self.handleDecomposed
         )
         self.left = 10
         self.top = 10
@@ -30,6 +31,8 @@ class App(QMainWindow):
         self.graph_canvas = GraphCanvas(parent=self)
         self.domain_canvas = DomainCanvas(parent=self)
         self.generatorsTextEdit = None
+        self.matrixLineEdit = None
+        self.decompositionTextEdit = None
 
         self.minimumCanvasHeight = 550
         self.initUI()
@@ -61,6 +64,7 @@ class App(QMainWindow):
         self.grid.addWidget(self.createGraphSection(), 1, 0)
         self.grid.addWidget(self.createDomainSection(), 2, 0)
         self.grid.addWidget(self.createGeneratorsSection(), 3, 0)
+        self.grid.addWidget(self.createDecompositionSection(), 4, 0)
 
         self.scrollAreaWidgetContents.setLayout(self.grid)
 
@@ -175,6 +179,59 @@ class App(QMainWindow):
         groupBox.setMinimumSize(groupBox.sizeHint())
         return groupBox
 
+    def createDecompositionSection(self):
+        groupBox = QGroupBox("Decomposition of matrix")
+        groupBoxLayout = QVBoxLayout(groupBox)
+
+        matrixHBox = QWidget(groupBox)
+        matrixHBoxLayout = QHBoxLayout(matrixHBox)
+
+        matrixLabel = QLabel(groupBox)
+        matrixLabel.setText('Type matrix:')
+        self.matrixLineEdit = QLineEdit(groupBox)
+
+        decomposeButton = QPushButton('Decompose')
+        decomposeButton.setFixedSize(decomposeButton.sizeHint())
+        decomposeButton.clicked.connect(self.onDecomposeButtonClicked)
+
+        matrixHBoxLayout.addWidget(matrixLabel)
+        matrixHBoxLayout.addWidget(self.matrixLineEdit)
+        matrixHBoxLayout.addWidget(decomposeButton)
+
+        groupBoxLayout.addWidget(matrixHBox)
+
+        scrollArea = QScrollArea(groupBox)
+        scrollArea.setWidgetResizable(True)
+        scrollArea.setMinimumHeight(150)
+        scrollArea.setFrameShape(QFrame.NoFrame)
+        scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+        scrollArea.verticalScrollBar().setEnabled(False)
+
+        groupBoxLayout.addWidget(scrollArea)
+
+        scrollAreaWidgetContents = QWidget()
+        scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 400))
+
+        scrollArea.setWidget(scrollAreaWidgetContents)
+
+        vbox = QVBoxLayout(scrollAreaWidgetContents)
+        vbox.addStretch()
+
+        self.decompositionTextEdit = QTextEdit(self)
+        self.monospaceFont = QFontDatabase.systemFont(QFontDatabase.FixedFont)
+
+        self.decompositionTextEdit.setFont(self.monospaceFont)
+
+        # self.generatorsTextEdit.setFontPointSize(16)
+
+        self.decompositionTextEdit.setReadOnly(True)
+
+        vbox.addWidget(self.decompositionTextEdit, Qt.AlignCenter, Qt.AlignTop)
+
+        groupBox.setMinimumSize(groupBox.sizeHint())
+        return groupBox
+
     def onApplyButtonClicked(self):
         self.api.digest(
             subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
@@ -188,6 +245,9 @@ class App(QMainWindow):
             self.statusBar.showMessage('Type number N in text field on top', 5000)
         except:
             self.statusBar.showMessage('Unknown error', 5000)
+
+    def onDecomposeButtonClicked(self):
+        self.api.decompose(matrix=self.matrixLineEdit.text())
 
     @pyqtSlot(object)
     def handleStatusMessage(self, message):
@@ -211,6 +271,10 @@ class App(QMainWindow):
 
             self.generatorsTextEdit.setMinimumSize(textWidth, textHeight)  # good if you want to insert this into a layout
             self.generatorsTextEdit.resize(textWidth, textHeight)
+
+    @pyqtSlot(str)
+    def handleDecomposed(self, decomposition):
+        self.decompositionTextEdit.setText(decomposition)
 
 
 

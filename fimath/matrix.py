@@ -3,6 +3,7 @@ from .field import Field
 from .re_field import ReField
 from .geodesic import Geodesic
 import operator
+import re
 
 class Matrix(BaseMatrix):
 
@@ -24,8 +25,18 @@ class Matrix(BaseMatrix):
             self._c = c
             self._d = d
             return self
+
+        elif type(a) is str:
+            return Matrix.from_str(str(a))
+
         else:
             raise TypeError('all arguments should be int type')
+
+    @staticmethod
+    def from_str(matrix_str):
+        parsed = re.sub('[^0-9,\-]', '', matrix_str)
+        a, b, c, d = list(map(int, parsed.split(',')))
+        return Matrix(a, b, c, d)
 
     @property
     def a(self):

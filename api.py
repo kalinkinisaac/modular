@@ -3,7 +3,8 @@ from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
 from special_polygon import get_all
-from fimath import Matrix
+from fimath import Matrix, Field
+from reduction import Decomposer
 
 class Api(object):
 
@@ -14,6 +15,7 @@ class Api(object):
         self._tree = None
         self._involutions = None
         self._generators = None
+        self._decomposition = None
 
     def set_subgroup(self, subgroup: ClassicalSubgroups, n=2, *args, **kwargs):
         self._subgroup = subgroup.to_class()(n)
@@ -43,3 +45,13 @@ class Api(object):
 
     def get_generators_str(self):
         return Matrix.beautify(self._generators)
+
+    def decompose_matrix(self, matrix_str):
+        matrix = Matrix(matrix_str)
+        z = Field(0.5+1.5j)
+        w = matrix.moe(z)
+        decomposer = Decomposer(polygon=self._domain, involutions=self._involutions, z=z, w=w)
+        self._decomposition = decomposer.decompose()
+
+    def get_decomposition(self):
+        return Matrix.beautify(self._decomposition)
