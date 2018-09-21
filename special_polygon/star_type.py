@@ -6,7 +6,7 @@ class StarType(Enum):
     Racket = 2
 
     @staticmethod
-    def star_type(neighbors):
+    def from_nei(neighbors):
         if len(neighbors) == 1:
             return StarType.Segment
 

@@ -2,7 +2,8 @@ from subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
-from special_polygon import get_all
+from plotter.marker_potter import MarkerPlotter
+from special_polygon import SpecialPolygon
 from fimath import Matrix, Field
 from reduction import Decomposer
 
@@ -15,6 +16,9 @@ class Api(object):
         self._tree = None
         self._involutions = None
         self._generators = None
+        self._white_markers = None
+        self._black_markers = None
+        self._cut_markers = None
         self._decomposition = None
 
     def set_subgroup(self, subgroup: ClassicalSubgroups, n=2, *args, **kwargs):
@@ -29,11 +33,18 @@ class Api(object):
     def plot_graph_on_canvas(self, canvas, *args, **kwargs):
         canvas.cla()
         gd = GraphPlotter(canvas.ax)
-        gd.draw(self._graph)
+        gd.plot(self._graph)
 
     def calc_domain(self, *args, **kwargs):
         if self._graph:
-            self._domain, self._tree, self._involutions = get_all(self._graph)
+            sp = SpecialPolygon(self._graph)
+            sp.construct_polygon()
+            self._domain = sp.edges
+            self._tree = sp.tree
+            self._involutions = sp.involutions
+            self._white_markers = sp.white_vertices
+            self._black_markers = sp.black_vertices
+            self._cut_markers = sp.cut_vertices
             self._generators = list(zip(*self._involutions))[2]
         else:
             raise Exception('graph is not set')
@@ -41,7 +52,10 @@ class Api(object):
     def plot_domain_on_canvas(self, canvas, *args, **kwargs):
         canvas.cla()
         geo_drawer = GeodesicPlotter(canvas.ax)
-        geo_drawer.draw(self._domain)
+        geo_drawer.plot(self._domain)
+        geo_drawer.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
+        mp = MarkerPlotter(canvas.ax)
+        mp.plot(self._white_markers, self._black_markers, self._cut_markers)
 
     def get_generators_str(self):
         return Matrix.beautify(self._generators)

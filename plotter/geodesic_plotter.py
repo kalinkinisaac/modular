@@ -11,7 +11,7 @@ class GeodesicPlotter(object):
     def __init__(self, ax):
         self._ax = ax
 
-    def draw(self, geodesics, *args, **kwargs):
+    def plot(self, geodesics, *args, **kwargs):
         if type(geodesics) == list:
             for geodesic in geodesics:
                 self._plot(geodesic, *args, **kwargs)

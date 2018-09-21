@@ -11,7 +11,7 @@ class GraphPlotter(object):
     def draw_vertex(self, xy, color='w'):
         self._ax.add_patch(patches.Circle(xy, radius=0.05, color=color))
 
-    def draw(self, graph: BCGraph):
+    def plot(self, graph: BCGraph):
         margin = 0.1
         max_size = max(1.0, len(graph.V0) * 0.2)
         self._ax.set_xlim(0, max_size)
