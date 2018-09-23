@@ -1,4 +1,4 @@
-from subgroups_names import ClassicalSubgroups
+from api.subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
@@ -45,6 +45,7 @@ class Api(object):
             self._white_markers = sp.white_vertices
             self._black_markers = sp.black_vertices
             self._cut_markers = sp.cut_vertices
+            # print(f'w: {self._white_markers}\nb: {self._black_markers}\nx: {self._cut_markers}')
             self._generators = list(zip(*self._involutions))[2]
         else:
             raise Exception('graph is not set')

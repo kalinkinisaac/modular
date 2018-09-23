@@ -107,12 +107,14 @@ class SpecialPolygon(object):
                 self._I[v] = 0
 
                 s = [Geodesic(ZERO, INF), Geodesic(ZERO, ONE), Geodesic(ONE, INF)]
+                v = [V0, Field(0.5+0.5j), Field(1+1j)]
                 s1 = s[(j + 1) % 3]
                 s2 = s[(j + 2) % 3]
                 g = (G1 ** (j - 1) * G_ * G1 ** (1 - j))
 
                 self._edges.extend([s1, s2])
                 self._involutions.append([s1, s2, g])
+                self.cut_vertices.extend([v[(j + 1) % 3], v[(j + 2) % 3]])
                 logging.debug(f'added edges:\ns1 = {s1}\ns2 = {s2}')
 
         logging.debug('initial prepararion finished')
@@ -239,7 +241,7 @@ class SpecialPolygon(object):
 
         self._edges.extend([s1, s2])
         self._involutions.append([s1, s2, g_ * G0 * (g * e).inv()])
-        self._cut_vertices.append(g_.moe(V0))
+        self._cut_vertices.extend([(g * e).moe(V0), g_.moe(V0)])
 
         self._removed[self._L0[l_]] = True
         logging.debug(f'case 2b\'\': W({w}) marked as \"visited\"\nadded edges:\ns1: {s1},\ns2 : {s2}')
@@ -252,7 +254,7 @@ class SpecialPolygon(object):
         s2 = g2.moe(s0)
         self._edges.extend([s1, s2])
         self._involutions.append([s1, s2, g2 * (g1 * G0).inv()])
-        self._cut_vertices.append(g1.moe(V0))
+        self._cut_vertices.extend([g1.moe(V0), g2.moe(V0)])
 
         logging.debug(f'case 2c: Star V__ is a racket\nadded edges:\ns1 : {s1},\ns2 : {s2}')
 

@@ -1,5 +1,5 @@
 from .qt_api import QtApi
-from subgroups_names import ClassicalSubgroups
+from api.subgroups_names import ClassicalSubgroups
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QRect, pyqtSlot
@@ -23,8 +23,8 @@ class App(QMainWindow):
         )
         self.left = 10
         self.top = 10
-        self.width = 640
-        self.height = 400
+        self.width = 1080
+        self.height = 720
         self.title = 'Modular'
         self.statusBar = QStatusBar()
         self.subgroups_combo = None
@@ -40,6 +40,7 @@ class App(QMainWindow):
     def initUI(self):
         self.centralWidget = QWidget(self)
         layout = QVBoxLayout(self.centralWidget)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.scrollArea = QScrollArea(self.centralWidget)
         self.scrollArea.setWidgetResizable(True)
