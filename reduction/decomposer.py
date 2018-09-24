@@ -1,58 +1,65 @@
 from fimath.geodesic import Geodesic, undirected_eq
-from .sort import cyclic_sorted
 from fimath import Matrix
+from .sort import cyclic_sorted
+
 
 class Decomposer(object):
     def __init__(self, polygon, involutions, z, w):
         self._poly = polygon
         self._cur_poly = []
-        self.involutions = involutions
-        self.line = Geodesic(w, z)
-        self.decomposition = []
-        self.mul_dec = Matrix()
-        self.previous_edge = None
+        self._involutions = involutions
+        self._w = w
+        self._z = z
+        self._line = None
+        self._decomposition = []
+        self._mul_dec = Matrix()
+        self._previous_edge = None
         self._involution_dict = None
-        self.crossing = True
+        self._crossing = True
 
     def decompose(self):
+        if self._w == self._z:
+            return [Matrix(1, 0, 0, 1)]
+
+        self._line = Geodesic(self._w, self._z)
+
         self.prepare_involutions()
 
         self._poly = cyclic_sorted(self._poly)
         self._cur_poly = self._poly[::]
 
-        previous_edges = get_cross_edges(self._cur_poly, self.line)
+        previous_edges = get_cross_edges(self._cur_poly, self._line)
 
         if len(previous_edges) != 1:
             raise Exception('Number of crossed edges is not equal to 1')
 
-        self.previous_edge = previous_edges[0]
+        self._previous_edge = previous_edges[0]
 
-
-        while self.crossing:
+        while self._crossing:
             self._iteration()
 
-        return self.decomposition
+        return self._decomposition
 
     def _iteration(self):
-        _g_i = self._get_involution(self.previous_edge).inv()
-        g_i = self.mul_dec * _g_i * self.mul_dec.inv()
+        _g_i = self._get_involution(self._previous_edge).inv()
+        g_i = self._mul_dec * _g_i * self._mul_dec.inv()
 
-        self.decomposition.append(_g_i)
-        self.mul_dec = g_i * self.mul_dec
+        self._decomposition.append(_g_i)
+        self._mul_dec = g_i * self._mul_dec
 
         for i in range(len(self._cur_poly)):
             self._cur_poly[i] = g_i.moe(self._cur_poly[i])
 
         # geo_drawer.draw(self._cur_poly, color='grey')
 
-        crossed = get_cross_edges(self._cur_poly, self.line)
-        crossed = list(filter(lambda e: not undirected_eq(e, self.previous_edge), crossed))
+        crossed = get_cross_edges(self._cur_poly, self._line)
+        crossed = list(filter(lambda e: not undirected_eq(e, self._previous_edge), crossed))
 
         if not crossed:
-            self.crossing = False
+            self._crossing = False
 
         elif len(crossed) == 1:
-            self.previous_edge = crossed[0]
+            self._previous_edge = crossed[0]
 
         elif len(crossed) == 2:
             # Decision: which way should we go
@@ -60,13 +67,13 @@ class Decomposer(object):
             first_poly = self._cur_poly[::]
             for i in range(len(first_poly)):
                 first_poly[i] = g_i.moe(first_poly[i])
-            _crossed = get_cross_edges(self._cur_poly, self.line)
+            _crossed = get_cross_edges(self._cur_poly, self._line)
             _crossed = list(filter(lambda e: not undirected_eq(e, crossed[0]), _crossed))
 
             if _crossed:
-                self.previous_edge = crossed[0]
+                self._previous_edge = crossed[0]
             else:
-                self.previous_edge = crossed[1]
+                self._previous_edge = crossed[1]
 
         else:
             raise Exception('there are more than 2 crossing edges')
@@ -74,7 +81,7 @@ class Decomposer(object):
     def prepare_involutions(self):
         self._involution_dict = dict()
 
-        for a, b, g in self.involutions:
+        for a, b, g in self._involutions:
             self._involution_dict[a] = g
             self._involution_dict[b] = g.inv()
 
@@ -82,27 +89,26 @@ class Decomposer(object):
         edge_ = self._poly[self._cur_poly.index(edge)]
         return self._involution_dict[edge_]
 
+
 # O(n)
-def get_cross_edges(polygon, line : Geodesic):
+def get_cross_edges(polygon, line: Geodesic):
     edges = []
     for edge in polygon:
         if is_crossing(edge, line):
             edges.append(edge)
     return edges
 
+
 # O(1)
-def is_crossing(line1 : Geodesic, line2 : Geodesic):
-    l1_is_vert = line1.is_vertical
-    l2_is_vert = line2.is_vertical
+def is_crossing(line1: Geodesic, line2: Geodesic):
+    if line1.is_vertical or line2.is_vertical:
 
-    if l1_is_vert or l2_is_vert:
-
-        if l2_is_vert:
+        if line2.is_vertical:
             line1, line2 = line2, line1
 
-        if l2_is_vert:
+        if line2.is_vertical:
             return line1.vertical_x == line2.vertical_x and (line1.bot.imag <= line2.begin.imag <= line1.top.imag or
-                                                                 line1.bot.imag <= line2.end.imag <= line1.top.imag)
+                                                             line1.bot.imag <= line2.end.imag <= line1.top.imag)
         else:
             x_cross = line1.vertical_x
             if line2.left.real <= x_cross <= line2.right.real:
@@ -115,16 +121,14 @@ def is_crossing(line1 : Geodesic, line2 : Geodesic):
                 return False
 
     else:
-
         if line1.center == line2.center:
             return line1.sq_radius == line2.sq_radius
 
-        x_cross = 0.5 * (line1.center + line2.center +
-                             (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
+        x_cross = 0.5 * (line1.center +
+                         line2.center + (line1.sq_radius - line2.sq_radius) / (line2.center - line1.center))
 
         if line1.left.real <= x_cross <= line1.right.real and line2.left.real <= x_cross <= line2.right.real:
             return True
 
         else:
             return False
-

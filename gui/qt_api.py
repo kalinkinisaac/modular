@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QThread, pyqtSignal, QObject
 
-from api import Api
+from api import Api, ApiError
 
 
 class QtApi(QObject):
@@ -65,20 +65,45 @@ class DigestionThread(QThread):
 
     def run(self):
         self.statusMessage.emit('Calculating subgroup data')
-        self.api.set_subgroup(self.subgroup, self.n)
+        try:
+            self.api.set_subgroup(self.subgroup, self.n)
+        except ApiError as e:
+            self.statusMessage.emit(f'Api error: {e}')
+            return
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
+            return
 
         self.statusMessage.emit('Calculating graph data')
-        self.api.calc_graph()
+
+        try:
+            self.api.calc_graph()
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
+            return
 
         self.statusMessage.emit('Plotting graph')
-        self.api.plot_graph_on_canvas(self.graph_canvas)
+        try:
+            self.api.plot_graph_on_canvas(self.graph_canvas)
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
+            return
         self.onChewed.emit()
 
         self.statusMessage.emit('Calculating domain')
-        self.api.calc_domain()
+        try:
+            self.api.calc_domain()
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
+            return
 
         self.statusMessage.emit('Plotting domain')
-        self.api.plot_domain_on_canvas(self.domain_canvas)
+        try:
+            self.api.plot_domain_on_canvas(self.domain_canvas)
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
+            return
+        self.statusMessage.emit('Domain is plotted')
         self.onDigested.emit(self.api.get_generators_str())
 
 
@@ -97,6 +122,8 @@ class DecompositionThread(QThread):
             self.api.decompose_matrix(self.matrix_str)
             self.statusMessage.emit('Decomposed successfully')
             self.onDecomposed.emit(self.api.get_decomposition())
-        except ValueError:
-            self.statusMessage.emit('You should write matrix in following format: a,b,c,d')
+        except ApiError as e:
+            self.statusMessage.emit(f'Api error: {e}')
+        except Exception as e:
+            self.statusMessage.emit(f'Unexpected error: {e}')
 

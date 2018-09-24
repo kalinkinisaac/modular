@@ -6,6 +6,8 @@ from plotter.marker_potter import MarkerPlotter
 from special_polygon import SpecialPolygon
 from fimath import Matrix, Field
 from reduction import Decomposer
+from .error import FormatError, ValueRangeError
+
 
 class Api(object):
 
@@ -21,21 +23,32 @@ class Api(object):
         self._cut_markers = None
         self._decomposition = None
 
-    def set_subgroup(self, subgroup: ClassicalSubgroups, n=2, *args, **kwargs):
+    def set_subgroup(self, subgroup: ClassicalSubgroups, n=2):
+        if type(n) is not int:
+            if n == '':
+                raise FormatError('Field N should be filled')
+            try:
+                n = int(n)
+            except ValueError:
+                raise FormatError('N should be int')
+
+        if n <= 1:
+            raise ValueRangeError('N should be greater than 1')
+
         self._subgroup = subgroup.to_class()(n)
 
-    def calc_graph(self, *args, **kwargs):
+    def calc_graph(self):
         if self._subgroup:
             self._graph = get_graph(self._subgroup)
         else:
             raise Exception('subgroup is not set')
 
-    def plot_graph_on_canvas(self, canvas, *args, **kwargs):
+    def plot_graph_on_canvas(self, canvas):
         canvas.cla()
         gd = GraphPlotter(canvas.ax)
         gd.plot(self._graph)
 
-    def calc_domain(self, *args, **kwargs):
+    def calc_domain(self):
         if self._graph:
             sp = SpecialPolygon(self._graph)
             sp.construct_polygon()
@@ -45,12 +58,11 @@ class Api(object):
             self._white_markers = sp.white_vertices
             self._black_markers = sp.black_vertices
             self._cut_markers = sp.cut_vertices
-            # print(f'w: {self._white_markers}\nb: {self._black_markers}\nx: {self._cut_markers}')
             self._generators = list(zip(*self._involutions))[2]
         else:
             raise Exception('graph is not set')
 
-    def plot_domain_on_canvas(self, canvas, *args, **kwargs):
+    def plot_domain_on_canvas(self, canvas):
         canvas.cla()
         geo_drawer = GeodesicPlotter(canvas.ax)
         geo_drawer.plot(self._domain)
@@ -62,7 +74,11 @@ class Api(object):
         return Matrix.beautify(self._generators)
 
     def decompose_matrix(self, matrix_str):
-        matrix = Matrix(matrix_str)
+        try:
+            matrix = Matrix(matrix_str)
+        except Exception:
+            raise FormatError('Matrix should be in following format: a, b, c, d')
+
         z = Field(0.5+1.5j)
         w = matrix.moe(z)
         decomposer = Decomposer(polygon=self._domain, involutions=self._involutions, z=z, w=w)

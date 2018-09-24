@@ -236,23 +236,17 @@ class App(QMainWindow):
     def onApplyButtonClicked(self):
         self.api.digest(
             subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
-            n=int(self.line_edit.text()),
+            n=self.line_edit.text(),
             graph_canvas=self.graph_canvas,
             domain_canvas=self.domain_canvas
         )
-        try:
-            pass
-        except ValueError:
-            self.statusBar.showMessage('Type number N in text field on top', 5000)
-        except:
-            self.statusBar.showMessage('Unknown error', 5000)
 
     def onDecomposeButtonClicked(self):
         self.api.decompose(matrix=self.matrixLineEdit.text())
 
     @pyqtSlot(object)
     def handleStatusMessage(self, message):
-        self.statusBar.showMessage(message, 2000)
+        self.statusBar.showMessage(message, 5000)
 
     @pyqtSlot()
     def handleChewed(self):
@@ -270,9 +264,10 @@ class App(QMainWindow):
             textWidth = textSize.width() + 30  # constant may need to be tweaked
             textHeight = textSize.height() + 30  # constant may need to be tweaked
 
-            self.generatorsTextEdit.setMinimumSize(textWidth, textHeight)  # good if you want to insert this into a layout
+            self.generatorsTextEdit.setMinimumSize(textWidth, textHeight)
             self.generatorsTextEdit.resize(textWidth, textHeight)
 
+    # TODO: make resize
     @pyqtSlot(str)
     def handleDecomposed(self, decomposition):
         self.decompositionTextEdit.setText(decomposition)

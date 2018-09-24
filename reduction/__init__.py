@@ -1,4 +1,4 @@
-from .procedure import Decomposer
+from .decomposer import Decomposer
 
 def decompose(*args, **kwargs):
     dcp = Decomposer(*args, **kwargs)
