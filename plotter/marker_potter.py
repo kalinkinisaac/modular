@@ -1,4 +1,5 @@
-import matplotlib.lines as mlines
+from matplotlib.widgets import CheckButtons
+import matplotlib.pyplot as plt
 
 
 class MarkerPlotter(object):
@@ -12,7 +13,7 @@ class MarkerPlotter(object):
     def plot(self, white, black, cut):
 
         if white:
-            self._ax.scatter(
+            white_markers = self._ax.scatter(
                 [p.real for p in white], [p.imag for p in white],
                 marker='o',
                 c='white',
@@ -23,7 +24,7 @@ class MarkerPlotter(object):
                 s=MarkerPlotter.SIZE
             )
         if black:
-            self._ax.scatter(
+            black_markers = self._ax.scatter(
                 [p.real for p in black],
                 [p.imag for p in black],
                 marker='o',
@@ -35,7 +36,7 @@ class MarkerPlotter(object):
                 s=MarkerPlotter.SIZE
             )
         if cut:
-            self._ax.scatter(
+            cut_markers = self._ax.scatter(
                 [p.real for p in cut],
                 [p.imag for p in cut],
                 marker='x',

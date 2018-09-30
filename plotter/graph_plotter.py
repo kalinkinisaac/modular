@@ -13,11 +13,11 @@ class GraphPlotter(object):
 
     def plot(self, graph: BCGraph):
         margin = 0.1
-        max_size = max(1.0, len(graph.V0) * 0.2)
-        self._ax.set_xlim(0, max_size)
-        self._ax.set_ylim(0.0, max_size)
-        x_min, x_max = self._ax.get_xbound()
-        y_min, y_max = self._ax.get_ybound()
+        max_size = len(graph.V0) * 0.2
+        self._ax.set_xlim(-0.75, 1.75)
+        self._ax.set_ylim(max_size - 2.0, max_size - 1.0)
+        x_min, x_max = 0, 1
+        y_min, y_max = 0, max_size
 
         margin_x_min = x_min + margin * (x_max - x_min)
         margin_x_max = x_max + margin * (x_min - x_max)

@@ -429,7 +429,7 @@ axes.grid           : False   ## display grid or not
 figure.figsize   : 1.0, 1.0   ## figure size in inches
 figure.dpi       : 240       ## figure dots per inch
 figure.facecolor : gray     ## figure facecolor
-figure.edgecolor : gray     ## figure edgecolor
+figure.edgecolor : black     ## figure edgecolor
 figure.frameon : True         ## enable figure frame
 #figure.max_open_warning : 20  ## The maximum number of figures to open through
                                ## the pyplot interface before emitting a warning.

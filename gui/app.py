@@ -28,7 +28,7 @@ class App(QMainWindow):
         self.title = 'Modular'
         self.statusBar = QStatusBar()
         self.subgroups_combo = None
-        self.graph_canvas = GraphCanvas(parent=self)
+        self.graph_canvas = GraphCanvas(parent=self, _full=True)
         self.domain_canvas = DomainCanvas(parent=self)
         self.generatorsTextEdit = None
         self.matrixLineEdit = None

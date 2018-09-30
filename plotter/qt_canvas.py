@@ -9,7 +9,7 @@ domain_style_path = f'{os.getcwd()}/plotter/domain.mplstyle'
 
 class MplCanvas(FigureCanvasQTAgg):
 
-    def __init__(self, parent=None, style='ggplot', *args, **kwargs):
+    def __init__(self, parent=None, style='ggplot', _full=False, *args, **kwargs):
         self._style = style
         with plt.style.context(style):
             self.fig = plt.Figure()
@@ -17,7 +17,10 @@ class MplCanvas(FigureCanvasQTAgg):
             super(__class__, self).__init__(self.fig)
             self.setParent(parent)
 
-            self.ax = self.figure.add_subplot(111)
+            if _full:
+                self.ax = self.figure.add_axes([0,0,1,1])
+            else:
+                self.ax = self.figure.add_subplot(111)
             self.ax.set_aspect('equal')
             self.config()
 
