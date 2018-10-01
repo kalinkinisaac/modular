@@ -1,7 +1,3 @@
-from matplotlib.widgets import CheckButtons
-import matplotlib.pyplot as plt
-
-
 class MarkerPlotter(object):
     ALPHA = 0.75
     Z_ORDER = 10

@@ -133,7 +133,8 @@ class App(QMainWindow):
         vbox = QVBoxLayout()
         vbox.addStretch()
 
-        toolbar = NavigationToolbar(self.domain_canvas, self)
+        toolbar = MyToolbar(self.domain_canvas, self)
+        toolbar.update()
 
         vbox.addWidget(self.domain_canvas, Qt.AlignLeft)
         vbox.addWidget(toolbar, Qt.AlignLeft)
@@ -272,5 +273,26 @@ class App(QMainWindow):
     def handleDecomposed(self, decomposition):
         self.decompositionTextEdit.setText(decomposition)
 
+    def handleMarkersStatehanged(self):
+        pass
 
 
+class MyToolbar(NavigationToolbar):
+    def __init__(self, figure_canvas, parent=None):
+        self.parent = parent
+        self.toolitems = (('Home', 'Lorem ipsum dolor sit amet', 'home', 'home'),
+            ('Back', 'consectetuer adipiscing elit', 'back', 'back'),
+            ('Forward', 'sed diam nonummy nibh euismod', 'forward', 'forward'),
+            (None, None, None, None),
+            ('Pan', 'tincidunt ut laoreet', 'move', 'pan'),
+            ('Zoom', 'dolore magna aliquam', 'zoom_to_rect', 'zoom'),
+            ('Subplots', 'putamus parum claram', 'subplots', 'configure_subplots'),
+            ('Save', 'sollemnes in futurum', 'filesave', 'save_figure'),
+            (None, None, None, None),
+            ('Markers', 'Select', "select", 'select_tool')
+                          )
+
+        NavigationToolbar.__init__(self, figure_canvas, parent=self.parent)
+
+    def select_tool(self):
+        self.parent.handleMarkersStatehanged()

@@ -3,43 +3,40 @@ from matplotlib import collections as mc
 from matplotlib.path import Path
 import matplotlib.patches as patches
 
-
 class GraphPlotter(object):
     def __init__(self, ax):
         self._ax = ax
 
+
     def draw_vertex(self, xy, color='w'):
-        self._ax.add_patch(patches.Circle(xy, radius=0.05, color=color))
+        self._ax.add_artist(patches.Circle(xy, radius=0.045, facecolor=color, edgecolor='black'))
 
     def plot(self, graph: BCGraph):
         margin = 0.1
-        max_size = len(graph.V0) * 0.2
-        self._ax.set_xlim(-0.75, 1.75)
-        self._ax.set_ylim(max_size - 2.0, max_size - 1.0)
-        x_min, x_max = 0, 1
-        y_min, y_max = 0, max_size
+        black_delta = 0.25
+        height = black_delta * (len(graph.V0) + 1)
+        white_delta = height / (len(graph.V1) + 1)
 
-        margin_x_min = x_min + margin * (x_max - x_min)
-        margin_x_max = x_max + margin * (x_min - x_max)
-        margin_y_min = y_min + margin * (y_max - y_min)
-        margin_y_max = y_max + margin * (y_min - y_max)
+        self._ax.set_xlim(-0.2, 1.2)
+        self._ax.set_ylim(height - 1.2, height + 0.2)
 
-        black = [[]] * len(graph.V0)
-        white = [[]] * len(graph.V1)
+
+        black = []
+        white = []
 
         for i in range(len(graph.V0)):
-            pos = (i + 1) / (len(graph.V0) + 1)
-            y = margin_y_max + pos * (margin_y_min - margin_y_max)
-            black[i] = [margin_x_min, y]
-            self.draw_vertex((margin_x_min, y), color='black')
+            pos = (0, height - black_delta - black_delta * i)
+            black.append(pos)
+            self.draw_vertex(pos, color='black')
 
         for i in range(len(graph.V1)):
-            pos = (i + 1) / (len(graph.V1) + 1)
-            y = margin_y_max + pos * (margin_y_min - margin_y_max)
-            white[i] = [margin_x_max, y]
-            self.draw_vertex((margin_x_max, y), color='w')
+            pos = (1, height - white_delta - white_delta * i)
+            white.append(pos)
+            self.draw_vertex(pos, color='w')
 
         lines = []
+
+        linewidth = 1.45
 
         for i in range(len(graph.V0)):
             nei = graph.V0[i]
@@ -68,8 +65,8 @@ class GraphPlotter(object):
                 path1 = Path(vertices_1, codes)
                 path2 = Path(vertices_2, codes)
 
-                patch1 = patches.PathPatch(path1, facecolor='none', lw=2, zorder=-10)
-                patch2 = patches.PathPatch(path2, facecolor='none', lw=2, zorder=-10)
+                patch1 = patches.PathPatch(path1, facecolor='none', linewidth=linewidth, zorder=-10)
+                patch2 = patches.PathPatch(path2, facecolor='none', linewidth=linewidth, zorder=-10)
 
                 self._ax.add_patch(patch1)
                 self._ax.add_patch(patch2)
@@ -77,7 +74,7 @@ class GraphPlotter(object):
                 for n in nei:
                     lines.append([white[n], black[i]])
 
-        lc = mc.LineCollection(lines, linewidths=2, colors=['black'] * len(lines), zorder=-10)
+        lc = mc.LineCollection(lines, linewidths=linewidth, colors=['black'] * len(lines), zorder=-10)
         self._ax.add_collection(lc)
 
     @staticmethod

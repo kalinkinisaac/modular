@@ -62,13 +62,14 @@ class Api(object):
         else:
             raise Exception('graph is not set')
 
-    def plot_domain_on_canvas(self, canvas):
+    def plot_domain_on_canvas(self, canvas, _markers=True):
         canvas.cla()
         geo_drawer = GeodesicPlotter(canvas.ax)
         geo_drawer.plot(self._domain)
         geo_drawer.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
-        mp = MarkerPlotter(canvas.ax)
-        mp.plot(self._white_markers, self._black_markers, self._cut_markers)
+        if _markers:
+            mp = MarkerPlotter(canvas.ax)
+            mp.plot(self._white_markers, self._black_markers, self._cut_markers)
 
     def get_generators_str(self):
         return Matrix.beautify(self._generators)

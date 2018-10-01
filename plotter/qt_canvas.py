@@ -11,10 +11,11 @@ class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, style='ggplot', _full=False, *args, **kwargs):
         self._style = style
-        with plt.style.context(style):
-            self.fig = plt.Figure()
 
-            super(__class__, self).__init__(self.fig)
+        with plt.style.context(style):
+            self._fig = plt.Figure()
+
+            super(__class__, self).__init__(self._fig)
             self.setParent(parent)
 
             if _full:
@@ -41,9 +42,11 @@ class GraphCanvas(MplCanvas):
 
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(style=graph_style_path, *args, **kwargs)
+        # super(__class__, self).__init__(style='ggplot', *args, **kwargs)
 
     def config(self):
-        self.ax.axis('off')
+        # self.ax.axis('off')
+        pass
 
 
 class DomainCanvas(MplCanvas):
