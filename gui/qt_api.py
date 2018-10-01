@@ -50,6 +50,9 @@ class QtApi(QObject):
         self.decompositionThread.finished.disconnect(self._on_decomposed)
         self.decompositionThread = None
 
+    def change_markers_state(self):
+        self.api.change_markers_state()
+
 class DigestionThread(QThread):
     statusMessage = pyqtSignal(object)
     onChewed = pyqtSignal()

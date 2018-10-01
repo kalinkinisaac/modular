@@ -273,8 +273,9 @@ class App(QMainWindow):
     def handleDecomposed(self, decomposition):
         self.decompositionTextEdit.setText(decomposition)
 
-    def handleMarkersStatehanged(self):
-        pass
+    def handleMarkersStateChanged(self):
+        self.api.change_markers_state()
+        self.domain_canvas.draw()
 
 
 class MyToolbar(NavigationToolbar):
@@ -289,10 +290,10 @@ class MyToolbar(NavigationToolbar):
             ('Subplots', 'putamus parum claram', 'subplots', 'configure_subplots'),
             ('Save', 'sollemnes in futurum', 'filesave', 'save_figure'),
             (None, None, None, None),
-            ('Markers', 'Select', "select", 'select_tool')
+            ('Markers', 'Change', "change", 'change_state')
                           )
 
         NavigationToolbar.__init__(self, figure_canvas, parent=self.parent)
 
-    def select_tool(self):
-        self.parent.handleMarkersStatehanged()
+    def change_state(self):
+        self.parent.handleMarkersStateChanged()

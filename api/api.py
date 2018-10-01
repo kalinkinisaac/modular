@@ -22,6 +22,7 @@ class Api(object):
         self._black_markers = None
         self._cut_markers = None
         self._decomposition = None
+        self._marker_plotter = None
 
     def set_subgroup(self, subgroup: ClassicalSubgroups, n=2):
         if type(n) is not int:
@@ -68,8 +69,12 @@ class Api(object):
         geo_drawer.plot(self._domain)
         geo_drawer.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
         if _markers:
-            mp = MarkerPlotter(canvas.ax)
-            mp.plot(self._white_markers, self._black_markers, self._cut_markers)
+            self._marker_plotter = MarkerPlotter(canvas.ax)
+            self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+
+    def change_markers_state(self):
+        if self._marker_plotter:
+            self._marker_plotter.change_visible()
 
     def get_generators_str(self):
         return Matrix.beautify(self._generators)

@@ -5,11 +5,15 @@ class MarkerPlotter(object):
 
     def __init__(self, ax):
         self._ax = ax
+        self.white_markers = None
+        self.black_markers = None
+        self.cut_markers = None
+        self.legend = None
 
     def plot(self, white, black, cut):
 
         if white:
-            white_markers = self._ax.scatter(
+            self.white_markers = self._ax.scatter(
                 [p.real for p in white], [p.imag for p in white],
                 marker='o',
                 c='white',
@@ -20,7 +24,7 @@ class MarkerPlotter(object):
                 s=MarkerPlotter.SIZE
             )
         if black:
-            black_markers = self._ax.scatter(
+            self.black_markers = self._ax.scatter(
                 [p.real for p in black],
                 [p.imag for p in black],
                 marker='o',
@@ -32,7 +36,7 @@ class MarkerPlotter(object):
                 s=MarkerPlotter.SIZE
             )
         if cut:
-            cut_markers = self._ax.scatter(
+            self.cut_markers = self._ax.scatter(
                 [p.real for p in cut],
                 [p.imag for p in cut],
                 marker='x',
@@ -43,5 +47,14 @@ class MarkerPlotter(object):
                 label='cut vertices',
                 s=MarkerPlotter.SIZE
             )
+        self.legend = self._ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1, prop={'size': 5})
 
-        self._ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1, prop={'size': 5})
+    def change_visible(self):
+        if self.white_markers:
+            self.white_markers.set_visible(not self.white_markers.get_visible())
+        if self.black_markers:
+            self.black_markers.set_visible(not self.black_markers.get_visible())
+        if self.cut_markers:
+            self.cut_markers.set_visible(not self.cut_markers.get_visible())
+        if self.legend:
+            self.legend.set_visible(not self.legend.get_visible())
