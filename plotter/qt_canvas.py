@@ -5,6 +5,8 @@ import os
 
 graph_style_path = f'{os.getcwd()}/plotter/graph.mplstyle'
 domain_style_path = f'{os.getcwd()}/plotter/domain.mplstyle'
+# graph_style_path = '/Users/kalinkinisaac/PycharmProjects/modular/plotter/graph.mplstyle'
+# domain_style_path = '/Users/kalinkinisaac/PycharmProjects/modular/plotter/domain.mplstyle'
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -12,7 +14,7 @@ class MplCanvas(FigureCanvasQTAgg):
     def __init__(self, parent=None, style='ggplot', _full=False, *args, **kwargs):
         self._style = style
 
-        with plt.style.context(style):
+        with plt.style.context(self._style):
             self._fig = plt.Figure()
 
             super(__class__, self).__init__(self._fig)

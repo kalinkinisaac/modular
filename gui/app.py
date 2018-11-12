@@ -262,8 +262,8 @@ class App(QMainWindow):
             fontMetrics = QFontMetrics(self.monospaceFont)
             textSize = fontMetrics.size(0, generators)
 
-            textWidth = textSize.width() + 30  # constant may need to be tweaked
-            textHeight = textSize.height() + 30  # constant may need to be tweaked
+            textWidth = max(textSize.width() + 30, 1000)  # constant may need to be tweaked
+            textHeight = max(textSize.height() + 30, 220) # constant may need to be tweaked
 
             self.generatorsTextEdit.setMinimumSize(textWidth, textHeight)
             self.generatorsTextEdit.resize(textWidth, textHeight)
