@@ -63,8 +63,8 @@ class GraphConstructor(object):
                 j = 2
 
         return BCGraph(
-            V0=V0G,
-            V1=V1G,
+            v0=V0G,
+            v1=V1G,
             dist_edge=[v02n(v0), v12n(v1), j]
         )
 

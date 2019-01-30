@@ -4,7 +4,7 @@ from fimath.geodesic import Geodesic
 from fimath.constants import *
 
 import logging
-# logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log', level=logging.DEBUG)
+logging.basicConfig(format='%(levelname)s:%(message)s', filename='log.log', level=logging.DEBUG)
 
 
 class SpecialPolygon(object):

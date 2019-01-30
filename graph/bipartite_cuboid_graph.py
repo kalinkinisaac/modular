@@ -1,15 +1,9 @@
 class BipartiteCuboidGraph(object):
 
-    def __init__(self, V0=None, V1=None, dist_edge=(0, 1, 0)):
-        self.V0 = V0
-        self.V1 = V1
+    def __init__(self, v0=None, v1=None, dist_edge=(0, 1, 0)):
+        self.V0 = v0
+        self.V1 = v1
         self.v0, self.v1, self.dist_j = dist_edge
-
-        #self._size = len(V0) + len(V1)
-
-    # @property
-    # def size(self):
-    #     return self._size
 
     @staticmethod
     def cyc_next(vertex, order):
@@ -28,4 +22,3 @@ class BipartiteCuboidGraph(object):
 
     def v1_nei(self, vertex):
         return self.V1[vertex]
-
