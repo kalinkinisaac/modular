@@ -1,12 +1,14 @@
 from .algorithm import GraphConstructor
 
+
 def get_graph(gamma):
     gc = GraphConstructor(
-        L=gamma.reprs,
+        l=gamma.reprs,
         reduced=gamma.reduced,
         sort_key=gamma.sort_key,
-        N=gamma.N)
+        n=gamma.N)
 
     return gc.construct()
+
 
 __all__ = ['get_graph', 'GraphConstructor']

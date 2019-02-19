@@ -4,6 +4,4 @@ from .geodesic import Geodesic
 from .matrix import Matrix
 
 
-
-
 __all__ = ['Matrix', 'Field', 'ReField', 'Geodesic']

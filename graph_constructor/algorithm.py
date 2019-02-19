@@ -2,23 +2,24 @@ from graph import BCGraph
 from fimath.constants import *
 from .error import ReprNotFoundError
 
+
 class GraphConstructor(object):
 
-    def __init__(self, L, N, reduced, sort_key):
-        self.L = L
-        self.N = N
+    def __init__(self, l, n, reduced, sort_key):
+        self.L = l
+        self.N = n
         self.reduced = reduced
         self.sort_key = sort_key
-
-    # TODO: make new solution without repr hash
-    def construct(self):
-        L = self.L
         self.V0 = []
         self.V1 = []
 
-        for mat in L:
+    def construct(self):
+        self.V0 = []
+        self.V1 = []
+
+        for mat in self.L:
             orb = self.g0_orb(mat)
-            if mat ==  self.minimum(orb):
+            if mat == self.minimum(orb):
                 self.V0.append(mat)
 
             orb = self.g1_orb(mat)
@@ -28,23 +29,23 @@ class GraphConstructor(object):
         self.V0.sort(key=self.sort_key)
         self.V1.sort(key=self.sort_key)
 
-        self._v02n = dict({(self.V0[i], i) for i in range(len(self.V0))})
-        self._v12n = dict({(self.V1[i], i) for i in range(len(self.V1))})
+        _v02n = dict({(self.V0[i], i) for i in range(len(self.V0))})
+        _v12n = dict({(self.V1[i], i) for i in range(len(self.V1))})
 
-        def v02n(v0):
-            if v0 not in self._v02n.keys():
-                raise ReprNotFoundError(v0)
+        def v02n(_v0):
+            if _v0 not in _v02n.keys():
+                raise ReprNotFoundError(_v0)
             else:
-                return self._v02n[v0]
+                return _v02n[_v0]
 
-        def v12n(v1):
-            if v1 not in self._v12n.keys():
-                raise ReprNotFoundError(v1)
+        def v12n(_v1):
+            if _v1 not in _v12n.keys():
+                raise ReprNotFoundError(_v1)
             else:
-                return self._v12n[v1]
+                return _v12n[_v1]
 
-        V0G = [list(map(v12n, self.g0_nei(v))) for v in self.V0]
-        V1G = [list(map(v02n, self.g1_nei(v))) for v in self.V1]
+        v0_g = [list(map(v12n, self.g0_nei(v))) for v in self.V0]
+        v1_g = [list(map(v02n, self.g1_nei(v))) for v in self.V1]
 
         v0 = self.minimum(self.g0_orb(IDM))
         v1 = self.minimum(self.g1_orb(IDM))
@@ -63,8 +64,8 @@ class GraphConstructor(object):
                 j = 2
 
         return BCGraph(
-            v0=V0G,
-            v1=V1G,
+            v0=v0_g,
+            v1=v1_g,
             dist_edge=[v02n(v0), v12n(v1), j]
         )
 
@@ -77,7 +78,7 @@ class GraphConstructor(object):
         return orb[0]
 
     # Returns orbit of matrix
-    def g0_orb(self, mat : Matrix):
+    def g0_orb(self, mat: Matrix):
         mat = mat % self.N
         acted = self.acted(mat, G0)
 
@@ -86,7 +87,7 @@ class GraphConstructor(object):
         else:
             return [mat, acted]
 
-    def g1_orb(self, mat : Matrix):
+    def g1_orb(self, mat: Matrix):
         mat = mat % self.N
         acted = self.acted(mat, G1)
 
@@ -96,10 +97,10 @@ class GraphConstructor(object):
             return [mat, acted, self.acted(mat, G1_2)]
 
     # Returns neighbors of vertex
-    def g0_nei(self, mat : Matrix):
+    def g0_nei(self, mat: Matrix):
         orbit = self.g0_orb(mat)
         return [self.minimum(self.g1_orb(m)) for m in orbit]
 
-    def g1_nei(self, mat : Matrix):
+    def g1_nei(self, mat: Matrix):
         orbit = self.g1_orb(mat)
         return [self.minimum(self.g0_orb(m)) for m in orbit]
