@@ -2,11 +2,22 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5.QtWidgets import QSizePolicy
 import matplotlib.pyplot as plt
 import os
+import sys
 
-graph_style_path = f'{os.getcwd()}/plotter/graph.mplstyle'
-domain_style_path = f'{os.getcwd()}/plotter/domain.mplstyle'
-# graph_style_path = '/Users/kalinkinisaac/PycharmProjects/modular/plotter/graph.mplstyle'
-# domain_style_path = '/Users/kalinkinisaac/PycharmProjects/modular/plotter/domain.mplstyle'
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
+
+
+graph_style_path = resource_path('plotter/graph.mplstyle')
+domain_style_path = resource_path('plotter/domain.mplstyle')
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -19,9 +30,9 @@ class MplCanvas(FigureCanvasQTAgg):
 
             super(__class__, self).__init__(self._fig)
             self.setParent(parent)
-
+            self.figure.set_tight_layout(False)
             if _full:
-                self.ax = self.figure.add_axes([0,0,1,1])
+                self.ax = self.figure.add_axes([0, 0, 1, 1])
             else:
                 self.ax = self.figure.add_subplot(111)
             self.ax.set_aspect('equal')
