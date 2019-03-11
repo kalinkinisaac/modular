@@ -1,16 +1,17 @@
 from .qt_api import QtApi
 from api.subgroups_names import ClassicalSubgroups
-
+from matplotlib.axes import Axes
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QRect, pyqtSlot
+from PyQt5.QtCore import Qt, QRect, pyqtSlot, pyqtSignal
 from PyQt5.QtGui import QFontDatabase, QFontMetrics
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from plotter.qt_canvas import GraphCanvas, DomainCanvas
+from plotter.qt_canvas import GraphCanvas, DomainCanvas, MplCanvas2
 
 
 class App(QMainWindow):
+    send_fig = pyqtSignal(Axes, str, name="send_fig")
 
     def __init__(self):
         super(__class__, self).__init__()
@@ -28,7 +29,8 @@ class App(QMainWindow):
         self.title = 'Modular'
         self.statusBar = QStatusBar()
         self.subgroups_combo = None
-        self.graph_canvas = GraphCanvas(parent=self, _full=True)
+        # self.graph_canvas = GraphCanvas(parent=self, _full=True)
+        self.graph_canvas = MplCanvas2(self)
         self.domain_canvas = DomainCanvas(parent=self)
         self.generatorsTextEdit = None
         self.matrixLineEdit = None
@@ -241,6 +243,7 @@ class App(QMainWindow):
             graph_canvas=self.graph_canvas,
             domain_canvas=self.domain_canvas
         )
+
 
     def onDecomposeButtonClicked(self):
         self.api.decompose(matrix=self.matrixLineEdit.text())

@@ -1,6 +1,7 @@
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from PyQt5.QtWidgets import QSizePolicy
 import matplotlib.pyplot as plt
+from matplotlib.figure import Figure
 import os
 import sys
 
@@ -23,7 +24,7 @@ domain_style_path = resource_path('plotter/domain.mplstyle')
 class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, style='ggplot', _full=False, *args, **kwargs):
-        self._style = style
+        self._style = 'ggplot'
 
         with plt.style.context(self._style):
             self._fig = plt.Figure()
@@ -47,6 +48,7 @@ class MplCanvas(FigureCanvasQTAgg):
             self.ax.clear()
             self.config()
 
+
     def config(self):
         pass
 
@@ -66,3 +68,23 @@ class DomainCanvas(MplCanvas):
 
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(style=domain_style_path, *args, **kwargs)
+
+
+class MplCanvas2(FigureCanvasQTAgg):
+
+    def __init__(self, parent=None):
+        self.fig = Figure()
+        self.axes = self.fig.add_subplot(111)
+
+        # We want the axes cleared every time plot() is called
+#        self.axes.hold(False)
+
+        FigureCanvasQTAgg.__init__(self, self.fig)
+        self.setParent(parent)
+
+        FigureCanvasQTAgg.setSizePolicy(self, QSizePolicy.Expanding, QSizePolicy.Expanding)
+        FigureCanvasQTAgg.updateGeometry(self)
+
+    def update_plot(self, axes):
+        self.axes = axes
+        self.draw()

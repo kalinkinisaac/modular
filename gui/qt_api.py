@@ -1,10 +1,12 @@
-from PyQt5.QtCore import QThread, pyqtSignal, QObject
-
+from PyQt5.QtCore import QThread, pyqtSignal, QObject, pyqtSlot
+from copy import deepcopy
+from matplotlib.axes import Axes
 from api import Api, ApiError
 
-
+# TODO: rewrite with thread safe methods, plot in another thread
 class QtApi(QObject):
-    def __init__(self, handleStatusMessage, handleChewed, handleDigested, handleDecomposed):
+    send_fig = pyqtSignal(Axes, name="send_fig")
+    def __init__(self, handleStatusMessage, handleChewed, handleDigested, handleDecomposed, g=None):
         super(__class__, self).__init__()
         self.api = Api()
         self.digestionThread = None
@@ -13,31 +15,39 @@ class QtApi(QObject):
         self._handle_digested = handleDigested
         self._handle_decomposed = handleDecomposed
 
+        self.digestionThread = None
+        self.decompositionThread = None
+        self.g = g
+
     def digest(self, *args, **kwargs):
         self._on_eat(*args, **kwargs)
 
-    def _on_eat(self, *args, **kwargs):
+    def _on_eat(self, graph_canvas, *args, **kwargs):
         if not self.digestionThread:
-            self.digestionThread = DigestionThread(api=self.api, *args, **kwargs)
+            self.digestionThread = DigestionThread(api=self.api, graph_canvas=graph_canvas, *args, **kwargs)
+            self.send_fig.connect(self.digestionThread._axes)
+            self.send_fig.emit(graph_canvas.axes)
 
             self.digestionThread.statusMessage.connect(self._handle_status_message)
             self.digestionThread.onChewed.connect(self._handle_chewed)
             self.digestionThread.onDigested.connect(self._handle_digested)
             self.digestionThread.finished.connect(self._on_digested)
+            self.digestionThread.return_fig.connect(graph_canvas.update_plot)
             self.digestionThread.start()
 
     def _on_digested(self):
-        self.digestionThread.statusMessage.disconnect(self._handle_status_message)
-        self.digestionThread.onChewed.disconnect(self._handle_chewed)
-        self.digestionThread.onDigested.disconnect(self._handle_digested)
-        self.digestionThread.finished.disconnect(self._on_digested)
-        self.digestionThread = None
+        if self.digestionThread:
+            self.digestionThread.statusMessage.disconnect(self._handle_status_message)
+            self.digestionThread.onChewed.disconnect(self._handle_chewed)
+            self.digestionThread.onDigested.disconnect(self._handle_digested)
+            self.digestionThread.finished.disconnect(self._on_digested)
+            self.digestionThread = None
 
     def decompose(self, matrix):
         self._on_decompose(matrix)
 
     def _on_decompose(self, matrix_str):
-        if not self.digestionThread:
+        if not self.decompositionThread:
             self.decompositionThread = DecompositionThread(api=self.api, matrix_str=matrix_str)
             self.decompositionThread.statusMessage.connect(self._handle_status_message)
             self.decompositionThread.onDecomposed.connect(self._handle_decomposed)
@@ -45,18 +55,23 @@ class QtApi(QObject):
             self.decompositionThread.start()
 
     def _on_decomposed(self):
-        self.decompositionThread.statusMessage.disconnect(self._handle_status_message)
-        self.decompositionThread.onDecomposed.disconnect(self._handle_decomposed)
-        self.decompositionThread.finished.disconnect(self._on_decomposed)
-        self.decompositionThread = None
+        if self.decompositionThread:
+            self.decompositionThread.statusMessage.disconnect(self._handle_status_message)
+            self.decompositionThread.onDecomposed.disconnect(self._handle_decomposed)
+            self.decompositionThread.finished.disconnect(self._on_decomposed)
+            self.decompositionThread = None
 
     def change_markers_state(self):
         self.api.change_markers_state()
+
+
+
 
 class DigestionThread(QThread):
     statusMessage = pyqtSignal(object)
     onChewed = pyqtSignal()
     onDigested = pyqtSignal(str)
+    return_fig = pyqtSignal(Axes)
 
     def __init__(self, api: Api, subgroup, n, graph_canvas, domain_canvas):
         super(__class__, self).__init__()
@@ -65,6 +80,11 @@ class DigestionThread(QThread):
         self.n = n
         self.graph_canvas = graph_canvas
         self.domain_canvas = domain_canvas
+        self.axes = None
+
+    @pyqtSlot(Axes)
+    def _axes(self, axes):
+        self.axes = axes
 
     def run(self):
         self.statusMessage.emit('Calculating subgroup data')
@@ -87,7 +107,9 @@ class DigestionThread(QThread):
 
         self.statusMessage.emit('Plotting graph')
         try:
-            self.api.plot_graph_on_canvas(self.graph_canvas)
+            # self.api.plot_graph_on_canvas(self.graph_canvas)
+            self.api.plot_graph_on_axes(self.axes)
+            self.return_fig.emit(self.axes)
         except Exception as e:
             self.statusMessage.emit(f'Unexpected error: {e}')
             return
@@ -102,7 +124,8 @@ class DigestionThread(QThread):
 
         self.statusMessage.emit('Plotting domain')
         try:
-            self.api.plot_domain_on_canvas(self.domain_canvas)
+            #self.api.plot_domain_on_canvas(self.domain_canvas)
+            pass
         except Exception as e:
             self.statusMessage.emit(f'Unexpected error: {e}')
             return

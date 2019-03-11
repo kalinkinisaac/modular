@@ -49,6 +49,10 @@ class Api(object):
         gd = GraphPlotter(canvas.ax)
         gd.plot(self._graph)
 
+    def plot_graph_on_axes(self, axes):
+        gd = GraphPlotter(axes)
+        gd.plot(self._graph)
+
     def calc_domain(self):
         if self._graph:
             sp = SpecialPolygon(self._graph)
