@@ -1,27 +1,21 @@
 from .qt_api import QtApi
-from api.subgroups_names import ClassicalSubgroups
+from api import ClassicalSubgroups
 from matplotlib.axes import Axes
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QRect, pyqtSlot, pyqtSignal
+from PyQt5.QtCore import Qt, QRect, pyqtSlot, pyqtSignal, QThread
 from PyQt5.QtGui import QFontDatabase, QFontMetrics
 
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
-from plotter.qt_canvas import GraphCanvas, DomainCanvas, MplCanvas2
+from plotter.qt_canvas import GraphCanvas, DomainCanvas
 
 
 class App(QMainWindow):
-    send_fig = pyqtSignal(Axes, str, name="send_fig")
+    digest = pyqtSignal(ClassicalSubgroups, str, Axes, Axes, name="digest")
 
     def __init__(self):
         super(__class__, self).__init__()
 
-        self.api = QtApi(
-            handleStatusMessage=self.handleStatusMessage,
-            handleChewed=self.handleChewed,
-            handleDigested=self.handleDigested,
-            handleDecomposed=self.handleDecomposed
-        )
         self.left = 10
         self.top = 10
         self.width = 1080
@@ -29,14 +23,27 @@ class App(QMainWindow):
         self.title = 'Modular'
         self.statusBar = QStatusBar()
         self.subgroups_combo = None
-        # self.graph_canvas = GraphCanvas(parent=self, _full=True)
-        self.graph_canvas = MplCanvas2(self)
-        self.domain_canvas = DomainCanvas(parent=self)
+        self.graph_canvas = GraphCanvas(self)
+        self.domain_canvas = DomainCanvas(self)
         self.generatorsTextEdit = None
         self.matrixLineEdit = None
         self.decompositionTextEdit = None
 
         self.minimumCanvasHeight = 550
+
+        self.api_thread = QThread()
+        self.api = QtApi()
+
+        self.digest.connect(self.api.on_digest)
+        self.api.handle_graph_axes.connect(self.graph_canvas.update_plot)
+        self.api.handle_domain_axes.connect(self.domain_canvas.update_plot)
+        self.api.handle_generators.connect(self.handleDigested)
+        # self._qt_api.finished.connect(self.thread.quit)
+        # self._qt_api.finished.connect(self.thread.deleteLater)
+
+        self.api.moveToThread(self.api_thread)
+        self.api_thread.start()
+
         self.initUI()
 
     def initUI(self):
@@ -44,32 +51,30 @@ class App(QMainWindow):
         layout = QVBoxLayout(self.centralWidget)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.scrollArea = QScrollArea(self.centralWidget)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollArea.setMinimumWidth(self.width)
-        self.scrollArea.setFrameShape(QFrame.NoFrame)
-        self.scrollArea.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollArea.horizontalScrollBar().setEnabled(False)
+        self.scroll_area = QScrollArea(self.centralWidget)
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setMinimumWidth(self.width)
+        self.scroll_area.setFrameShape(QFrame.NoFrame)
+        self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.scroll_area.horizontalScrollBar().setEnabled(False)
 
-        layout.addWidget(self.scrollArea)
+        layout.addWidget(self.scroll_area)
 
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 640, 400))
+        self.scroll_area_widget_contents = QWidget()
+        self.scroll_area_widget_contents.setGeometry(QRect(0, 0, 640, 400))
 
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
+        self.scroll_area.setWidget(self.scroll_area_widget_contents)
 
-
-
-        self.grid = QGridLayout(self.scrollAreaWidgetContents)
+        self.grid = QGridLayout(self.scroll_area_widget_contents)
 
         self.grid.addWidget(self.createGammaSection(), 0, 0)
-        self.grid.addWidget(self.createGraphSection(), 1, 0)
+        self.grid.addWidget(self.create_graph_section(), 1, 0)
         self.grid.addWidget(self.createDomainSection(), 2, 0)
         self.grid.addWidget(self.createGeneratorsSection(), 3, 0)
         self.grid.addWidget(self.createDecompositionSection(), 4, 0)
 
-        self.scrollAreaWidgetContents.setLayout(self.grid)
+        self.scroll_area_widget_contents.setLayout(self.grid)
 
         self.setCentralWidget(self.centralWidget)
 
@@ -81,7 +86,6 @@ class App(QMainWindow):
 
     def createGammaSection(self):
         groupBox = QGroupBox("Subgroup selection")
-
 
         lbl = QLabel('Choose subgroup: ')
         lbl.setFixedSize(lbl.sizeHint())
@@ -113,21 +117,20 @@ class App(QMainWindow):
 
         return groupBox
 
-    def createGraphSection(self):
-        groupBox = QGroupBox("Graph visualization")
+    def create_graph_section(self):
+        group_box = QGroupBox("Graph visualization")
 
         vbox = QVBoxLayout()
         vbox.addStretch()
-
 
         toolbar = NavigationToolbar(self.graph_canvas, self)
 
         vbox.addWidget(self.graph_canvas, Qt.AlignLeft)
         vbox.addWidget(toolbar, Qt.AlignLeft)
 
-        groupBox.setLayout(vbox)
-        groupBox.setMinimumHeight(self.minimumCanvasHeight)
-        return groupBox
+        group_box.setLayout(vbox)
+        group_box.setMinimumHeight(self.minimumCanvasHeight)
+        return group_box
 
     def createDomainSection(self):
         groupBox = QGroupBox("Domain and tree visualization")
@@ -237,16 +240,22 @@ class App(QMainWindow):
         return groupBox
 
     def onApplyButtonClicked(self):
-        self.api.digest(
-            subgroup=ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
-            n=self.line_edit.text(),
-            graph_canvas=self.graph_canvas,
-            domain_canvas=self.domain_canvas
+
+        self.graph_canvas.cla()
+        self.domain_canvas.cla()
+
+        self.digest.emit(
+            ClassicalSubgroups.from_str(self.subgroups_combo.currentText()),
+            self.line_edit.text(),
+            self.graph_canvas.axes,
+            self.domain_canvas.axes
         )
 
 
+
     def onDecomposeButtonClicked(self):
-        self.api.decompose(matrix=self.matrixLineEdit.text())
+        # self.api.decompose(matrix=self.matrixLineEdit.text())
+        pass
 
     @pyqtSlot(object)
     def handleStatusMessage(self, message):
@@ -258,8 +267,6 @@ class App(QMainWindow):
 
     @pyqtSlot(str)
     def handleDigested(self, generators: str):
-        self.domain_canvas.draw()
-
         if self.generatorsTextEdit:
             self.generatorsTextEdit.setText(generators)
             fontMetrics = QFontMetrics(self.monospaceFont)
@@ -277,8 +284,9 @@ class App(QMainWindow):
         self.decompositionTextEdit.setText(decomposition)
 
     def handleMarkersStateChanged(self):
-        self.api.change_markers_state()
-        self.domain_canvas.draw()
+        #self.api.change_markers_state()
+        #self.domain_canvas.draw()
+        pass
 
 
 class MyToolbar(NavigationToolbar):

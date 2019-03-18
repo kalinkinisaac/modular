@@ -6,7 +6,7 @@ from plotter.marker_potter import MarkerPlotter
 from special_polygon import SpecialPolygon
 from fimath import Matrix, Field
 from reduction import Decomposer
-from .error import FormatError, ValueRangeError
+from .error import ApiError, FormatError, ValueRangeError
 
 
 class Api(object):
@@ -45,11 +45,15 @@ class Api(object):
             raise Exception('subgroup is not set')
 
     def plot_graph_on_canvas(self, canvas):
+        if not self._graph:
+            raise ApiError('graph is not calculated')
         canvas.cla()
         gd = GraphPlotter(canvas.ax)
         gd.plot(self._graph)
 
     def plot_graph_on_axes(self, axes):
+        if not self._graph:
+            raise ApiError('graph is not calculated')
         gd = GraphPlotter(axes)
         gd.plot(self._graph)
 
@@ -74,6 +78,14 @@ class Api(object):
         geo_drawer.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
         if _markers:
             self._marker_plotter = MarkerPlotter(canvas.ax)
+            self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+
+    def plot_domain_on_axes(self, axes, _markers=True):
+        gp = GeodesicPlotter(axes)
+        gp.plot(self._domain)
+        gp.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
+        if _markers:
+            self._marker_plotter = MarkerPlotter(axes)
             self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
 
     def change_markers_state(self):

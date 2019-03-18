@@ -2,6 +2,7 @@ from graph import BCGraph
 from matplotlib import collections as mc
 from matplotlib.path import Path
 import matplotlib.patches as patches
+from matplotlib.lines import Line2D
 
 
 class GraphPlotter(object):
@@ -22,53 +23,49 @@ class GraphPlotter(object):
         self._ax.set_xlim(-0.2, 1.2)
         self._ax.set_ylim(height - 1.2, height + 0.2)
 
-        black = []
-        white = []
+        blacks = []
+        whites = []
 
         for i in range(len(graph.V0)):
             pos = (0, height - black_delta - black_delta * i)
-            black.append(pos)
+            blacks.append(pos)
             self.draw_vertex(pos, color='black')
 
         for i in range(len(graph.V1)):
             pos = (1, height - white_delta - white_delta * i)
-            white.append(pos)
+            whites.append(pos)
             self.draw_vertex(pos, color='w')
-
-        lines = []
-        colors = []
 
         line_width = 1.45
 
         for i in range(len(graph.V0)):
-            nei = graph.V0[i]
+            neighbors = graph.V0[i]
 
-            if GraphPlotter.has_parallel(nei):
-                sx, sy = black[i]
-                ex, ey = white[nei[0]]
-                # mid1 = ((sx + ex)/2, (sy + ey)/2 + 0.075)
-                # mid2 = ((sx + ex) / 2, (sy + ey) / 2 - 0.075)
-                mid1 = GraphPlotter.lerp(black[i], white[nei[0]], y_shift=0.075)
-                mid2 = GraphPlotter.lerp(black[i], white[nei[0]], y_shift=-0.075)
+            if GraphPlotter.has_parallel(neighbors):
+                mid1 = GraphPlotter.lerp(blacks[i], whites[neighbors[0]], y_shift=0.075)
+                mid2 = GraphPlotter.lerp(blacks[i], whites[neighbors[0]], y_shift=-0.075)
 
                 vertices_1 = [
-                    black[i],
+                    blacks[i],
                     mid1,
                     mid1,
-                    white[nei[0]]
+                    whites[neighbors[0]]
                 ]
                 vertices_2 = [
-                    black[i],
+                    blacks[i],
                     mid2,
                     mid2,
-                    white[nei[0]]
+                    whites[neighbors[0]]
                 ]
-                codes = [Path.MOVETO,
-                         Path.CURVE4,
-                         Path.CURVE4,
-                         Path.CURVE4,
-                         ]
+                codes = [
+                    Path.MOVETO,
+                    Path.CURVE4,
+                    Path.CURVE4,
+                    Path.CURVE4
+                ]
+
                 path1 = Path(vertices_1, codes)
+
                 if cycle_text:
                     self._ax.text(
                         mid1[0],
@@ -106,10 +103,11 @@ class GraphPlotter(object):
                 self._ax.add_patch(patch1)
                 self._ax.add_patch(patch2)
             else:
-                for n in nei:
+                for n in neighbors:
+                    color = None
                     if len(graph.V1[n]) == 3:
                         if GraphPlotter.has_parallel(graph.V1[n]):
-                            pos = GraphPlotter.lerp(black[i], white[n], 0.5)
+                            pos = GraphPlotter.lerp(blacks[i], whites[n], 0.5)
                             if cycle_text:
                                 self._ax.text(
                                     pos[0],
@@ -118,9 +116,9 @@ class GraphPlotter(object):
                                     fontsize=GraphPlotter.FONT_SIZE,
                                     bbox=dict(facecolor='w', edgecolor='black', boxstyle='round')
                                 )
-                            colors.append(cycle_colors[2])
+                            color = cycle_colors[2]
                         else:
-                            pos = GraphPlotter.lerp(black[i], white[n], 0.35)
+                            pos = GraphPlotter.lerp(blacks[i], whites[n], 0.35)
                             if cycle_text:
                                 self._ax.text(
                                     pos[0],
@@ -129,13 +127,17 @@ class GraphPlotter(object):
                                     fontsize=GraphPlotter.FONT_SIZE,
                                     bbox=dict(facecolor='w', edgecolor='black', boxstyle='round')
                                 )
-                            colors.append(cycle_colors[graph.V1[n].index(i)])
+                            color = cycle_colors[graph.V1[n].index(i)]
                     else:
-                        colors.append('black')
-                    lines.append([white[n], black[i]])
+                        color = 'black'
+                    x_min = whites[n][0]
+                    x_max = blacks[i][0]
+                    y_min = whites[n][1]
+                    y_max = blacks[i][1]
+                    self._ax.add_line(Line2D([x_min, x_max], [y_min, y_max], color=color, zorder=-10, linewidth=line_width))
 
-        lc = mc.LineCollection(lines, linewidths=line_width, colors=colors, zorder=-10)
-        self._ax.add_collection(lc)
+        #lc = mc.LineCollection(lines, linewidths=line_width, colors=colors, zorder=-10)
+        #self._ax.add_collection(lc)
 
     @staticmethod
     def lerp(start, end, t=0.5, x_shift=0.0, y_shift=0.0):
