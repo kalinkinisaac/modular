@@ -34,7 +34,7 @@ class Matrix(BaseMatrix):
 
     @staticmethod
     def from_str(matrix_str):
-        parsed = re.sub('[^0-9,\-]', '', matrix_str)
+        parsed = re.sub(r'[^0-9,\-]', '', matrix_str)
         a, b, c, d = list(map(int, parsed.split(',')))
         return Matrix(a, b, c, d)
 

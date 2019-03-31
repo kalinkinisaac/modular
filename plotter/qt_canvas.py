@@ -27,7 +27,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
     def __init__(self, parent=None, style='fast'):
         with plt.style.context(style):
-            fig = Figure()
+            fig = Figure(figsize=(40, 40), dpi=80)
             super(__class__, self).__init__(fig)
 
             self._style = style
@@ -36,10 +36,10 @@ class MplCanvas(FigureCanvasQTAgg):
             self.delayTimeout = 100
 
             self._resizeTimer = QtCore.QTimer(self)
-            self._resizeTimer.timeout.connect(self._delayedUpdate)
+            self._resizeTimer.timeout.connect(self._delayed_update)
 
             self.axes = self.figure.add_subplot(111)
-            self.figure.set_tight_layout(False)
+            self.figure.set_tight_layout(True)
             self.axes.set_aspect('equal')
 
             FigureCanvasQTAgg.__init__(self, self.figure)
@@ -63,7 +63,7 @@ class MplCanvas(FigureCanvasQTAgg):
 
         super(__class__, self).resizeEvent(event)
 
-    def _delayedUpdate(self):
+    def _delayed_update(self):
         self._resizeTimer.stop()
         self.setUpdatesEnabled(True)
 

@@ -9,8 +9,9 @@ class MarkerPlotter(object):
         self.black_markers = None
         self.cut_markers = None
         self.legend = None
+        self._visible = True
 
-    def plot(self, white, black, cut):
+    def plot(self, white, black, cut, legend=False):
 
         if white:
             self.white_markers = self._ax.scatter(
@@ -47,14 +48,16 @@ class MarkerPlotter(object):
                 label='cut vertices',
                 s=MarkerPlotter.SIZE
             )
-        self.legend = self._ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1, prop={'size': 5})
+        if legend:
+            self._ax.legend(loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1, prop={'size': 5})
 
     def change_visible(self):
+        self._visible = not self._visible
         if self.white_markers:
-            self.white_markers.set_visible(not self.white_markers.get_visible())
+            self.white_markers.set_visible(self._visible)
         if self.black_markers:
-            self.black_markers.set_visible(not self.black_markers.get_visible())
+            self.black_markers.set_visible(self._visible)
         if self.cut_markers:
-            self.cut_markers.set_visible(not self.cut_markers.get_visible())
+            self.cut_markers.set_visible(self._visible)
         if self.legend:
-            self.legend.set_visible(not self.legend.get_visible())
+            self.legend.set_visible(self._visible)

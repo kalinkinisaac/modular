@@ -42,7 +42,7 @@ class Api(object):
         if self._subgroup:
             self._graph = get_graph(self._subgroup)
         else:
-            raise Exception('subgroup is not set')
+            raise Exception('subgroup is not set.')
 
     def plot_graph_on_canvas(self, canvas):
         if not self._graph:
@@ -60,7 +60,10 @@ class Api(object):
     def calc_domain(self):
         if self._graph:
             sp = SpecialPolygon(self._graph)
-            sp.construct_polygon()
+            try:
+                sp.construct_polygon()
+            except Exception as e:
+                raise ApiError(f'unexpected error during constructing polygon: {e}')
             self._domain = sp.edges
             self._tree = sp.tree
             self._involutions = sp.involutions
@@ -69,7 +72,7 @@ class Api(object):
             self._cut_markers = sp.cut_vertices
             self._generators = list(zip(*self._involutions))[2]
         else:
-            raise Exception('graph is not set')
+            raise ApiError('graph is not set.')
 
     def plot_domain_on_canvas(self, canvas, _markers=True):
         canvas.cla()
@@ -80,7 +83,7 @@ class Api(object):
             self._marker_plotter = MarkerPlotter(canvas.ax)
             self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
 
-    def plot_domain_on_axes(self, axes, _markers=True):
+    def plot_domain_on_axes(self, axes, _markers=False):
         gp = GeodesicPlotter(axes)
         gp.plot(self._domain)
         gp.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
@@ -97,14 +100,17 @@ class Api(object):
 
     def decompose_matrix(self, matrix_str):
         try:
-            matrix = Matrix(matrix_str)
+            matrix = Matrix.from_str(matrix_str)
         except Exception:
             raise FormatError('Matrix should be in following format: a, b, c, d')
 
         z = Field(0.5+1.5j)
         w = matrix.moe(z)
         decomposer = Decomposer(polygon=self._domain, involutions=self._involutions, z=z, w=w)
-        self._decomposition = decomposer.decompose()
+        try:
+            self._decomposition = decomposer.decompose()
+        except Exception:
+            raise ApiError('Matrix does not belong to subgroup or another unexpected error occurred.')
 
     def get_decomposition(self):
         return Matrix.beautify(self._decomposition)
