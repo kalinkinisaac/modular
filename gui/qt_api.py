@@ -23,6 +23,7 @@ class QtApi(QObject):
     handle_generators = pyqtSignal(str)
     handle_decomposition = pyqtSignal(str)
     handle_markers_state_plotted = pyqtSignal()
+    handle_markers = pyqtSignal(list)
     finished = pyqtSignal()
 
     def __init__(self):
@@ -74,8 +75,9 @@ class QtApi(QObject):
 
     @error_handled
     def _plot_domain(self, domain_axes):
-        self._api.plot_domain_on_axes(domain_axes, _markers=False)
+        self._api.plot_domain_on_axes(domain_axes, markers=False)
         self.handle_domain_axes.emit(domain_axes)
+        self.handle_markers.emit(self._api.markers)
         self.update_status_message('Domain is plotted!', 3000)
 
     @error_handled

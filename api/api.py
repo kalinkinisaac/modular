@@ -2,7 +2,7 @@ from api.subgroups_names import ClassicalSubgroups
 from graph_constructor import get_graph
 from plotter.graph_plotter import GraphPlotter
 from plotter.geodesic_plotter import GeodesicPlotter
-from plotter.marker_potter import MarkerPlotter
+from plotter.marker_plotter import MarkerPlotter
 from special_polygon import SpecialPolygon
 from fimath import Matrix, Field
 from reduction import Decomposer
@@ -44,13 +44,6 @@ class Api(object):
         else:
             raise Exception('subgroup is not set.')
 
-    def plot_graph_on_canvas(self, canvas):
-        if not self._graph:
-            raise ApiError('graph is not calculated')
-        canvas.cla()
-        gd = GraphPlotter(canvas.ax)
-        gd.plot(self._graph)
-
     def plot_graph_on_axes(self, axes):
         if not self._graph:
             raise ApiError('graph is not calculated')
@@ -74,22 +67,20 @@ class Api(object):
         else:
             raise ApiError('graph is not set.')
 
-    def plot_domain_on_canvas(self, canvas, _markers=True):
-        canvas.cla()
-        geo_drawer = GeodesicPlotter(canvas.ax)
-        geo_drawer.plot(self._domain)
-        geo_drawer.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
-        if _markers:
-            self._marker_plotter = MarkerPlotter(canvas.ax)
-            self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+    @property
+    def markers(self):
+        return [self._white_markers, self._black_markers, self._cut_markers]
 
-    def plot_domain_on_axes(self, axes, _markers=False):
+    def plot_domain_on_axes(self, axes, markers=False):
         gp = GeodesicPlotter(axes)
         gp.plot(self._domain)
         gp.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
-        if _markers:
-            self._marker_plotter = MarkerPlotter(axes)
-            self._marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+        if markers:
+            _marker_plotter = MarkerPlotter(axes)
+            try:
+                _marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+            except Exception:
+                raise ApiError('unexpected error.')
 
     def change_markers_state(self):
         if self._marker_plotter:

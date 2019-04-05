@@ -12,7 +12,6 @@ class MarkerPlotter(object):
         self._visible = True
 
     def plot(self, white, black, cut, legend=False):
-
         if white:
             self.white_markers = self._ax.scatter(
                 [p.real for p in white], [p.imag for p in white],

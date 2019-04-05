@@ -7,7 +7,7 @@ from matplotlib.lines import Line2D
 
 class GraphPlotter(object):
     FONT_SIZE = 4
-    CYCLE_COLORS = ('black', 'b', 'r')
+    CYCLE_COLORS = ('darkblue', 'blue', 'lightblue')
 
     def __init__(self, ax):
         self._ax = ax

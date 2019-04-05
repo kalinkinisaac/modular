@@ -1,5 +1,8 @@
 import sys
 
+import matplotlib
+matplotlib.use('WebAgg')
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QFontDatabase, QFontMetrics, QFont
@@ -8,18 +11,24 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT
 from plotter.qt_canvas import MplCanvas, GraphCanvas, DomainCanvas
 from gui.qt_api import QtApi
 from api import ClassicalSubgroups
+from plotter.marker_plotter import MarkerPlotter
 
 
 class App(QMainWindow):
     digest = pyqtSignal(ClassicalSubgroups, str, Axes, Axes, name='digest')
     decompose = pyqtSignal(str, name='decompose')
+
     STATUS_MESSAGE_COOLDOWN_TIME = 5000
+
+    DEFAULT_WIDTH = 1200
+    DEFAULT_HEIGHT = 800
 
     def __init__(self):
         super(__class__, self).__init__()
 
         self.graph_canvas = GraphCanvas()
         self.domain_canvas = DomainCanvas()
+        self.marker_plotter = None
 
         self.worker_thread = QThread()
         self.worker = QtApi()
@@ -32,6 +41,7 @@ class App(QMainWindow):
         self.worker.handle_generators.connect(self.generators_handler)
         self.worker.handle_decomposition.connect(self.decomposition_handler)
         self.worker.handle_markers_state_plotted.connect(self.on_markers_state_plotted)
+        self.worker.handle_markers.connect(self.on_markers)
 
         self.worker.moveToThread(self.worker_thread)
         self.worker_thread.start()
@@ -54,12 +64,20 @@ class App(QMainWindow):
 
         central_widget_layout.addWidget(self.create_setup_section())
         central_widget_layout.addWidget(self.create_plots_section())
-        central_widget_layout.addWidget(self.create_generators_section())
-        central_widget_layout.addWidget(self.create_decompose_section())
+
+        matrix_section = QWidget(parent=self.central_widget)
+        matrix_section_layout = QHBoxLayout()
+        matrix_section_layout.setContentsMargins(0, 0, 0, 0)
+        matrix_section_layout.addWidget(self.create_generators_section())
+        matrix_section_layout.addWidget(self.create_decompose_section())
+        matrix_section.setLayout(matrix_section_layout)
+
+        central_widget_layout.addWidget(matrix_section)
 
         self.central_widget.setLayout(central_widget_layout)
         self.setCentralWidget(self.central_widget)
         self.setStatusBar(self.status_bar)
+        self.resize(self.DEFAULT_WIDTH, self.DEFAULT_HEIGHT)
         self.show()
         self.update()
     
@@ -96,6 +114,7 @@ class App(QMainWindow):
     def create_plots_section(self):
         plots = QGroupBox("Graph and domain")
         plots_layout = QHBoxLayout()
+        plots_layout.setContentsMargins(0, 0, 0, 0)
 
         graph = QWidget(parent=plots)
         graph_layout = QVBoxLayout()
@@ -108,7 +127,7 @@ class App(QMainWindow):
         domain = QWidget(parent=plots)
         domain_layout = QVBoxLayout()
         domain_canvas_toolbar = DomainToolbar(self.domain_canvas, domain)
-        domain_canvas_toolbar.handle_markers_state_changed.connect(self.worker.on_markers_state_changed)
+        domain_canvas_toolbar.handle_markers_state_changed.connect(self.on_markers_state_changed)
         domain_layout.addWidget(self.domain_canvas)
         domain_layout.addWidget(domain_canvas_toolbar)
         domain.setLayout(domain_layout)
@@ -121,8 +140,10 @@ class App(QMainWindow):
         return plots
 
     def create_generators_section(self):
-        generators_section = QGroupBox("List of subgroup generators")
+        generators_section = QGroupBox("Generators section")
         generators_section_layout = QVBoxLayout()
+
+        label = QLabel('List of subgroup generators')
 
         self.generators_text_edit = QTextEdit()
         self.generators_text_edit.setReadOnly(True)
@@ -130,10 +151,11 @@ class App(QMainWindow):
         self.generators_text_edit.setFont(self.MONOSPACE_FONT)
         self.generators_text_edit.setLineWrapMode(QTextEdit.FixedPixelWidth)
 
+        generators_section_layout.addWidget(label)
         generators_section_layout.addWidget(self.generators_text_edit)
 
         generators_section.setLayout(generators_section_layout)
-        generators_section.setFixedHeight(generators_section.minimumSizeHint().height())
+        # generators_section.setFixedHeight(generators_section.minimumSizeHint().height())
         return generators_section
 
     def create_decompose_section(self):
@@ -169,7 +191,7 @@ class App(QMainWindow):
         group_box_layout.addWidget(self.decomposition_text_edit)
 
         group_box.setLayout(group_box_layout)
-        group_box.setFixedHeight(group_box.minimumSizeHint().height())
+        # group_box.setFixedHeight(group_box.minimumSizeHint().height())
         return group_box
 
     @pyqtSlot(str, int, name='statusMessageHandler')
@@ -210,9 +232,21 @@ class App(QMainWindow):
         self.decomposition_text_edit.setText(decomposition)
         font_metrics = QFontMetrics(self.MONOSPACE_FONT)
         text_width = font_metrics.boundingRect(decomposition.split('\n')[0]).width() + 30
-        self.decomposition_text_edit.setLineWrapMode(text_width)
+        self.decomposition_text_edit.setLineWrapColumnOrWidth(text_width)
 
     def on_markers_state_plotted(self):
+        self.domain_canvas.draw()
+
+    def on_markers_state_changed(self):
+        if self.marker_plotter:
+            self.marker_plotter.change_visible()
+            self.domain_canvas.draw()
+
+    @pyqtSlot(list, name='onMarkers')
+    def on_markers(self, markers):
+        white, black, cut = markers
+        self.marker_plotter = MarkerPlotter(self.domain_canvas.axes)
+        self.marker_plotter.plot(white, black, cut)
         self.domain_canvas.draw()
 
 
@@ -240,6 +274,8 @@ class DomainToolbar(NavigationToolbar2QT):
 
 
 if __name__ == '__main__':
+
+    
     app = QApplication(sys.argv)
     ex = App()
     sys.exit(app.exec_())
