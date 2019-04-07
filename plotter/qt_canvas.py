@@ -8,19 +8,19 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 
 
-def resource_path(relative_path):
-    """ Get absolute path to resource, works for dev and for PyInstaller """
-    try:
-        # PyInstaller creates a temp folder and stores path in _MEIPASS
-        base_path = getattr(sys, '_MEIPASS')
-    except AttributeError:
-        base_path = os.path.abspath(".")
+# def resource_path(relative_path):
+#     """ Get absolute path to resource, works for dev and for PyInstaller """
+#     try:
+#         # PyInstaller creates a temp folder and stores path in _MEIPASS
+#         base_path = getattr(sys, '_MEIPASS')
+#     except AttributeError:
+#         base_path = os.path.abspath(".")
+#
+#     return os.path.join(base_path, relative_path)
 
-    return os.path.join(base_path, relative_path)
 
-
-graph_style_path = resource_path('plotter/graph.mplstyle')
-domain_style_path = resource_path('plotter/domain.mplstyle')
+# graph_style_path = resource_path('plotter/graph.mplstyle')
+# domain_style_path = resource_path('plotter/domain.mplstyle')
 
 
 class MplCanvas(FigureCanvasQTAgg):
@@ -71,12 +71,12 @@ class MplCanvas(FigureCanvasQTAgg):
 class GraphCanvas(MplCanvas):
 
     def __init__(self, *args, **kwargs):
-        super(__class__, self).__init__(style=graph_style_path, *args, **kwargs)
+        super(__class__, self).__init__(style='fast', *args, **kwargs)
 
 
 class DomainCanvas(MplCanvas):
 
     def __init__(self, *args, **kwargs):
-        super(__class__, self).__init__(style=domain_style_path, *args, **kwargs)
+        super(__class__, self).__init__(style='ggplot', *args, **kwargs)
 
 
