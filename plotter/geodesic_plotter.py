@@ -27,6 +27,7 @@ class GeodesicPlotter(object):
             raise TypeError('geodesic should be Geodesic instance')
 
         if geodesic.is_vertical:
+            return
             if geodesic.has_inf:
                 self._vertical_inf(geodesic, *args, **kwargs)
             else:

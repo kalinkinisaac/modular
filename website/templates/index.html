@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block content %}
+
+
+
+<div class="grid">
+    <div class="row">
+        <div class="container">
+            <label for="subgroup-select">Choose subgroup:</label>
+        </div>
+        <div class="container">
+            <select id="subgroup-select">
+                <option value="Gamma bot zero">Gamma bot zero</option>
+                <option value="Gamma top zero">Gamma top zero</option>
+                <option value="Gamma bot one">Gamma bot one</option>
+                <option value="Gamma top one">Gamma top one</option>
+                <option value="Gamma">Gamma</option>
+            </select>
+        </div>
+        <div class="container">
+            <label for="n-input">Type N:</label>
+        </div>
+        <div class="container">
+            <input id="n-input" type="text" size="20">
+        </div>
+        <div class="col-sm">
+            <button onclick="onDigestButtonClick();">Apply</button>
+        </div>
+    </div>
+
+        <div id="graph-container" class="container">
+
+        </div>
+        <div id="domain-container" class="container"></div>
+
+    <div class="row">
+        <label for="matrix-input">Type matrix:</label>
+        <input id="matrix-input" type="text" size="40">
+        <button onclick="onDecomposeButtonClick();">Decompose</button>
+    </div>
+    <div class="row">
+        <label for="matrix-decomposition">Matrix decomposition</label>
+        <textarea id="matrix-decomposition" rows="2"></textarea>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function onDigestButtonClick() {
+        let subgroup = $("#subgroup-select option:selected").val();
+        let toDigest = {"subgroup": subgroup, "n": 2};
+        $.post({
+            async: true,
+            contentType: "json",
+            dataType: "json",
+            url: "/digest",
+            data: JSON.stringify(toDigest),
+            success: function (data) {
+              //   alert(data.graph);
+              //   !function(mpld3){
+              //      mpld3.draw_figure("fig_graph_plot", data.graph);
+              // }(mpld3);
+                alert(data.graph);
+                let graph = $("#graph-container");
+                graph.html(data.graph);
+                graph.show();
+            }
+        });
+    }
+    function onDecomposeButtonClick() {
+        let matrixStr = $("#matrix-input").val();
+        let toDecompose = {"matrix": matrixStr};
+        $.post({
+            async: true,
+            contentType: "json",
+            url: "/decompose",
+            data: JSON.stringify(toDecompose),
+            success: function (data) {
+            let decomposition = $("#matrix-decomposition");
+            decomposition.text(data);
+            decomposition.show();
+            }
+        });
+    }
+</script>
+{% endblock %}

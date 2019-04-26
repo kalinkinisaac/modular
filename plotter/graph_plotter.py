@@ -13,7 +13,7 @@ class GraphPlotter(object):
         self._ax = ax
 
     def draw_vertex(self, xy, color='w'):
-        self._ax.add_artist(patches.Circle(xy, radius=0.045, facecolor=color, edgecolor='black'))
+        self._ax.add_patch(patches.Circle(xy, radius=0.045, facecolor=color, edgecolor='black'))
 
     def plot(self, graph: BCGraph, cycle_colors=CYCLE_COLORS, cycle_text=False):
         black_delta = 0.25
