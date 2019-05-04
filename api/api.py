@@ -50,6 +50,12 @@ class Api(object):
         gd = GraphPlotter(axes)
         gd.plot(self._graph)
 
+    def plot_graph_on_bokeh(self, fig):
+        if not self._graph:
+            raise ApiError('graph is not calculated')
+        gd = GraphPlotter(bokeh_fig=fig)
+        gd.plot(self._graph)
+
     def calc_domain(self):
         if self._graph:
             sp = SpecialPolygon(self._graph)
@@ -72,7 +78,7 @@ class Api(object):
         return [self._white_markers, self._black_markers, self._cut_markers]
 
     def plot_domain_on_axes(self, axes, markers=False):
-        gp = GeodesicPlotter(axes)
+        gp = GeodesicPlotter(ax=axes)
         gp.plot(self._domain)
         gp.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
         if markers:
@@ -81,6 +87,18 @@ class Api(object):
                 _marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
             except Exception:
                 raise ApiError('unexpected error.')
+
+    def plot_domain_on_bokeh(self, fig, markers=True):
+        gp = GeodesicPlotter(bokeh_fig=fig)
+        gp.plot(self._domain)
+        gp.plot(self._tree)# , color='r', alpha=0.8, linewidth=0.75, linestyle='--')
+        if markers:
+            _marker_plotter = MarkerPlotter(bokeh_fig=fig)
+            _marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+            # try:
+            #     _marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)
+            # except Exception:
+            #     raise ApiError('unexpected error.')
 
     def change_markers_state(self):
         if self._marker_plotter:
@@ -98,6 +116,7 @@ class Api(object):
         z = Field(0.5+1.5j)
         w = matrix.moe(z)
         decomposer = Decomposer(polygon=self._domain, involutions=self._involutions, z=z, w=w)
+
         try:
             self._decomposition = decomposer.decompose()
         except Exception:

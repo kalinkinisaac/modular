@@ -2,14 +2,15 @@ from matplotlib.patches import Arc
 from fimath.geodesic import Geodesic
 from math import (degrees, sqrt)
 from cmath import phase
+from .plotter import Plotter
 
 
-class GeodesicPlotter(object):
+class GeodesicPlotter(Plotter):
 
     Y_MAX_INF = 2.5
 
-    def __init__(self, ax):
-        self._ax = ax
+    def __init__(self, *args, **kwargs):
+        super(__class__, self).__init__(*args, **kwargs)
 
     def plot(self, geodesics, *args, **kwargs):
         if type(geodesics) == list:
@@ -27,43 +28,55 @@ class GeodesicPlotter(object):
             raise TypeError('geodesic should be Geodesic instance')
 
         if geodesic.is_vertical:
-            return
             if geodesic.has_inf:
                 self._vertical_inf(geodesic, *args, **kwargs)
             else:
                 self._vertical_not_inf(geodesic, *args, **kwargs)
+            pass
         else:
             self._not_vertical(geodesic, *args, **kwargs)
 
     def _vertical_inf(self, geodesic: Geodesic, *args, **kwargs):
-        self._ax.vlines(x=geodesic.vertical_x,
-                        ymin=GeodesicPlotter._y_min(geodesic),
-                        ymax=GeodesicPlotter.Y_MAX_INF,
-                        *args, **kwargs)
+        x = float(geodesic.vertical_x)
+        y_min = self._y_min(geodesic),
+        y_max = GeodesicPlotter.Y_MAX_INF
+
+        if self._ax:
+            self._ax.vlines(x=x, ymin=y_min, ymax=y_max, *args, **kwargs)
+        if self._bokeh_fig:
+            self._bokeh_fig.ray([x], [y_min], angle=[90], angle_units="deg", length=0)
 
     def _vertical_not_inf(self, geodesic: Geodesic, *args, **kwargs):
-        self._ax.vlines(x=geodesic.vertical_x,
-                        ymin=GeodesicPlotter._y_min(geodesic),
-                        ymax=GeodesicPlotter._y_max(geodesic),
-                        *args, **kwargs)
+        x = float(geodesic.vertical_x)
+        y_min = self._y_min(geodesic)
+        y_max = self._y_max(geodesic)
+
+        if self._ax:
+            self._ax.vlines(x=x, ymin=y_min, ymax=y_max, *args, **kwargs)
+        if self._bokeh_fig:
+            self._bokeh_fig.ray([x], [y_min], angle=[90], angle_units="deg", length=y_max-y_min)
 
     def _not_vertical(self, geo: Geodesic, *args, **kwargs):
-        theta1 = degrees(phase(geo.begin - geo.center))
-        theta2 = degrees(phase(geo.end - geo.center))
-
+        theta1 = phase(geo.begin - geo.center)
+        theta2 = phase(geo.end - geo.center)
         theta1, theta2 = min(theta1, theta2), max(theta1, theta2)
+        theta1_deg = degrees(theta1)
+        theta2_deg = degrees(theta2)
 
         center = float(geo.center)
         radius = sqrt(float(geo.sq_radius))
 
-        self._ax.add_patch(Arc(
-            xy=(center, 0),
-            width=2*radius,
-            height=2*radius,
-            theta1=theta1,
-            theta2=theta2,
-            *args, **kwargs
-        ))
+        if self._ax:
+            self._ax.add_patch(Arc(
+                xy=(center, 0),
+                width=2*radius,
+                height=2*radius,
+                theta1=theta1_deg,
+                theta2=theta2_deg,
+                *args, **kwargs
+            ))
+        if self._bokeh_fig:
+            self._bokeh_fig.arc(x=center, y=0, radius=radius, start_angle=theta1, end_angle=theta2)
 
     @staticmethod
     def _y_min(geodesic):

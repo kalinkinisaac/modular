@@ -2,7 +2,7 @@ import enum
 from subgroups import (GammaBotZero, GammaTopZero, GammaBotOne, GammaTopOne, Gamma)
 gui_names = dict({
     0: 'Gamma bot zero',
-    1: 'Gamma top zero ',
+    1: 'Gamma top zero',
     2: 'Gamma top one',
     3: 'Gamma bot one',
     4: 'Gamma'
