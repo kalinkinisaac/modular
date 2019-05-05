@@ -31,7 +31,7 @@ class Api(object):
             try:
                 n = int(n)
             except ValueError:
-                raise FormatError('N should be int')
+                raise TypeError('N should be int')
 
         if n <= 1:
             raise ValueRangeError('N should be greater than 1')
@@ -91,7 +91,7 @@ class Api(object):
     def plot_domain_on_bokeh(self, fig, markers=True):
         gp = GeodesicPlotter(bokeh_fig=fig)
         gp.plot(self._domain)
-        gp.plot(self._tree)# , color='r', alpha=0.8, linewidth=0.75, linestyle='--')
+        gp.plot(self._tree, color='red', alpha=0.8, line_width=0.75, dashed=True)
         if markers:
             _marker_plotter = MarkerPlotter(bokeh_fig=fig)
             _marker_plotter.plot(self._white_markers, self._black_markers, self._cut_markers)

@@ -25,7 +25,7 @@ def gen_api(subgroup, n):
 def digest():
     data = json.loads(request.data)
 
-    user_api = gen_api(ClassicalSubgroups.from_str(data["subgroup"]), int(data["n"]))
+    user_api = gen_api(ClassicalSubgroups.from_str(data["subgroup"]), data["n"])
 
     graph_fig = bk.figure(match_aspect=True)
     graph_fig.sizing_mode = 'stretch_both'

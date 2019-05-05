@@ -3,9 +3,10 @@ from bokeh.models.markers import Circle, X
 
 
 class MarkerPlotter(Plotter):
-    ALPHA = 0.75
+    ALPHA = 0.7
     Z_ORDER = 10
-    SIZE = 30
+    SIZE = 20
+    LINE_WIDTH = 4
 
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
@@ -36,6 +37,7 @@ class MarkerPlotter(Plotter):
                     line_color='black',
                     fill_alpha=MarkerPlotter.ALPHA,
                     line_alpha=MarkerPlotter.ALPHA,
+                    line_width=self.LINE_WIDTH,
                     size=MarkerPlotter.SIZE
                 )
         if black:
@@ -58,6 +60,7 @@ class MarkerPlotter(Plotter):
                     color='black',
                     fill_alpha=MarkerPlotter.ALPHA,
                     line_alpha=MarkerPlotter.ALPHA,
+                    line_width=self.LINE_WIDTH,
                     size=MarkerPlotter.SIZE
                 )
         if cut:
@@ -80,6 +83,7 @@ class MarkerPlotter(Plotter):
                     color='black',
                     fill_alpha=MarkerPlotter.ALPHA,
                     line_alpha=MarkerPlotter.ALPHA,
+                    line_width=self.LINE_WIDTH,
                     size=MarkerPlotter.SIZE
                 )
         if legend:

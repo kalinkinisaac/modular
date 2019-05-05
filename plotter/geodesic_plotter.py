@@ -12,13 +12,27 @@ class GeodesicPlotter(Plotter):
     def __init__(self, *args, **kwargs):
         super(__class__, self).__init__(*args, **kwargs)
 
-    def plot(self, geodesics, *args, **kwargs):
+    @staticmethod
+    def bokeh_params(color='black', alpha=1, line_width=2, dashed=False):
+        params = dict({'color': color, 'line_alpha': alpha, 'line_width': line_width})
+        if dashed:
+            params['line_dash'] = [6, 3]
+        return params
+
+    @staticmethod
+    def mpl_params(color='black', alpha=1, line_width=2, dashed=False):
+        params = dict({'color': color, 'alpha': alpha, 'line_width': line_width})
+        if dashed:
+            params['line_style'] = '--'
+        return params
+
+    def plot(self, geodesics, color='black', alpha=1, line_width=2, dashed=False):
         if type(geodesics) == list:
             for geodesic in geodesics:
-                self._plot(geodesic, *args, **kwargs)
+                self._plot(geodesic, color=color, alpha=alpha, line_width=line_width, dashed=dashed)
 
         elif type(geodesics) == Geodesic:
-                self._plot(geodesics, *args, **kwargs)
+                self._plot(geodesics, color=color, alpha=alpha, line_width=line_width, dashed=dashed)
 
         else:
             raise TypeError('geodesic should be Geodesic or list instance')
@@ -36,27 +50,52 @@ class GeodesicPlotter(Plotter):
         else:
             self._not_vertical(geodesic, *args, **kwargs)
 
-    def _vertical_inf(self, geodesic: Geodesic, *args, **kwargs):
+    def _vertical_inf(self, geodesic: Geodesic, color, alpha, line_width, dashed):
         x = float(geodesic.vertical_x)
         y_min = self._y_min(geodesic),
         y_max = GeodesicPlotter.Y_MAX_INF
 
         if self._ax:
-            self._ax.vlines(x=x, ymin=y_min, ymax=y_max, *args, **kwargs)
+            self._ax.vlines(
+                x=x,
+                ymin=y_min,
+                ymax=y_max,
+                **self.mpl_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
+            )
         if self._bokeh_fig:
-            self._bokeh_fig.ray([x], [y_min], angle=[90], angle_units="deg", length=0)
+            self._bokeh_fig.ray(
+                [x],
+                [y_min],
+                angle=[90],
+                angle_units="deg",
+                length=0,
+                **self.bokeh_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
+            )
 
-    def _vertical_not_inf(self, geodesic: Geodesic, *args, **kwargs):
+    def _vertical_not_inf(self, geodesic: Geodesic, color, alpha, line_width, dashed):
         x = float(geodesic.vertical_x)
         y_min = self._y_min(geodesic)
         y_max = self._y_max(geodesic)
 
         if self._ax:
-            self._ax.vlines(x=x, ymin=y_min, ymax=y_max, *args, **kwargs)
-        if self._bokeh_fig:
-            self._bokeh_fig.ray([x], [y_min], angle=[90], angle_units="deg", length=y_max-y_min)
+            self._ax.vlines(
+                x=x,
+                ymin=y_min,
+                ymax=y_max,
+                **self.mpl_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
+            )
 
-    def _not_vertical(self, geo: Geodesic, *args, **kwargs):
+        if self._bokeh_fig:
+            self._bokeh_fig.ray(
+                [x],
+                [y_min],
+                angle=[90],
+                angle_units="deg",
+                length=y_max-y_min,
+                **self.bokeh_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
+            )
+
+    def _not_vertical(self, geo: Geodesic, color, alpha, line_width, dashed):
         theta1 = phase(geo.begin - geo.center)
         theta2 = phase(geo.end - geo.center)
         theta1, theta2 = min(theta1, theta2), max(theta1, theta2)
@@ -73,10 +112,17 @@ class GeodesicPlotter(Plotter):
                 height=2*radius,
                 theta1=theta1_deg,
                 theta2=theta2_deg,
-                *args, **kwargs
+                **self.mpl_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
             ))
         if self._bokeh_fig:
-            self._bokeh_fig.arc(x=center, y=0, radius=radius, start_angle=theta1, end_angle=theta2)
+            self._bokeh_fig.arc(
+                x=center,
+                y=0,
+                radius=radius,
+                start_angle=theta1,
+                end_angle=theta2,
+                **self.bokeh_params(color=color, alpha=alpha, line_width=line_width, dashed=dashed)
+            )
 
     @staticmethod
     def _y_min(geodesic):
