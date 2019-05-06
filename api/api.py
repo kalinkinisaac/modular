@@ -12,7 +12,9 @@ from .error import ApiError, FormatError, ValueRangeError
 class Api(object):
 
     def __init__(self):
+        self._subgroup_name = None
         self._subgroup = None
+        self._n = None
         self._graph = None
         self._domain = None
         self._tree = None
@@ -36,7 +38,9 @@ class Api(object):
         if n <= 1:
             raise ValueRangeError('N should be greater than 1')
 
-        self._subgroup = subgroup.to_class()(n)
+        self._n = n
+        self._subgroup_name = subgroup
+        self._subgroup = subgroup.to_class()(self._n)
 
     def calc_graph(self):
         if self._subgroup:
@@ -80,7 +84,7 @@ class Api(object):
     def plot_domain_on_axes(self, axes, markers=False):
         gp = GeodesicPlotter(ax=axes)
         gp.plot(self._domain)
-        gp.plot(self._tree, color='r', alpha=0.8, linewidth=0.75, linestyle='--')
+        gp.plot(self._tree, color='r', alpha=0.8, line_width=0.75, dashed=True)
         if markers:
             _marker_plotter = MarkerPlotter(axes)
             try:
@@ -107,11 +111,34 @@ class Api(object):
     def get_generators_str(self):
         return Matrix.beautify(self._generators)
 
+    def is_in_subgroup(self, matrix: Matrix):
+        if matrix.det() != 1:
+            return False
+
+        a, b, c, d = matrix.a, matrix.b, matrix.c, matrix.d
+        n = self._n
+
+        if self._subgroup_name is ClassicalSubgroups.GammaBotZero:
+            return c % n == 0
+        elif self._subgroup_name is ClassicalSubgroups.GammaTopZero:
+            return b % n == 0
+        elif self._subgroup_name is ClassicalSubgroups.GammaBotOne:
+            return a % n == 1 and d % n == 1 and c % n == 0
+        elif self._subgroup_name is ClassicalSubgroups.GammaTopOne:
+            return a % n == 1 and d % n == 1 and b % n == 0
+        elif self._subgroup_name is ClassicalSubgroups.Gamma:
+            return a % n == 1 and d % n == 1 and b % n == 0 and c % n == 0
+
+        return False
+
     def decompose_matrix(self, matrix_str):
         try:
             matrix = Matrix.from_str(matrix_str)
         except Exception:
-            raise FormatError('Matrix should be in following format: a, b, c, d')
+            raise ApiError('Matrix should be in following format: a, b, c, d')
+
+        if not self.is_in_subgroup(matrix):
+            raise ApiError('Matrix does not belong to subgroup')
 
         z = Field(0.5+1.5j)
         w = matrix.moe(z)
@@ -120,7 +147,7 @@ class Api(object):
         try:
             self._decomposition = decomposer.decompose()
         except Exception:
-            raise ApiError('Matrix does not belong to subgroup or another unexpected error occurred.')
+            raise ApiError('unexpected algorithm error occurred.')
 
     def get_decomposition(self):
         return Matrix.beautify(self._decomposition)

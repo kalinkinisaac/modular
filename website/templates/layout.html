@@ -16,6 +16,16 @@
   <body class="bg-light">
     <script type="text/javascript" src="https://mpld3.github.io/js/d3.v3.min.js"></script>
     <script type="text/javascript" src="https://mpld3.github.io/js/mpld3.v0.3.js"></script>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
     {% block content %}
     {% endblock %}
 

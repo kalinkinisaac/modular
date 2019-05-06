@@ -3,8 +3,8 @@ from subgroups import (GammaBotZero, GammaTopZero, GammaBotOne, GammaTopOne, Gam
 gui_names = dict({
     0: 'Gamma bot zero',
     1: 'Gamma top zero',
-    2: 'Gamma top one',
-    3: 'Gamma bot one',
+    2: 'Gamma bot one',
+    3: 'Gamma top one',
     4: 'Gamma'
 })
 

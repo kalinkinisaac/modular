@@ -3,25 +3,29 @@
 
 <div role="main" class="container shadow p-3">
 
-        <div class="input-group mb-3">
-            <div class="input-group-prepend">
-                <label class="input-group-text" for="subgroup-select">Subgroup</label>
-            </div>
-            <select class="custom-select" id="subgroup-select">
-                <option selected>Choose...</option>
+    <form id="form1">
+        <div class="form-group" onsubmit="onDigestButtonClick()">
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text" for="subgroup-select">Subgroup</label>
+                </div>
+                <select class="custom-select" id="subgroup-select" required>
+                    <option selected value="">Choose...</option>
                     <option value="Gamma bot zero">Gamma bot zero</option>
                     <option value="Gamma top zero">Gamma top zero</option>
                     <option value="Gamma bot one">Gamma bot one</option>
                     <option value="Gamma top one">Gamma top one</option>
                     <option value="Gamma">Gamma</option>
-            </select>
-             <input type="text" class="form-control" placeholder="Number N" aria-label="Number N" aria-describedby="button-addon2" id="n-input">
-            <div class="input-group-append">
-
-            <button onclick="onDigestButtonClick();" class="btn btn-outline-secondary" type="button" id="button-addon2">Construct</button>
+                </select>
+                <input type="number" min="2" step="1" class="form-control" placeholder="Number N" aria-label="Number N" aria-describedby="construct-button" id="n-input" required>
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" type="submit" id="construct-button">
+                        Construct
+                    </button>
                 </div>
+            </div>
         </div>
-
+    </form>
 
 
     <div class="row mb-3">
@@ -38,7 +42,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Subgroup generators</span>
             </div>
-            <textarea style="font-family:monospace;" id="generators" class="form-control" aria-label="With textarea"></textarea>
+            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly id="generators" class="form-control" aria-label="With textarea"></textarea>
         </div>
 
 
@@ -50,7 +54,7 @@
              <input type="text" class="form-control" placeholder="1, 0, 0, 1" aria-label="Number N" aria-describedby="button-addon2" id="matrix-input">
             <div class="input-group-append">
 
-            <button onclick="onDecomposeButtonClick();" class="btn btn-outline-secondary" type="button" id="button-addon22">Decompose</button>
+            <button onclick="onDecomposeButtonClick();" class="btn btn-outline-secondary" type="button" id="decompose-button">Decompose</button>
                 </div>
         </div>
 
@@ -60,7 +64,7 @@
             <div class="input-group-prepend">
                 <span class="input-group-text">Matrix decomposition</span>
             </div>
-            <textarea style="font-family:monospace; overflow-x: scroll; " wrap="off" id="matrix-decomposition" class="form-control" aria-label="With textarea"></textarea>
+            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly id="matrix-decomposition" class="form-control" aria-label="With textarea"></textarea>
         </div>
 
 </div>
@@ -68,10 +72,18 @@
 
 
 <script type="text/javascript">
+    $("#decompose-button").prop('disabled', true);
+    $(function() {
+      $('#form1').submit(function(e) {
+        onDigestButtonClick();
+        e.preventDefault();
+      });
+    });
     //import Bokeh from "Bokeh";
+    let subgroup, n;
     function onDigestButtonClick() {
-        let subgroup = $("#subgroup-select option:selected").val();
-        let n = $("#n-input").val();
+        subgroup = $("#subgroup-select option:selected").val();
+        n = $("#n-input").val();
         let toDigest = {"subgroup": subgroup, "n": n};
         $.post({
             async: true,
@@ -85,23 +97,37 @@
               $("#generators").text(data.generators);
               Bokeh.embed.embed_item(data.graph, "graph-container");
               Bokeh.embed.embed_item(data.domain, "domain-container");
+              $("#decompose-button").prop('disabled', false);
             }
         });
     }
     function onDecomposeButtonClick() {
-        let subgroup = $("#subgroup-select option:selected").val();
-        let n = $("#n-input").val();
+        if(!subgroup || !n){
+            alert('Type subgroup and number n!');
+            return;
+        }
+
+        subgroup = $("#subgroup-select option:selected").val();
+        n = $("#n-input").val();
         let matrixStr = $("#matrix-input").val();
         let toDecompose = {"subgroup": subgroup, "n": n, "matrix": matrixStr};
         $.post({
             async: true,
             contentType: "json",
+            dataType: "json",
             url: "/decompose",
             data: JSON.stringify(toDecompose),
             success: function (data) {
-            let decomposition = $("#matrix-decomposition");
-            decomposition.text(data);
-            decomposition.show();
+                if(data.errors)
+                {
+                    alert(data.errors);
+                }
+                else
+                {
+                    let decomposition = $("#matrix-decomposition");
+                    decomposition.text(data.decomposition);
+                    decomposition.show();
+                }
             }
         });
     }

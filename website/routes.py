@@ -1,6 +1,6 @@
-from flask import render_template, request, session
+from flask import render_template, request, flash
 from website import app
-from api import Api, ClassicalSubgroups
+from api import Api, ClassicalSubgroups, ApiError
 from bokeh.embed import json_item
 import bokeh.plotting as bk
 import random
@@ -49,5 +49,13 @@ def digest():
 def decompose():
     data = json.loads(request.data)
     user_api = gen_api(ClassicalSubgroups.from_str(data["subgroup"]), int(data["n"]))
-    user_api.decompose_matrix(data["matrix"])
-    return user_api.get_decomposition()
+    decomposition = ''
+    errors = ''
+    try:
+        user_api.decompose_matrix(data["matrix"])
+    except ApiError as e:
+        errors = str(e)
+    else:
+        decomposition = user_api.get_decomposition()
+
+    return json.dumps({'errors': errors, 'decomposition': decomposition})
