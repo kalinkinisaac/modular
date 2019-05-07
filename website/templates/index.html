@@ -1,87 +1,113 @@
 {% extends "layout.html" %}
 {% block content %}
+<!--<style>-->
+    <!--.vertical-center {-->
+        <!--min-height: 100%; /* Fallback for browsers do NOT support vh unit */-->
+        <!--min-height: 100vh; /* These two lines are counted as one :-)       */-->
 
-<div role="main" class="container shadow p-3">
+        <!--display: flex;-->
+        <!--align-items: center;-->
+    <!--}-->
+<!--</style>-->
 
-    <form id="form1">
-        <div class="form-group" onsubmit="onDigestButtonClick()">
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <label class="input-group-text" for="subgroup-select">Subgroup</label>
-                </div>
-                <select class="custom-select" id="subgroup-select" required>
-                    <option selected value="">Choose...</option>
-                    <option value="Gamma bot zero">Gamma bot zero</option>
-                    <option value="Gamma top zero">Gamma top zero</option>
-                    <option value="Gamma bot one">Gamma bot one</option>
-                    <option value="Gamma top one">Gamma top one</option>
-                    <option value="Gamma">Gamma</option>
-                </select>
-                <input type="number" min="2" step="1" class="form-control" placeholder="Number N" aria-label="Number N" aria-describedby="construct-button" id="n-input" required>
-                <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" type="submit" id="construct-button">
-                        Construct
-                    </button>
+
+
+<div id="wrap" class="vertical-center">
+    <div role="main" id="main" class="container shadow p-3" style="background-color: white">
+
+        <form id="form1">
+            <div class="form-group" onsubmit="onDigestButtonClick()">
+                <div class="input-group mb-3">
+                    <div class="input-group-prepend">
+                        <label class="input-group-text" for="subgroup-select">Subgroup</label>
+                    </div>
+                    <select class="custom-select" id="subgroup-select" required>
+                        <option selected value="">Choose...</option>
+                        <option value="Gamma bot zero">Gamma bot zero</option>
+                        <option value="Gamma top zero">Gamma top zero</option>
+                        <option value="Gamma bot one">Gamma bot one</option>
+                        <option value="Gamma top one">Gamma top one</option>
+                        <option value="Gamma">Gamma</option>
+                    </select>
+                    <input type="number" min="2" step="1" class="form-control" placeholder="Number N"
+                           aria-label="Number N"
+                           aria-describedby="construct-button" id="n-input" required>
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-primary" type="submit" id="construct-button">
+                            Construct
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </form>
-
-
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <div class="bk bk-root" id="graph-container"></div>
-        </div>
-        <div class="col-md-6">
-            <div class="bk bk-root" id="domain-container"></div>
-        </div>
-    </div>
+        </form>
 
 
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <span class="input-group-text">Subgroup generators</span>
             </div>
-            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly id="generators" class="form-control" aria-label="With textarea"></textarea>
+            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly id="generators"
+                      class="form-control" aria-label="With textarea"></textarea>
         </div>
-
 
 
         <div class="input-group mb-3">
             <div class="input-group-prepend">
                 <label class="input-group-text" for="subgroup-select">Matrix</label>
             </div>
-             <input type="text" class="form-control" placeholder="1, 0, 0, 1" aria-label="Number N" aria-describedby="button-addon2" id="matrix-input">
+            <input type="text" class="form-control" placeholder="1, 0, 0, 1" aria-label="Number N"
+                   aria-describedby="button-addon2" id="matrix-input">
             <div class="input-group-append">
 
-            <button onclick="onDecomposeButtonClick();" class="btn btn-outline-secondary" type="button" id="decompose-button">Decompose</button>
-                </div>
+                <button onclick="onDecomposeButtonClick();" class="btn btn-outline-primary" type="button"
+                        id="decompose-button">Decompose
+                </button>
+            </div>
         </div>
 
 
-
-        <div class="input-group mb">
+        <div class="input-group">
             <div class="input-group-prepend">
                 <span class="input-group-text">Matrix decomposition</span>
             </div>
-            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly id="matrix-decomposition" class="form-control" aria-label="With textarea"></textarea>
+            <textarea style="font-family:monospace; overflow: auto;" wrap="off" rows="2" readonly
+                      id="matrix-decomposition"
+                      class="form-control" aria-label="With textarea"></textarea>
+        </div>
+        <div class="d-flex justify-content-center">
+          <div id="loader" class="d-none spinner-border mt-3 mb-3" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="bk bk-root" id="graph-container"></div>
+            </div>
+            <div class="col-md-6">
+                <div class="bk bk-root" id="domain-container"></div>
+            </div>
         </div>
 
-</div>
 
+    </div>
+</div>
 
 
 <script type="text/javascript">
     $("#decompose-button").prop('disabled', true);
-    $(function() {
-      $('#form1').submit(function(e) {
-        onDigestButtonClick();
-        e.preventDefault();
-      });
+    $(function () {
+        $('#form1').submit(function (e) {
+            onDigestButtonClick();
+            e.preventDefault();
+        });
     });
     //import Bokeh from "Bokeh";
     let subgroup, n;
+
     function onDigestButtonClick() {
+        $("#graph-container").html("");
+        $("#domain-container").html("");
+        $("#loader").removeClass("d-none");
         subgroup = $("#subgroup-select option:selected").val();
         n = $("#n-input").val();
         let toDigest = {"subgroup": subgroup, "n": n};
@@ -92,17 +118,17 @@
             url: "/digest",
             data: JSON.stringify(toDigest),
             success: function (data) {
-              $("#graph-container").html("");
-              $("#domain-container").html("");
-              $("#generators").text(data.generators);
-              Bokeh.embed.embed_item(data.graph, "graph-container");
-              Bokeh.embed.embed_item(data.domain, "domain-container");
-              $("#decompose-button").prop('disabled', false);
+                Bokeh.embed.embed_item(data.graph, "graph-container");
+                Bokeh.embed.embed_item(data.domain, "domain-container");
+                $("#decompose-button").prop('disabled', false);
+                $("#wrap").removeClass("vertical-center");
+                $("#loader").addClass("d-none");
             }
         });
     }
+
     function onDecomposeButtonClick() {
-        if(!subgroup || !n){
+        if (!subgroup || !n) {
             alert('Type subgroup and number n!');
             return;
         }
@@ -118,12 +144,9 @@
             url: "/decompose",
             data: JSON.stringify(toDecompose),
             success: function (data) {
-                if(data.errors)
-                {
+                if (data.errors) {
                     alert(data.errors);
-                }
-                else
-                {
+                } else {
                     let decomposition = $("#matrix-decomposition");
                     decomposition.text(data.decomposition);
                     decomposition.show();

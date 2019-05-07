@@ -8,6 +8,11 @@ import string
 import json
 
 
+@app.route('/links')
+def links():
+    return render_template('links.html')
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -27,10 +32,12 @@ def digest():
 
     user_api = gen_api(ClassicalSubgroups.from_str(data["subgroup"]), data["n"])
 
-    graph_fig = bk.figure(match_aspect=True)
+    tools = "pan,wheel_zoom,reset,save"
+
+    graph_fig = bk.figure(match_aspect=True, title='Graph', tools=tools)
     graph_fig.sizing_mode = 'stretch_both'
-    domain_fig = bk.figure(match_aspect=True)
-    domain_fig.width_policy = 'min'
+
+    domain_fig = bk.figure(match_aspect=True, title='Domain', tools=tools)
     domain_fig.sizing_mode = 'stretch_both'
 
     user_api.plot_graph_on_bokeh(graph_fig)
