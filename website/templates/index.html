@@ -118,6 +118,7 @@
             url: "/digest",
             data: JSON.stringify(toDigest),
             success: function (data) {
+                $("#generators").text(data.generators);
                 Bokeh.embed.embed_item(data.graph, "graph-container");
                 Bokeh.embed.embed_item(data.domain, "domain-container");
                 $("#decompose-button").prop('disabled', false);
