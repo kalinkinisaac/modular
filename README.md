@@ -89,14 +89,12 @@ Using Docker simplifies deployment by bundling all dependencies into a container
    ```
 
    This will output a container ID.
-
-4. **Stop the Docker Container**  
-   To stop the running container, use:
+4. **Access the Application**  
+   Open your browser and go to:  
+   [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+5. **Stop the Docker Container**  
+   After you have finished with the app you can stop the running container:
 
    ```bash
    docker stop <container-id>
    ```
-
-5. **Access the Application**  
-   Open your browser and go to:  
-   [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
