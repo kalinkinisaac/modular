@@ -1,5 +1,4 @@
 import sys
-
 import matplotlib
 
 matplotlib.use('WebAgg')

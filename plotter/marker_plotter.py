@@ -1,5 +1,4 @@
 from .plotter import Plotter
-from bokeh.models.markers import Circle, X
 
 
 class MarkerPlotter(Plotter):

@@ -2,6 +2,7 @@ from flask import render_template, request, flash
 from website import app
 from api import Api, ClassicalSubgroups, ApiError
 from bokeh.embed import json_item
+from bokeh.resources import INLINE
 import bokeh.plotting as bk
 import random
 import string
@@ -10,12 +11,24 @@ import json
 
 @app.route('/links')
 def links():
-    return render_template('links.html')
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+    return render_template(
+        'links.html',
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
 
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+    return render_template(
+        'index.html',
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
 
 
 def gen_api(subgroup, n):
@@ -35,10 +48,10 @@ def digest():
     tools = "pan,wheel_zoom,reset,save"
 
     graph_fig = bk.figure(match_aspect=True, title='Graph', tools=tools)
-    graph_fig.sizing_mode = 'stretch_both'
+    graph_fig.sizing_mode = 'scale_both'
 
     domain_fig = bk.figure(match_aspect=True, title='Domain', tools=tools)
-    domain_fig.sizing_mode = 'stretch_both'
+    domain_fig.sizing_mode = 'scale_both'
 
     user_api.plot_graph_on_bokeh(graph_fig)
     user_api.plot_domain_on_bokeh(domain_fig)

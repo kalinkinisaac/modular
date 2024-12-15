@@ -16,14 +16,14 @@ class GeodesicPlotter(Plotter):
     def bokeh_params(color='black', alpha=1, line_width=2, dashed=False):
         params = dict({'color': color, 'line_alpha': alpha, 'line_width': line_width})
         if dashed:
-            params['line_dash'] = [6, 3]
+            params['line_dash'] = "dashed"
         return params
 
     @staticmethod
     def mpl_params(color='black', alpha=1, line_width=2, dashed=False):
-        params = dict({'color': color, 'alpha': alpha, 'line_width': line_width})
+        params = dict({'color': color, 'alpha': alpha, 'linewidth': line_width})
         if dashed:
-            params['line_style'] = '--'
+            params['linestyle'] = '--'
         return params
 
     def plot(self, geodesics, color='black', alpha=1, line_width=2, dashed=False):
@@ -46,7 +46,6 @@ class GeodesicPlotter(Plotter):
                 self._vertical_inf(geodesic, *args, **kwargs)
             else:
                 self._vertical_not_inf(geodesic, *args, **kwargs)
-            pass
         else:
             self._not_vertical(geodesic, *args, **kwargs)
 
