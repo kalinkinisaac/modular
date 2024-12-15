@@ -85,7 +85,7 @@ Using Docker simplifies deployment by bundling all dependencies into a container
    Start the container with:
 
    ```bash
-   docker run -d -p 8000:8000 modular
+   docker run -p 8000:8000 modular
    ```
 
    This will output a container ID.

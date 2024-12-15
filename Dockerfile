@@ -21,4 +21,4 @@ COPY . /app/
 EXPOSE 8000
 ENV PYTHONPATH=.
 # Command to run the application
-CMD ["python", "website/run_website.py"]
+CMD ["python", "run_website.py"]
