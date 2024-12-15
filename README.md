@@ -93,7 +93,9 @@ Using Docker simplifies deployment by bundling all dependencies into a container
    Open your browser and go to:  
    [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 5. **Stop the Docker Container**  
-   After you have finished with the app you can stop the running container:
+   After you have finished with the app you can stop the running container by pressing `<Ctrl> + C` in the terminal.
+
+   Or there is another way to stop docker container if you know it's ID hash:
 
    ```bash
    docker stop <container-id>
